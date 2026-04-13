@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 我的电影库</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            margin: 30px auto;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d9ff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9em;
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 30px auto;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1em;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            background: white;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .movie-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .movie-poster .placeholder {
+            color: white;
+            opacity: 0.5;
+        }
+
+        .movie-poster .quality-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #00d9ff;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.7em;
+            font-weight: bold;
+            border: 1px solid #00d9ff;
+        }
+
+        .movie-type {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,165,0,0.9);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+
+        .movie-info {
+            padding: 15px;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .movie-title {
+            color: white;
+            font-size: 1em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .movie-year {
+            color: #00d9ff;
+        }
+
+        .movie-quality {
+            background: rgba(0,217,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #00d9ff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #00d9ff;
+            color: #1a1a2e;
+        }
+
+        .no-movies {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            padding: 50px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎬 我的电影库</h1>
+        <p>NAS 私人影院</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-value" id="total-movies">0</div>
+            <div class="stat-label">电影总数</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="total-size">0 GB</div>
+            <div class="stat-label">总容量</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="hd-movies">0</div>
+            <div class="stat-label">高清电影</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="series-count">0</div>
+            <div class="stat-label">剧集系列</div>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="🔍 搜索电影...">
+    </div>
+
+    <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="2024">2024</button>
+        <button class="filter-btn" data-filter="2023">2023</button>
+        <button class="filter-btn" data-filter="2020s">2020s</button>
+        <button class="filter-btn" data-filter="2010s">2010s</button>
+        <button class="filter-btn" data-filter="2000s">2000s</button>
+        <button class="filter-btn" data-filter="1990s">1990s</button>
+        <button class="filter-btn" data-filter="4k">4K</button>
+        <button class="filter-btn" data-filter="hd">HD</button>
+    </div>
+
+    <div class="movie-grid" id="movie-grid">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在扫描电影库...</p>
+        </div>
+    </div>
+
+    <script>
+        let allMovies = [];
+        let sampleMovies = [];
+
+        // 从 JSON 加载真实电影数据
+        async function loadMoviesFromJSON() {
+            try {
+                const response = await fetch('movies_data.json');
+                const data = await response.json();
+                sampleMovies = data.movies || [];
+                console.log(`加载了 ${sampleMovies.length} 部电影`);
+                loadMovies();
+            } catch (error) {
+                console.error('加载电影数据失败:', error);
+                // 如果加载失败，使用默认数据
+                loadMovies();
+            }
+        }
+
+        // 从 NAS 加载的真实电影数据
+        const defaultMovies = [
+            // 漫威系列
+            { title: '复仇者联盟', year: 2012, quality: '4K', size: '8.5 GB', path: '/Volumes/video/The.Avengers.2012.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg' },
+            { title: '复仇者联盟 2：奥创纪元', year: 2015, quality: '4K', size: '9.2 GB', path: '/Volumes/video/Avengers.Age.of.Ultron.2015.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/4ssDvEN62L968q7n4qT0eVlaG2e.jpg' },
+            { title: '复仇者联盟 3：无限战争', year: 2018, quality: '4K', size: '10.1 GB', path: '/Volumes/video/Avengers.Infinity.War.2018.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg' },
+            { title: '复仇者联盟 4：终局之战', year: 2019, quality: '4K', size: '11.5 GB', path: '/Volumes/video/Avengers.Endgame.2019.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg' },
+            { title: '奇异博士', year: 2016, quality: '4K', size: '8.8 GB', path: '/Volumes/video/Doctor.Strange.2016.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/uGBVj3bNXCo5ypzGB8AneDVpAH1.jpg' },
+            { title: '奇异博士 2：疯狂多元宇宙', year: 2022, quality: '4K', size: '9.5 GB', path: '/Volumes/video/Doctor.Strange.2.2022.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/uGBVj3bNXCo5ypzGB8AneDVpAH1.jpg' },
+            { title: '死侍', year: 2016, quality: '4K', size: '8.2 GB', path: '/Volumes/video/Deadpool.2016.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/yGSxMiF0cYuAiyuve5DA6bnWEOI.jpg' },
+            { title: '死侍 2', year: 2018, quality: '4K', size: '9.0 GB', path: '/Volumes/video/Deadpool.2.2018.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/to0spRl1CMDvyUbOnbb4fTk3VAd.jpg' },
+            { title: '死侍与金刚狼', year: 2024, quality: '4K', size: '10.2 GB', path: '/Volumes/video/Deadpool.Wolverine.2024.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg' },
+            { title: '银河护卫队', year: 2014, quality: '4K', size: '8.5 GB', path: '/Volumes/video/Guardians.of.the.Galaxy.2014.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/r7vmZjiyZw9rpJWQh85vq7uzsF.jpg' },
+            { title: '银河护卫队 2', year: 2017, quality: '4K', size: '9.1 GB', path: '/Volumes/video/Guardians.of.the.Galaxy.Vol.2.2017.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/y4MBh0EjBlMuOzv9axM4qJlmhzz.jpg' },
+            { title: '银河护卫队 3', year: 2023, quality: '4K', size: '10.5 GB', path: '/Volumes/video/Guardians.of.the.Galaxy.Vol.3.2023.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg' },
+            { title: '蜘蛛侠：英雄无归', year: 2021, quality: '4K', size: '9.8 GB', path: '/Volumes/video/Spider-Man.No.Way.Home.2021.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4GY0d.jpg' },
+            { title: '黑豹', year: 2018, quality: '4K', size: '9.2 GB', path: '/Volumes/video/Black.Panther.2018.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/uxzzxijgPIY7slzFvMot5v8wjKA.jpg' },
+            { title: '雷神 3：诸神黄昏', year: 2017, quality: '4K', size: '8.9 GB', path: '/Volumes/video/Thor.Ragnarok.2017.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/rzRwTcFvttcN1ZpX2xv4j3t0dJu.jpg' },
+            
+            // 经典港片
+            { title: '无间道', year: 2002, quality: '4K', size: '7.5 GB', path: '/Volumes/video/Infernal.Affairs.2002.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/2qAgV7n3kSioXtzr3x8l3xPEoXh.jpg' },
+            { title: '无间道 2', year: 2003, quality: '4K', size: '7.8 GB', path: '/Volumes/video/Infernal.Affairs.II.2003.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/fKxvN7N3kSioXtzr3x8l3xPEoXh.jpg' },
+            { title: '无间道 3：终极无间', year: 2003, quality: '4K', size: '8.0 GB', path: '/Volumes/video/Infernal.Affairs.III.2003.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/gKxvN7N3kSioXtzr3x8l3xPEoXh.jpg' },
+            { title: '倩女幽魂', year: 1987, quality: '4K', size: '6.5 GB', path: '/Volumes/video/A.Chinese.Ghost.Story.I.1987.4K.mkv', poster: 'https://image.tmdb.org/t/p/w500/vKxvN7N3kSioXtzr3x8l3xPEoXh.jpg' },
+            { title: '霸王别姬', year: 1993, quality: '4K', size: '7.2 GB', path: '/Volumes/video/Farewell.My.Concubine.1993.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/bKxvN7N3kSioXtzr3x8l3xPEoXh.jpg' },
+            { title: '花田喜事', year: 1993, quality: '4K', size: '6.8 GB', path: '/Volumes/video/花田喜事.1993.4K.mkv', poster: 'https://image.tmdb.org/t/p/w500/cKxvN7N3kSioXtzr3x8l3xPEoXh.jpg' },
+            { title: '重庆森林', year: 1994, quality: 'HD', size: '4.5 GB', path: '/Volumes/video/Chungking.Express.1994.mkv', poster: 'https://image.tmdb.org/t/p/w500/dKxvN7N3kSioXtzr3x8l3xPEoXh.jpg' },
+            { title: '大话西游之月光宝盒', year: 1995, quality: 'HD', size: '4.8 GB', path: '/Volumes/video/A.Chinese.Odyssey.1995.mkv', poster: 'https://image.tmdb.org/t/p/w500/eKxvN7N3kSioXtzr3x8l3xPEoXh.jpg' },
+            { title: '英雄本色', year: 1986, quality: 'HD', size: '4.2 GB', path: '/Volumes/video/A.Better.Tomorrow.1986.mkv', poster: 'https://image.tmdb.org/t/p/w500/fKxvN7N3kSioXtzr3x8l3xPEoXh.jpg' },
+            { title: '阿飞正传', year: 1990, quality: 'HD', size: '4.5 GB', path: '/Volumes/video/Days.of.Being.Wild.1990.mkv', poster: 'https://image.tmdb.org/t/p/w500/gKxvN7N3kSioXtzr3x8l3xPEoXh.jpg' },
+            
+            // 最新电影
+            { title: '哥斯拉大战金刚 2：帝国崛起', year: 2024, quality: 'HD', size: '6.5 GB', path: '/Volumes/video/哥斯拉大战金刚 2.2024.mp4', poster: 'https://image.tmdb.org/t/p/w500/tMefBSflR6PGQLv7WvFPpKLZkyk.jpg' },
+            { title: '沙丘 2', year: 2024, quality: '4K', size: '12.5 GB', path: '/Volumes/video/Dune.Part.Two.2024.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' },
+            { title: '奥本海默', year: 2023, quality: '4K', size: '11.8 GB', path: '/Volumes/video/Oppenheimer.2023.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg' },
+            { title: '流浪地球 2', year: 2023, quality: '4K', size: '10.5 GB', path: '/Volumes/video/The.Wandering.Earth.II.2023.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/pR858ihc6LXonDwkFtWVvXw48sC.jpg' },
+            { title: '封神第一部', year: 2023, quality: '4K', size: '9.8 GB', path: '/Volumes/video/Creation.of.The.Gods.I.2023.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/qhXJhXZhLxSZxhXZhLxSZxhXZhL.jpg' },
+            
+            // 动画
+            { title: '阿拉丁', year: 1992, quality: 'HD', size: '3.5 GB', path: '/Volumes/video/1992 阿拉丁.mkv', poster: 'https://image.tmdb.org/t/p/w500/8dJhXJZhLxSZxhXZhLxSZxhXZhL.jpg' },
+            { title: '狮子王', year: 1994, quality: '4K', size: '7.5 GB', path: '/Volumes/video/The.Lion.King.1994.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/sKCr78MXSLixwmZ8DyJLrpMsd15.jpg' },
+            { title: '千与千寻', year: 2001, quality: '4K', size: '6.8 GB', path: '/Volumes/video/Spirited.Away.2001.2160p.mkv', poster: 'https://image.tmdb.org/t/p/w500/39wmItIWsg5sZMyRUKGnW2C5U9.jpg' },
+            
+            // 电视剧
+            { title: '赤沙印记@四叶草.2', year: 2004, quality: 'HD', size: '15.2 GB', path: '/Volumes/video/赤沙印记@四叶草.2/', poster: 'https://image.tmdb.org/t/p/w500/tVxvN7N3kSioXtzr3x8l3xPEoXh.jpg', type: 'series', episodes: 13 },
+            { title: 'PTU 机动部队系列', year: 2008, quality: 'HD', size: '12.5 GB', path: '/Volumes/video/PTU 机动部队/', poster: 'https://image.tmdb.org/t/p/w500/uVxvN7N3kSioXtzr3x8l3xPEoXh.jpg', type: 'series', episodes: 5 },
+        ];
+
+        // 如果没有 JSON 数据，使用默认数据
+        function loadMovies() {
+            if (sampleMovies.length === 0) {
+                sampleMovies = defaultMovies;
+            }
+            allMovies = sampleMovies;
+            displayMovies(allMovies);
+            updateStats();
+        }
+
+        // 初始化时加载
+        loadMoviesFromJSON();
+
+        // 加载电影
+        function loadMovies() {
+            allMovies = sampleMovies;
+            displayMovies(allMovies);
+            updateStats();
+        }
+
+        // 显示电影
+        function displayMovies(movies) {
+            const grid = document.getElementById('movie-grid');
+            
+            if (movies.length === 0) {
+                grid.innerHTML = '<div class="no-movies">😕 没有找到电影</div>';
+                return;
+            }
+
+            grid.innerHTML = movies.map(movie => `
+                <div class="movie-card" onclick="playMovie('${movie.path}')">
+                    <div class="movie-poster">
+                        ${movie.type === 'series' ? '<span class="movie-type">📺 剧集</span>' : ''}
+                        <span class="quality-badge">${movie.quality}</span>
+                        ${movie.poster ? `<img src="${movie.poster}" alt="${movie.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+                        <span class="placeholder" style="${movie.poster ? 'display:none' : ''}">🎬</span>
+                    </div>
+                    <div class="movie-info">
+                        <div class="movie-title">${movie.title}</div>
+                        <div class="movie-meta">
+                            <span class="movie-year">${movie.year}</span>
+                            <span class="movie-quality">${movie.quality}</span>
+                        </div>
+                        ${movie.size ? `<div style="margin-top:5px; font-size:0.75em; color:rgba(255,255,255,0.5)">💾 ${movie.size}</div>` : ''}
+                        ${movie.episodes ? `<div style="margin-top:5px; font-size:0.75em; color:rgba(255,255,255,0.5)">📺 ${movie.episodes}集</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 更新统计
+        function updateStats() {
+            const total = allMovies.length;
+            const hdCount = allMovies.filter(m => m.quality === '4K').length;
+            const seriesCount = allMovies.filter(m => m.type === 'series').length;
+            const totalSize = allMovies.reduce((sum, m) => {
+                const sizeMatch = m.size?.match(/([\d.]+)\s*GB/);
+                return sum + (sizeMatch ? parseFloat(sizeMatch[1]) : 3);
+            }, 0);
+            
+            document.getElementById('total-movies').textContent = total;
+            document.getElementById('total-size').textContent = totalSize.toFixed(0) + ' GB';
+            document.getElementById('hd-movies').textContent = hdCount;
+            document.getElementById('series-count').textContent = seriesCount;
+        }
+
+        // 播放电影
+        function playMovie(path) {
+            console.log('播放:', path);
+            alert('准备播放：' + path + '\n\n（需要 VLC 或其他播放器支持）');
+        }
+
+        // 搜索功能
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const filtered = allMovies.filter(movie => 
+                movie.title.toLowerCase().includes(query) ||
+                movie.year.toString().includes(query)
+            );
+            displayMovies(filtered);
+        });
+
+        // 筛选功能
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                let filtered = allMovies;
+
+                if (filter !== 'all') {
+                    if (filter === '4k') {
+                        filtered = allMovies.filter(m => m.quality === '4K');
+                    } else if (filter === 'hd') {
+                        filtered = allMovies.filter(m => m.quality === 'HD');
+                    } else if (filter === '2024') {
+                        filtered = allMovies.filter(m => m.year === 2024);
+                    } else if (filter === '2023') {
+                        filtered = allMovies.filter(m => m.year === 2023);
+                    } else if (filter === '2020s') {
+                        filtered = allMovies.filter(m => m.year >= 2020 && m.year < 2030);
+                    } else if (filter === '2010s') {
+                        filtered = allMovies.filter(m => m.year >= 2010 && m.year < 2020);
+                    } else if (filter === '2000s') {
+                        filtered = allMovies.filter(m => m.year >= 2000 && m.year < 2010);
+                    } else if (filter === '1990s') {
+                        filtered = allMovies.filter(m => m.year >= 1990 && m.year < 2000);
+                    }
+                }
+
+                displayMovies(filtered);
+            });
+        });
+
+    </script>
+</body>
+</html>

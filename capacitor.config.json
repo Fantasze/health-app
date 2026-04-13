@@ -1,0 +1,20 @@
+{
+  "appId": "com.healthapp.app",
+  "appName": "健康管家",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "Camera": {
+      "saveToGallery": false,
+      "allowEditing": false,
+      "quality": 80,
+      "resultType": "base64"
+    },
+    "Preferences": {
+      "suiteName": "health_app_data"
+    }
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

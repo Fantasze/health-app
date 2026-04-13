@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>💪 健康管家 - 你的私人健康顾问</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #FF9800;
+            --danger: #f44336;
+            --info: #2196F3;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76,175,80,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary), #F57C00);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.85em;
+        }
+
+        .stat-item.warning .stat-value {
+            color: var(--secondary);
+        }
+
+        .stat-item.danger .stat-value {
+            color: var(--danger);
+        }
+
+        .nutrition-bars {
+            margin-top: 15px;
+        }
+
+        .nutrition-item {
+            margin-bottom: 15px;
+        }
+
+        .nutrition-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 6px;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.protein {
+            background: linear-gradient(90deg, #f44336, #d32f2f);
+        }
+
+        .progress-fill.carbs {
+            background: linear-gradient(90deg, #ff9800, #f57c00);
+        }
+
+        .progress-fill.fat {
+            background: linear-gradient(90deg, #2196f3, #1976d2);
+        }
+
+        .camera-section {
+            text-align: center;
+        }
+
+        .camera-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 2em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .camera-preview {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .food-result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .food-result h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .food-result p {
+            margin: 5px 0;
+            color: var(--text-light);
+        }
+
+        .suggestion-list {
+            list-style: none;
+        }
+
+        .suggestion-list li {
+            padding: 10px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            line-height: 1.5;
+        }
+
+        .suggestion-list li.exercise {
+            border-left-color: var(--secondary);
+        }
+
+        .suggestion-list li.diet {
+            border-left-color: var(--info);
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            text-align: center;
+            padding: 5px 15px;
+            cursor: pointer;
+            transition: color 0.3s;
+            color: var(--text-light);
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item .icon {
+            font-size: 1.5em;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .nav-item .label {
+            font-size: 0.75em;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .today-summary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .today-summary h3 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .summary-item {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .summary-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            background: #fff3cd;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .alert.success {
+            background: #d4edda;
+            border-left-color: var(--primary);
+        }
+
+        .onboarding {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            z-index: 2000;
+            display: none;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .onboarding.active {
+            display: block;
+        }
+
+        .onboarding-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            margin: 0 auto;
+            color: var(--text);
+        }
+
+        .onboarding h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .onboarding p {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .welcome-icon {
+            font-size: 4em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            font-size: 1.5em;
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 欢迎引导页面 -->
+    <div id="onboarding" class="onboarding">
+        <div class="onboarding-content">
+            <div class="welcome-icon">👋</div>
+            <h2>欢迎来到健康管家！</h2>
+            <p>首先，让我们了解你的基本情况，这样我可以为你提供最个性化的建议</p>
+            
+            <ul class="feature-list">
+                <li><span class="feature-icon">📊</span> 计算 BMI、FFMI 等健康指标</li>
+                <li><span class="feature-icon">🎯</span> 定制每日营养目标</li>
+                <li><span class="feature-icon">📷</span> AI 识别食物卡路里</li>
+                <li><span class="feature-icon">💡</span> 个性化饮食运动建议</li>
+            </ul>
+            
+            <form id="onboarding-form">
+                <div class="form-group">
+                    <label>性别</label>
+                    <select id="onboarding-gender" required>
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>年龄（岁）</label>
+                    <input type="number" id="onboarding-age" min="10" max="100" placeholder="例如：30" required>
+                </div>
+                <div class="form-group">
+                    <label>身高（cm）</label>
+                    <input type="number" id="onboarding-height" min="100" max="250" placeholder="例如：175" required>
+                </div>
+                <div class="form-group">
+                    <label>体重（kg）</label>
+                    <input type="number" id="onboarding-weight" min="30" max="200" placeholder="例如：70" required>
+                </div>
+                <div class="form-group">
+                    <label>活动水平</label>
+                    <select id="onboarding-activity" required>
+                        <option value="1.2">久坐（几乎不运动）</option>
+                        <option value="1.375">轻度活动（每周 1-3 次运动）</option>
+                        <option value="1.55">中度活动（每周 3-5 次运动）</option>
+                        <option value="1.725">活跃（每周 6-7 次运动）</option>
+                        <option value="1.9">非常活跃（体力工作 + 每天运动）</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>目标</label>
+                    <select id="onboarding-goal" required>
+                        <option value="lose">减脂（-500 卡/天）</option>
+                        <option value="maintain">维持</option>
+                        <option value="gain">增肌（+300 卡/天）</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">🚀 开始健康之旅</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 头部 -->
+    <div class="header">
+        <h1>💪 健康管家</h1>
+        <p>你的私人健康顾问</p>
+    </div>
+
+    <!-- 页面 1: 首页/今日总结 -->
+    <div id="page-home" class="page active">
+        <div class="container">
+            <div class="today-summary" id="today-summary">
+                <h3>📊 今日进度</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-value" id="calories-consumed">0</div>
+                        <div class="summary-label">已摄入卡路里</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="calories-remaining">0</div>
+                        <div class="summary-label">剩余卡路里</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="protein-consumed">0g</div>
+                        <div class="summary-label">蛋白质</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="carbs-consumed">0g</div>
+                        <div class="summary-label">碳水</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🍽️ AI 食物识别</h2>
+                <div class="camera-section">
+                    <button class="camera-btn" onclick="takePhoto()">📷</button>
+                    <p>拍摄食物照片，AI 自动计算卡路里</p>
+                    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none;" onchange="processImage(event)">
+                    <img id="camera-preview" class="camera-preview" alt="预览">
+                    <div id="food-result" class="food-result" style="display:none;">
+                        <div class="loading" id="food-loading" style="display:none;">
+                            <div class="loading-spinner"></div>
+                            <p>🔍 AI 正在分析食物...</p>
+                        </div>
+                        <div id="food-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💡 今日建议</h2>
+                <ul class="suggestion-list" id="daily-suggestions">
+                    <li class="diet">🥗 早餐建议：燕麦粥 + 鸡蛋 + 水果</li>
+                    <li class="exercise">🏃 建议运动：30 分钟有氧运动</li>
+                    <li class="diet">💧 记得喝够 8 杯水</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面 2: 个人资料 -->
+    <div id="page-profile" class="page">
+        <div class="container">
+            <div class="card">
+                <h2>👤 个人资料</h2>
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label>性别</label>
+                        <select id="gender" required>
+                            <option value="male">男</option>
+                            <option value="female">女</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>年龄（岁）</label>
+                        <input type="number" id="age" min="10" max="100" placeholder="例如：30" required>
+                    </div>
+                    <div class="form-group">
+                        <label>身高（cm）</label>
+                        <input type="number" id="height" min="100" max="250" placeholder="例如：175" required>
+                    </div>
+                    <div class="form-group">
+                        <label>体重（kg）</label>
+                        <input type="number" id="weight" min="30" max="200" placeholder="例如：70" required>
+                    </div>
+                    <div class="form-group">
+                        <label>体脂率（%，可选）</label>
+                        <input type="number" id="bodyfat" min="5" max="50" placeholder="例如：20">
+                    </div>
+                    <div class="form-group">
+                        <label>活动水平</label>
+                        <select id="activity" required>
+                            <option value="1.2">久坐（几乎不运动）</option>
+                            <option value="1.375">轻度活动（每周 1-3 次运动）</option>
+                            <option value="1.55">中度活动（每周 3-5 次运动）</option>
+                            <option value="1.725">活跃（每周 6-7 次运动）</option>
+                            <option value="1.9">非常活跃（体力工作 + 每天运动）</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>目标</label>
+                        <select id="goal" required>
+                            <option value="lose">减脂（-500 卡/天）</option>
+                            <option value="maintain">维持</option>
+                            <option value="gain">增肌（+300 卡/天）</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">💾 保存数据</button>
+                </form>
+            </div>
+
+            <div class="card" id="health-stats" style="display:none;">
+                <h2>📊 健康指标</h2>
+                <div class="stats-grid">
+                    <div class="stat-item" id="bmi-item">
+                        <div class="stat-value" id="bmi-value">--</div>
+                        <div class="stat-label">BMI</div>
+                    </div>
+                    <div class="stat-item" id="ffmi-item">
+                        <div class="stat-value" id="ffmi-value">--</div>
+                        <div class="stat-label">FFMI</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="bmr-value">--</div>
+                        <div class="stat-label">基础代谢（卡/天）</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="tdee-value">--</div>
+                        <div class="stat-label">每日消耗（卡/天）</div>
+                    </div>
+                </div>
+                <div class="alert" style="margin-top:15px;">
+                    <strong>💡 提示：</strong>
+                    <p style="margin-top:5px; font-size:0.9em;">
+                        BMI 正常范围：18.5-24.9<br>
+                        FFMI 男性正常：18-20，女性：15-17
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📈 体重记录</h2>
+                <div id="weight-log">
+                    <p style="text-align:center; color:#999; padding:20px;">暂无记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面 3: 营养目标 -->
+    <div id="page-nutrition" class="page">
+        <div class="container">
+            <div class="card">
+                <h2>🎯 每日营养目标</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="calorie-target">--</div>
+                        <div class="stat-label">卡路里（卡）</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="protein-target">--</div>
+                        <div class="stat-label">蛋白质（克）</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="carbs-target">--</div>
+                        <div class="stat-label">碳水（克）</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="fat-target">--</div>
+                        <div class="stat-label">脂肪（克）</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📈 今日摄入进度</h2>
+                <div class="nutrition-bars">
+                    <div class="nutrition-item">
+                        <div class="nutrition-header">
+                            <span>🔥 卡路里</span>
+                            <span id="calorie-progress">0 / 0 卡</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="calorie-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="nutrition-item">
+                        <div class="nutrition-header">
+                            <span>🥩 蛋白质</span>
+                            <span id="protein-progress">0 / 0g</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill protein" id="protein-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="nutrition-item">
+                        <div class="nutrition-header">
+                            <span>🍚 碳水化合物</span>
+                            <span id="carbs-progress">0 / 0g</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill carbs" id="carbs-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="nutrition-item">
+                        <div class="nutrition-header">
+                            <span>🥑 脂肪</span>
+                            <span id="fat-progress">0 / 0g</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill fat" id="fat-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🍽️ 食物记录</h2>
+                <div id="food-log">
+                    <p style="text-align:center; color:#999; padding:20px;">暂无记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="switchPage('home')">
+            <span class="icon">🏠</span>
+            <span class="label">首页</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('profile')">
+            <span class="icon">👤</span>
+            <span class="label">档案</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('nutrition')">
+            <span class="icon">🍽️</span>
+            <span class="label">营养</span>
+        </div>
+    </div>
+
+    <script>
+        // 全局数据
+        let userData = {
+            gender: 'male',
+            age: 30,
+            height: 175,
+            weight: 70,
+            bodyfat: 20,
+            activity: 1.55,
+            goal: 'maintain'
+        };
+
+        let dailyLog = {
+            date: new Date().toDateString(),
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            foods: []
+        };
+
+        // 初始化
+        function init() {
+            checkOnboarding();
+            loadUserData();
+            loadDailyLog();
+            updateUI();
+        }
+
+        // 检查是否需要欢迎引导
+        function checkOnboarding() {
+            const hasData = localStorage.getItem('healthApp_userData');
+            if (!hasData) {
+                document.getElementById('onboarding').classList.add('active');
+            }
+        }
+
+        // 欢迎引导表单提交
+        document.getElementById('onboarding-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            userData = {
+                gender: document.getElementById('onboarding-gender').value,
+                age: parseInt(document.getElementById('onboarding-age').value),
+                height: parseInt(document.getElementById('onboarding-height').value),
+                weight: parseInt(document.getElementById('onboarding-weight').value),
+                bodyfat: null,
+                activity: parseFloat(document.getElementById('onboarding-activity').value),
+                goal: document.getElementById('onboarding-goal').value
+            };
+
+            localStorage.setItem('healthApp_userData', JSON.stringify(userData));
+            document.getElementById('onboarding').classList.remove('active');
+            
+            // 填充档案表单
+            document.getElementById('gender').value = userData.gender;
+            document.getElementById('age').value = userData.age;
+            document.getElementById('height').value = userData.height;
+            document.getElementById('weight').value = userData.weight;
+            document.getElementById('activity').value = userData.activity;
+            document.getElementById('goal').value = userData.goal;
+            
+            calculateHealthStats();
+            calculateNutritionTargets();
+            updateUI();
+            
+            alert('✅ 欢迎加入！数据已保存！');
+        });
+
+        // 加载用户数据
+        function loadUserData() {
+            const saved = localStorage.getItem('healthApp_userData');
+            if (saved) {
+                userData = JSON.parse(saved);
+                document.getElementById('gender').value = userData.gender;
+                document.getElementById('age').value = userData.age;
+                document.getElementById('height').value = userData.height;
+                document.getElementById('weight').value = userData.weight;
+                document.getElementById('bodyfat').value = userData.bodyfat || '';
+                document.getElementById('activity').value = userData.activity;
+                document.getElementById('goal').value = userData.goal;
+                calculateHealthStats();
+                calculateNutritionTargets();
+            }
+        }
+
+        // 加载每日记录
+        function loadDailyLog() {
+            const saved = localStorage.getItem('healthApp_dailyLog');
+            if (saved) {
+                const log = JSON.parse(saved);
+                if (log.date === new Date().toDateString()) {
+                    dailyLog = log;
+                }
+            }
+        }
+
+        // 保存用户数据
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            userData = {
+                gender: document.getElementById('gender').value,
+                age: parseInt(document.getElementById('age').value),
+                height: parseInt(document.getElementById('height').value),
+                weight: parseInt(document.getElementById('weight').value),
+                bodyfat: document.getElementById('bodyfat').value ? parseFloat(document.getElementById('bodyfat').value) : null,
+                activity: parseFloat(document.getElementById('activity').value),
+                goal: document.getElementById('goal').value
+            };
+
+            localStorage.setItem('healthApp_userData', JSON.stringify(userData));
+            calculateHealthStats();
+            calculateNutritionTargets();
+            updateUI();
+            
+            alert('✅ 数据已保存！');
+        });
+
+        // 计算健康指标
+        function calculateHealthStats() {
+            // BMI
+            const heightM = userData.height / 100;
+            const bmi = userData.weight / (heightM * heightM);
+            document.getElementById('bmi-value').textContent = bmi.toFixed(1);
+            
+            // BMI 状态
+            const bmiItem = document.getElementById('bmi-item');
+            if (bmi < 18.5) {
+                bmiItem.className = 'stat-item warning';
+            } else if (bmi >= 25) {
+                bmiItem.className = 'stat-item danger';
+            } else {
+                bmiItem.className = 'stat-item';
+            }
+
+            // FFMI
+            let ffmi = '--';
+            if (userData.bodyfat) {
+                const leanMass = userData.weight * (1 - userData.bodyfat / 100);
+                ffmi = leanMass / (heightM * heightM);
+                document.getElementById('ffmi-value').textContent = ffmi.toFixed(1);
+            }
+
+            // BMR (Mifflin-St Jeor 公式)
+            let bmr;
+            if (userData.gender === 'male') {
+                bmr = 10 * userData.weight + 6.25 * userData.height - 5 * userData.age + 5;
+            } else {
+                bmr = 10 * userData.weight + 6.25 * userData.height - 5 * userData.age - 161;
+            }
+            document.getElementById('bmr-value').textContent = Math.round(bmr);
+
+            // TDEE
+            const tdee = bmr * userData.activity;
+            document.getElementById('tdee-value').textContent = Math.round(tdee);
+
+            // 显示统计
+            document.getElementById('health-stats').style.display = 'block';
+            
+            // 保存体重记录
+            saveWeightRecord();
+        }
+
+        // 保存体重记录
+        function saveWeightRecord() {
+            let weightRecords = JSON.parse(localStorage.getItem('healthApp_weightRecords') || '[]');
+            weightRecords.push({
+                date: new Date().toISOString(),
+                weight: userData.weight
+            });
+            
+            // 只保留最近 30 条
+            if (weightRecords.length > 30) {
+                weightRecords = weightRecords.slice(-30);
+            }
+            
+            localStorage.setItem('healthApp_weightRecords', JSON.stringify(weightRecords));
+            updateWeightLog();
+        }
+
+        // 更新体重记录显示
+        function updateWeightLog() {
+            const logDiv = document.getElementById('weight-log');
+            const records = JSON.parse(localStorage.getItem('healthApp_weightRecords') || '[]');
+            
+            if (records.length === 0) {
+                logDiv.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">暂无记录</p>';
+                return;
+            }
+            
+            logDiv.innerHTML = records.reverse().slice(0, 10).map(r => {
+                const date = new Date(r.date).toLocaleDateString('zh-CN');
+                return `
+                    <div style="padding:10px; margin:8px 0; background:#f8f9fa; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong>${date}</strong>
+                        </div>
+                        <div style="text-align:right;">
+                            <strong style="color:#4CAF50;">${r.weight} kg</strong>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 计算营养目标
+        function calculateNutritionTargets() {
+            // 计算 TDEE
+            let bmr;
+            if (userData.gender === 'male') {
+                bmr = 10 * userData.weight + 6.25 * userData.height - 5 * userData.age + 5;
+            } else {
+                bmr = 10 * userData.weight + 6.25 * userData.height - 5 * userData.age - 161;
+            }
+            const tdee = bmr * userData.activity;
+
+            // 根据目标调整
+            let targetCalories;
+            if (userData.goal === 'lose') {
+                targetCalories = tdee - 500;
+            } else if (userData.goal === 'gain') {
+                targetCalories = tdee + 300;
+            } else {
+                targetCalories = tdee;
+            }
+
+            // 宏量营养素分配（40% 碳水，30% 蛋白质，30% 脂肪）
+            const protein = (targetCalories * 0.3) / 4;
+            const carbs = (targetCalories * 0.4) / 4;
+            const fat = (targetCalories * 0.3) / 9;
+
+            document.getElementById('calorie-target').textContent = Math.round(targetCalories);
+            document.getElementById('protein-target').textContent = Math.round(protein);
+            document.getElementById('carbs-target').textContent = Math.round(carbs);
+            document.getElementById('fat-target').textContent = Math.round(fat);
+
+            // 更新进度条
+            updateProgressBars();
+        }
+
+        // 更新进度条
+        function updateProgressBars() {
+            const targets = {
+                calories: parseInt(document.getElementById('calorie-target').textContent) || 2000,
+                protein: parseInt(document.getElementById('protein-target').textContent) || 150,
+                carbs: parseInt(document.getElementById('carbs-target').textContent) || 200,
+                fat: parseInt(document.getElementById('fat-target').textContent) || 65
+            };
+
+            const current = dailyLog;
+
+            // 卡路里
+            const calPercent = Math.min((current.calories / targets.calories) * 100, 100);
+            document.getElementById('calorie-bar').style.width = calPercent + '%';
+            document.getElementById('calorie-progress').textContent = `${current.calories} / ${targets.calories} 卡`;
+
+            // 蛋白质
+            const proteinPercent = Math.min((current.protein / targets.protein) * 100, 100);
+            document.getElementById('protein-bar').style.width = proteinPercent + '%';
+            document.getElementById('protein-progress').textContent = `${current.protein} / ${targets.protein}g`;
+
+            // 碳水
+            const carbsPercent = Math.min((current.carbs / targets.carbs) * 100, 100);
+            document.getElementById('carbs-bar').style.width = carbsPercent + '%';
+            document.getElementById('carbs-progress').textContent = `${current.carbs} / ${targets.carbs}g`;
+
+            // 脂肪
+            const fatPercent = Math.min((current.fat / targets.fat) * 100, 100);
+            document.getElementById('fat-bar').style.width = fatPercent + '%';
+            document.getElementById('fat-progress').textContent = `${current.fat} / ${targets.fat}g`;
+
+            // 更新首页总结
+            document.getElementById('calories-consumed').textContent = current.calories;
+            document.getElementById('calories-remaining').textContent = targets.calories - current.calories;
+            document.getElementById('protein-consumed').textContent = current.protein + 'g';
+            document.getElementById('carbs-consumed').textContent = current.carbs + 'g';
+        }
+
+        // 更新 UI
+        function updateUI() {
+            updateProgressBars();
+            updateFoodLog();
+            generateDailySuggestions();
+            updateWeightLog();
+        }
+
+        // 切换页面
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('page-' + page).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // 拍照功能
+        function takePhoto() {
+            document.getElementById('camera-input').click();
+        }
+
+        // 处理图片
+        function processImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('camera-preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+
+                // 显示加载动画
+                document.getElementById('food-result').style.display = 'block';
+                document.getElementById('food-loading').style.display = 'block';
+                document.getElementById('food-content').innerHTML = '';
+
+                // 调用 AI API 识别食物
+                analyzeFoodWithAI(file);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 使用 AI 识别食物（使用 CalorieMama API 或其他免费 API）
+        async function analyzeFoodWithAI(file) {
+            // 注意：这里需要实际的 AI API
+            // 以下是示例代码，需要替换为真实的 API
+            
+            // 方案 1：使用 CalorieMama API（需要 API key）
+            // 方案 2：使用 TensorFlow.js 本地识别
+            // 方案 3：使用自定义后端
+            
+            // 现在用模拟数据演示
+            setTimeout(() => {
+                const mockFoods = [
+                    { 
+                        name: '米饭（1 碗，150g）', 
+                        calories: 200, 
+                        protein: 4, 
+                        carbs: 45, 
+                        fat: 0.5,
+                        confidence: 0.92
+                    },
+                    { 
+                        name: '鸡胸肉（100g）', 
+                        calories: 165, 
+                        protein: 31, 
+                        carbs: 0, 
+                        fat: 3.6,
+                        confidence: 0.88
+                    },
+                    { 
+                        name: '炒青菜（100g）', 
+                        calories: 50, 
+                        protein: 2, 
+                        carbs: 8, 
+                        fat: 2,
+                        confidence: 0.85
+                    }
+                ];
+
+                // 随机选择 1-3 种食物
+                const numFoods = Math.floor(Math.random() * 3) + 1;
+                const foods = [];
+                for (let i = 0; i < numFoods; i++) {
+                    foods.push(mockFoods[Math.floor(Math.random() * mockFoods.length)]);
+                }
+
+                displayFoodResult(foods);
+            }, 2000);
+        }
+
+        // 显示食物识别结果
+        function displayFoodResult(foods) {
+            document.getElementById('food-loading').style.display = 'none';
+            
+            const totalCalories = foods.reduce((sum, f) => sum + f.calories, 0);
+            const totalProtein = foods.reduce((sum, f) => sum + f.protein, 0);
+            const totalCarbs = foods.reduce((sum, f) => sum + f.carbs, 0);
+            const totalFat = foods.reduce((sum, f) => sum + f.fat, 0);
+
+            const contentDiv = document.getElementById('food-content');
+            contentDiv.innerHTML = `
+                <h4>🍽️ AI 识别结果</h4>
+                ${foods.map(f => `
+                    <div style="background:white; padding:10px; margin:8px 0; border-radius:8px; border-left:4px solid #4CAF50;">
+                        <strong>${f.name}</strong>
+                        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:5px; margin-top:8px; font-size:0.85em; color:#666;">
+                            <span>🔥 ${f.calories}卡</span>
+                            <span>🥩 ${f.protein}g 蛋白质</span>
+                            <span>🍚 ${f.carbs}g 碳水</span>
+                            <span>🥑 ${f.fat}g 脂肪</span>
+                        </div>
+                        <div style="text-align:right; margin-top:5px; font-size:0.75em; color:#999;">
+                            置信度：${Math.round(f.confidence * 100)}%
+                        </div>
+                    </div>
+                `).join('')}
+                
+                <div style="background:#4CAF50; color:white; padding:15px; margin:15px 0; border-radius:8px; text-align:center;">
+                    <strong>总计</strong><br>
+                    🔥 ${totalCalories}卡 | 🥩 ${totalProtein.toFixed(1)}g | 🍚 ${totalCarbs.toFixed(1)}g | 🥑 ${totalFat.toFixed(1)}g
+                </div>
+                
+                <button class="btn" onclick="addFoodsToLog(${JSON.stringify(foods).replace(/"/g, '&quot;')})">
+                    ✅ 添加到今日记录
+                </button>
+            `;
+        }
+
+        // 添加食物到记录
+        function addFoodsToLog(foods) {
+            foods.forEach(food => {
+                dailyLog.calories += food.calories;
+                dailyLog.protein += food.protein;
+                dailyLog.carbs += food.carbs;
+                dailyLog.fat += food.fat;
+                dailyLog.foods.push({
+                    name: food.name,
+                    calories: food.calories,
+                    protein: food.protein,
+                    carbs: food.carbs,
+                    fat: food.fat,
+                    time: new Date().toLocaleTimeString()
+                });
+            });
+
+            // 保存
+            localStorage.setItem('healthApp_dailyLog', JSON.stringify(dailyLog));
+
+            // 更新 UI
+            updateUI();
+
+            // 隐藏结果
+            document.getElementById('food-result').style.display = 'none';
+            document.getElementById('camera-preview').style.display = 'none';
+
+            alert(`✅ 已添加 ${foods.length} 种食物到今日记录！`);
+        }
+
+        // 更新食物记录
+        function updateFoodLog() {
+            const logDiv = document.getElementById('food-log');
+            if (dailyLog.foods.length === 0) {
+                logDiv.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">暂无记录</p>';
+                return;
+            }
+
+            logDiv.innerHTML = dailyLog.foods.map(food => `
+                <div style="padding:10px; margin:8px 0; background:#f8f9fa; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong>${food.name}</strong><br>
+                        <small style="color:#999;">${food.time}</small>
+                    </div>
+                    <div style="text-align:right;">
+                        <strong style="color:#4CAF50;">${food.calories} 卡</strong><br>
+                        <small style="color:#999;">🥩${food.protein}g 🍚${food.carbs}g 🥑${food.fat}g</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 生成每日建议
+        function generateDailySuggestions() {
+            const suggestionsDiv = document.getElementById('daily-suggestions');
+            const suggestions = [];
+
+            // 根据目标生成建议
+            if (userData.goal === 'lose') {
+                suggestions.push({
+                    type: 'diet',
+                    text: '🥗 多吃蔬菜和高蛋白食物，增加饱腹感'
+                });
+                suggestions.push({
+                    type: 'exercise',
+                    text: '🏃 每天 30-45 分钟有氧运动，帮助燃脂'
+                });
+            } else if (userData.goal === 'gain') {
+                suggestions.push({
+                    type: 'diet',
+                    text: '🍗 增加蛋白质摄入，每餐都要有蛋白质'
+                });
+                suggestions.push({
+                    type: 'exercise',
+                    text: '💪 力量训练为主，每周 3-4 次'
+                });
+            } else {
+                suggestions.push({
+                    type: 'diet',
+                    text: '🍽️ 保持均衡饮食，三餐规律'
+                });
+                suggestions.push({
+                    type: 'exercise',
+                    text: '🚴 每周 150 分钟中等强度运动'
+                });
+            }
+
+            // 通用建议
+            suggestions.push({
+                type: 'diet',
+                text: '💧 每天喝够 8 杯水（约 2 升）'
+            });
+
+            // 根据当前摄入情况给建议
+            if (dailyLog.calories > 0) {
+                const targets = {
+                    calories: parseInt(document.getElementById('calorie-target').textContent) || 2000
+                };
+                const remaining = targets.calories - dailyLog.calories;
+                
+                if (remaining < 0) {
+                    suggestions.push({
+                        type: 'diet',
+                        text: '⚠️ 今日卡路里已超标，建议适度运动消耗'
+                    });
+                } else if (remaining < 200) {
+                    suggestions.push({
+                        type: 'diet',
+                        text: '⚠️ 剩余卡路里不多，晚餐注意控制'
+                    });
+                }
+            }
+
+            suggestionsDiv.innerHTML = suggestions.map(s => `
+                <li class="${s.type}">${s.text}</li>
+            `).join('');
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
