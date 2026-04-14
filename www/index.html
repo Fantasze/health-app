@@ -475,8 +475,6 @@
         }
 
         function processImage(event) {
-            // 这里可以调用 AI API 识别食物
-            // 现在用模拟数据
             alert('📷 照片已拍摄！AI 识别功能需要接入 API，现在请用手动输入。');
         }
 
@@ -488,14 +486,6 @@
                 backupTime: new Date().toISOString()
             };
 
-            // 方案 1: 发送到你的服务器
-            // fetch('https://your-server.com/backup', {
-            //     method: 'POST',
-            //     headers: {'Content-Type': 'application/json'},
-            //     body: JSON.stringify(backupData)
-            // });
-
-            // 方案 2: 生成 JSON 文件下载
             const dataStr = JSON.stringify(backupData, null, 2);
             const blob = new Blob([dataStr], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
@@ -509,12 +499,10 @@
 
         // 更新 UI
         function updateUI() {
-            // 更新问候
             if (userData.name) {
                 document.getElementById('user-greeting').textContent = `欢迎，${userData.name}！`;
             }
 
-            // 更新食物记录
             const logDiv = document.getElementById('food-log');
             if (dailyLog.foods.length === 0) {
                 logDiv.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">暂无记录</p>';
@@ -532,7 +520,6 @@
                 `).join('');
             }
 
-            // 更新统计
             const totalCalories = dailyLog.foods.reduce((sum, f) => sum + f.calories, 0);
             const totalProtein = dailyLog.foods.reduce((sum, f) => sum + f.protein, 0);
             
