@@ -461,15 +461,43 @@
             '豆腐': { calories: 76, protein: 8, carbs: 1.9, fat: 4.8 },
         };
 
-        // 从食物名称估算营养
+        // 从食物名称估算营养（支持多个食物）
         function estimateNutrition(foodName) {
-            for (const [key, nutrition] of Object.entries(foodDatabase)) {
-                if (foodName.includes(key)) {
-                    return nutrition;
+            // 拆分多个食物（支持逗号、空格分隔）
+            const foods = foodName.split(/[,,\s]+/).filter(f => f.trim());
+            
+            let total = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+            let matched = [];
+            
+            for (const food of foods) {
+                let found = false;
+                for (const [key, nutrition] of Object.entries(foodDatabase)) {
+                    if (food.includes(key) || key.includes(food)) {
+                        total.calories += nutrition.calories;
+                        total.protein += nutrition.protein;
+                        total.carbs += nutrition.carbs;
+                        total.fat += nutrition.fat;
+                        matched.push(key);
+                        found = true;
+                        break;
+                    }
+                }
+                // 未匹配的食物用默认值
+                if (!found && food.length > 1) {
+                    total.calories += 150;
+                    total.protein += 10;
+                    total.carbs += 20;
+                    total.fat += 5;
+                    matched.push(food + '(估算)');
                 }
             }
-            // 默认值（中等热量食物）
-            return { calories: 150, protein: 10, carbs: 20, fat: 5 };
+            
+            // 如果完全没有匹配，用默认值
+            if (matched.length === 0) {
+                return { calories: 150, protein: 10, carbs: 20, fat: 5 };
+            }
+            
+            return total;
         }
 
         // 手动添加食物
@@ -493,8 +521,9 @@
                 carbs = estimated.carbs;
                 fat = estimated.fat;
                 
-                // 显示估算提示
-                if (confirm(`🤖 未找到营养数据，已自动估算：\n\n${name}\n${calories}卡 | 蛋白质${protein}g | 碳水${carbs}g | 脂肪${fat}g\n\n确定添加吗？`)) {
+                // 显示估算详情
+                const msg = `🤖 自动识别以下食物：\n\n${name}\n\n总计：${calories}卡 | 蛋白质${protein}g | 碳水${carbs}g | 脂肪${fat}g\n\n确定添加吗？`;
+                if (confirm(msg)) {
                     // 继续
                 } else {
                     return;
