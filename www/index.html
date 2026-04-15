@@ -736,8 +736,32 @@
             alert('📷 照片已拍摄！AI 识别功能需要接入 API，现在请用手动输入。');
         }
 
-        // 备份数据
+        // 备份数据到 NAS
         function backupData() {
+            // 显示配置对话框
+            const nasConfig = prompt(
+                '📍 NAS 备份配置\n\n请输入你的 Synology NAS 信息：\n\n格式：http(s)://NAS-IP:端口/health_backups/\n\n例如：\nhttp://192.168.1.100:5005/health_backups/\n\n留空则下载到本地',
+                ''
+            );
+
+            if (!nasConfig) {
+                // 用户取消，下载到本地
+                downloadBackup();
+                return;
+            }
+
+            if (!nasConfig.trim()) {
+                // 空字符串，下载到本地
+                downloadBackup();
+                return;
+            }
+
+            // 上传到 NAS
+            uploadToNAS(nasConfig);
+        }
+
+        // 下载到本地
+        function downloadBackup() {
             const backupData = {
                 user: userData,
                 dailyLog: dailyLog,
@@ -754,6 +778,46 @@
             a.click();
 
             alert('✅ 备份文件已下载！');
+        }
+
+        // 上传到 NAS
+        async function uploadToNAS(baseUrl) {
+            const backupData = {
+                user: userData,
+                dailyLog: dailyLog,
+                calorieHistory: calorieHistory,
+                backupTime: new Date().toISOString()
+            };
+
+            const filename = `backup_${userData.name}_${new Date().toISOString().split('T')[0]}_${Date.now()}.json`;
+            const url = baseUrl.replace(/\/$/, '') + '/' + filename;
+
+            // 请求 NAS 账号密码
+            const auth = prompt('🔐 请输入 WebDAV 认证信息\n\n格式：账号：密码\n\n例如：admin:yourpassword', '');
+            
+            if (!auth) {
+                alert('❌ 已取消上传');
+                return;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa(auth)
+                    },
+                    body: JSON.stringify(backupData, null, 2)
+                });
+
+                if (response.ok || response.status === 201 || response.status === 204) {
+                    alert('✅ 备份已上传到 NAS！\n\n文件：' + filename);
+                } else {
+                    alert('❌ 上传失败：' + response.status + '\n\n请检查：\n1. NAS 是否开启 WebDAV\n2. 端口是否正确\n3. 账号密码是否正确\n4. 文件夹是否有写权限');
+                }
+            } catch (error) {
+                alert('❌ 上传失败：' + error.message + '\n\n请检查：\n1. NAS 是否在线\n2. 网络连接是否正常\n3. 端口是否转发（外网访问）');
+            }
         }
 
         // 更新 UI
