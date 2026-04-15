@@ -97,11 +97,6 @@
             background: #e3f2fd; padding: 15px; border-radius: 10px;
             margin: 15px 0; border-left: 4px solid var(--info);
         }
-        .food-input-group {
-            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px;
-            margin-bottom: 10px;
-        }
-        .food-input-group input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
         .camera-section { text-align: center; }
         .camera-btn {
             width: 80px; height: 80px; border-radius: 50%;
@@ -118,6 +113,101 @@
         .food-log-item {
             padding: 10px; margin: 8px 0; background: #f8f9fa;
             border-radius: 8px; display: flex; justify-content: space-between;
+        }
+        /* 营养输入框 2x2 网格 */
+        .nutrition-input-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .nutrition-input-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .nutrition-input-item label {
+            display: block;
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+        .nutrition-input-item input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+        /* 日历样式 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .calendar-header h3 {
+            color: var(--primary);
+        }
+        .calendar-nav-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-size: 0.8em;
+            color: var(--text-light);
+            padding: 5px;
+        }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #f8f9fa;
+            font-size: 0.9em;
+            position: relative;
+        }
+        .calendar-day.has-data {
+            background: #e8f5e9;
+            color: var(--primary-dark);
+            font-weight: bold;
+        }
+        .calendar-day.over-limit {
+            background: #ffebee;
+            color: var(--danger);
+        }
+        .calendar-day .day-number {
+            font-size: 1.1em;
+        }
+        .calendar-day .calorie-count {
+            font-size: 0.7em;
+            color: var(--text-light);
+        }
+        .calendar-day.today {
+            border: 2px solid var(--primary);
+        }
+        .month-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .month-selector h3 {
+            flex: 1;
+            text-align: center;
+            color: var(--primary);
         }
     </style>
 </head>
@@ -235,11 +325,23 @@
                             </select>
                         </div>
                     </div>
-                    <div class="food-input-group">
-                        <input type="number" id="food-calories" placeholder="卡路里" readonly style="background:#f5f5f5;">
-                        <input type="number" id="food-protein" placeholder="蛋白质 (g)" readonly style="background:#f5f5f5;">
-                        <input type="number" id="food-carbs" placeholder="碳水 (g)" readonly style="background:#f5f5f5;">
-                        <input type="number" id="food-fat" placeholder="脂肪 (g)" readonly style="background:#f5f5f5;">
+                    <div class="nutrition-input-grid">
+                        <div class="nutrition-input-item">
+                            <label>🔥 卡路里</label>
+                            <input type="number" id="food-calories" placeholder="0" readonly style="background:#f5f5f5;">
+                        </div>
+                        <div class="nutrition-input-item">
+                            <label>🥩 蛋白质 (g)</label>
+                            <input type="number" id="food-protein" placeholder="0" readonly style="background:#f5f5f5;">
+                        </div>
+                        <div class="nutrition-input-item">
+                            <label>🍚 碳水 (g)</label>
+                            <input type="number" id="food-carbs" placeholder="0" readonly style="background:#f5f5f5;">
+                        </div>
+                        <div class="nutrition-input-item">
+                            <label>🥑 脂肪 (g)</label>
+                            <input type="number" id="food-fat" placeholder="0" readonly style="background:#f5f5f5;">
+                        </div>
                     </div>
                     <p id="food-estimate-info" style="text-align:center; color:#666; font-size:0.85em; margin:10px 0;"></p>
                     <button class="btn" onclick="addManualFood()">✅ 添加食物</button>
@@ -307,9 +409,30 @@
         </div>
     </div>
 
-    <!-- 页面 3: 营养 -->
+    <!-- 页面 3: 营养日历 -->
     <div id="page-nutrition" class="page">
         <div class="container">
+            <div class="card">
+                <h2>📅 饮食记录</h2>
+                
+                <div class="month-selector">
+                    <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀ 上月</button>
+                    <h3 id="current-month">2026 年 4 月</h3>
+                    <button class="calendar-nav-btn" onclick="changeMonth(1)">下月 ▶</button>
+                </div>
+
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">日</div>
+                    <div class="calendar-day-header">一</div>
+                    <div class="calendar-day-header">二</div>
+                    <div class="calendar-day-header">三</div>
+                    <div class="calendar-day-header">四</div>
+                    <div class="calendar-day-header">五</div>
+                    <div class="calendar-day-header">六</div>
+                </div>
+                <div class="calendar-grid" id="calendar-days"></div>
+            </div>
+
             <div class="card">
                 <h2>📈 今日摄入</h2>
                 <div class="stats-grid">
@@ -342,8 +465,8 @@
             <span class="label">档案</span>
         </div>
         <div class="nav-item" onclick="switchPage('nutrition')">
-            <span class="icon">🍽️</span>
-            <span class="label">营养</span>
+            <span class="icon">📅</span>
+            <span class="label">记录</span>
         </div>
     </div>
 
@@ -361,96 +484,8 @@
         };
 
         let dailyLog = { foods: [] };
-
-        // 初始化
-        function init() {
-            checkOnboarding();
-            loadUserData();
-            loadDailyLog();
-            updateUI();
-        }
-
-        // 检查是否需要引导
-        function checkOnboarding() {
-            const hasData = localStorage.getItem('healthApp_userData');
-            if (!hasData) {
-                document.getElementById('onboarding').classList.add('active');
-            }
-        }
-
-        // 引导表单提交
-        document.getElementById('onboarding-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            userData = {
-                name: document.getElementById('onboarding-name').value,
-                email: document.getElementById('onboarding-email').value,
-                gender: document.getElementById('onboarding-gender').value,
-                age: parseInt(document.getElementById('onboarding-age').value),
-                height: parseInt(document.getElementById('onboarding-height').value),
-                weight: parseInt(document.getElementById('onboarding-weight').value),
-                activity: parseFloat(document.getElementById('onboarding-activity').value),
-                goal: document.getElementById('onboarding-goal').value
-            };
-
-            localStorage.setItem('healthApp_userData', JSON.stringify(userData));
-            document.getElementById('onboarding').classList.remove('active');
-            
-            // 填充档案表单
-            document.getElementById('profile-name').value = userData.name;
-            document.getElementById('profile-email').value = userData.email;
-            document.getElementById('profile-gender').value = userData.gender;
-            document.getElementById('profile-age').value = userData.age;
-            document.getElementById('profile-height').value = userData.height;
-            document.getElementById('profile-weight').value = userData.weight;
-            
-            updateUI();
-            alert('✅ 欢迎加入！数据已保存并备份！');
-        });
-
-        // 加载用户数据
-        function loadUserData() {
-            const saved = localStorage.getItem('healthApp_userData');
-            if (saved) {
-                userData = JSON.parse(saved);
-                document.getElementById('profile-name').value = userData.name || '';
-                document.getElementById('profile-email').value = userData.email || '';
-                document.getElementById('profile-gender').value = userData.gender;
-                document.getElementById('profile-age').value = userData.age;
-                document.getElementById('profile-height').value = userData.height;
-                document.getElementById('profile-weight').value = userData.weight;
-                
-                // 显示问候
-                if (userData.name) {
-                    document.getElementById('user-greeting').textContent = `欢迎，${userData.name}！`;
-                }
-            }
-        }
-
-        // 保存用户数据
-        document.getElementById('profile-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            userData.name = document.getElementById('profile-name').value;
-            userData.email = document.getElementById('profile-email').value;
-            userData.gender = document.getElementById('profile-gender').value;
-            userData.age = parseInt(document.getElementById('profile-age').value);
-            userData.height = parseInt(document.getElementById('profile-height').value);
-            userData.weight = parseInt(document.getElementById('profile-weight').value);
-
-            localStorage.setItem('healthApp_userData', JSON.stringify(userData));
-            updateUI();
-            alert('✅ 数据已保存！');
-        });
-
-        // 切换标签
-        function showTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            document.getElementById('tab-camera').style.display = tab === 'camera' ? 'block' : 'none';
-            document.getElementById('tab-manual').style.display = tab === 'manual' ? 'block' : 'none';
-        }
+        let calorieHistory = {}; // 存储每天的数据 { '2026-04-15': 1500, ... }
+        let currentMonth = new Date();
 
         // 食物数据库（每 100g）
         const foodDatabase = {
@@ -482,10 +517,10 @@
 
         // 分量单位（转换为克数）
         const portionUnits = {
-            '碗': 150,    // 1 碗 = 150g
+            '碗': 150,
             '盘': 200,
             '杯': 240,
-            '颗': 50,     // 1 颗鸡蛋
+            '颗': 50,
             '个': 100,
             '片': 30,
             '块': 100,
@@ -494,7 +529,97 @@
             '份': 100,
         };
 
-        // 自动估算食物营养（带分量）
+        // 初始化
+        function init() {
+            checkOnboarding();
+            loadUserData();
+            loadDailyLog();
+            loadCalorieHistory();
+            updateUI();
+            renderCalendar();
+        }
+
+        // 检查是否需要引导
+        function checkOnboarding() {
+            const hasData = localStorage.getItem('healthApp_userData');
+            if (!hasData) {
+                document.getElementById('onboarding').classList.add('active');
+            }
+        }
+
+        // 引导表单提交
+        document.getElementById('onboarding-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            userData = {
+                name: document.getElementById('onboarding-name').value,
+                email: document.getElementById('onboarding-email').value,
+                gender: document.getElementById('onboarding-gender').value,
+                age: parseInt(document.getElementById('onboarding-age').value),
+                height: parseInt(document.getElementById('onboarding-height').value),
+                weight: parseInt(document.getElementById('onboarding-weight').value),
+                activity: parseFloat(document.getElementById('onboarding-activity').value),
+                goal: document.getElementById('onboarding-goal').value
+            };
+
+            localStorage.setItem('healthApp_userData', JSON.stringify(userData));
+            document.getElementById('onboarding').classList.remove('active');
+            
+            document.getElementById('profile-name').value = userData.name;
+            document.getElementById('profile-email').value = userData.email;
+            document.getElementById('profile-gender').value = userData.gender;
+            document.getElementById('profile-age').value = userData.age;
+            document.getElementById('profile-height').value = userData.height;
+            document.getElementById('profile-weight').value = userData.weight;
+            
+            updateUI();
+            alert('✅ 欢迎加入！数据已保存并备份！');
+        });
+
+        // 加载用户数据
+        function loadUserData() {
+            const saved = localStorage.getItem('healthApp_userData');
+            if (saved) {
+                userData = JSON.parse(saved);
+                document.getElementById('profile-name').value = userData.name || '';
+                document.getElementById('profile-email').value = userData.email || '';
+                document.getElementById('profile-gender').value = userData.gender;
+                document.getElementById('profile-age').value = userData.age;
+                document.getElementById('profile-height').value = userData.height;
+                document.getElementById('profile-weight').value = userData.weight;
+                
+                if (userData.name) {
+                    document.getElementById('user-greeting').textContent = `欢迎，${userData.name}！`;
+                }
+            }
+        }
+
+        // 保存用户数据
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            userData.name = document.getElementById('profile-name').value;
+            userData.email = document.getElementById('profile-email').value;
+            userData.gender = document.getElementById('profile-gender').value;
+            userData.age = parseInt(document.getElementById('profile-age').value);
+            userData.height = parseInt(document.getElementById('profile-height').value);
+            userData.weight = parseInt(document.getElementById('profile-weight').value);
+
+            localStorage.setItem('healthApp_userData', JSON.stringify(userData));
+            updateUI();
+            alert('✅ 数据已保存！');
+        });
+
+        // 切换标签
+        function showTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('tab-camera').style.display = tab === 'camera' ? 'block' : 'none';
+            document.getElementById('tab-manual').style.display = tab === 'manual' ? 'block' : 'none';
+        }
+
+        // 自动估算食物营养
         function estimateFood() {
             const name = document.getElementById('food-name').value;
             const portion = parseFloat(document.getElementById('food-portion').value) || 1;
@@ -509,7 +634,6 @@
                 return;
             }
 
-            // 查找匹配的食物
             let nutrition = null;
             let matchedName = '';
             for (const [key, data] of Object.entries(foodDatabase)) {
@@ -521,9 +645,8 @@
             }
 
             if (nutrition) {
-                // 计算分量
                 const grams = portion * portionUnits[unit];
-                const multiplier = grams / 100; // 数据库是每 100g
+                const multiplier = grams / 100;
 
                 const calories = Math.round(nutrition.calories * multiplier);
                 const protein = Math.round(nutrition.protein * multiplier * 10) / 10;
@@ -547,45 +670,6 @@
             }
         }
 
-        // 从食物名称估算营养（支持多个食物）
-        function estimateNutrition(foodName) {
-            // 拆分多个食物（支持逗号、空格分隔）
-            const foods = foodName.split(/[,,\s]+/).filter(f => f.trim());
-            
-            let total = { calories: 0, protein: 0, carbs: 0, fat: 0 };
-            let matched = [];
-            
-            for (const food of foods) {
-                let found = false;
-                for (const [key, nutrition] of Object.entries(foodDatabase)) {
-                    if (food.includes(key) || key.includes(food)) {
-                        total.calories += nutrition.calories;
-                        total.protein += nutrition.protein;
-                        total.carbs += nutrition.carbs;
-                        total.fat += nutrition.fat;
-                        matched.push(key);
-                        found = true;
-                        break;
-                    }
-                }
-                // 未匹配的食物用默认值
-                if (!found && food.length > 1) {
-                    total.calories += 150;
-                    total.protein += 10;
-                    total.carbs += 20;
-                    total.fat += 5;
-                    matched.push(food + '(估算)');
-                }
-            }
-            
-            // 如果完全没有匹配，用默认值
-            if (matched.length === 0) {
-                return { calories: 150, protein: 10, carbs: 20, fat: 5 };
-            }
-            
-            return total;
-        }
-
         // 手动添加食物
         function addManualFood() {
             const name = document.getElementById('food-name').value;
@@ -601,12 +685,12 @@
                 return;
             }
 
-            // 如果用户没填营养数据，尝试自动估算
             if (isNaN(calories) || calories === 0) {
-                alert('⚠️ 未找到匹配的食物，请手动输入营养数据！\n\n提示：输入"饭"、"鸡胸"、"鸡蛋"等常见食物会自动计算。');
+                alert('⚠️ 未找到匹配的食物，请手动输入营养数据！');
                 return;
             }
 
+            const today = new Date().toDateString();
             dailyLog.foods.push({
                 name: `${name} (${portion}${unit})`,
                 calories: calories,
@@ -616,13 +700,22 @@
                 time: new Date().toLocaleTimeString(),
                 method: 'manual',
                 portion: portion,
-                unit: unit
+                unit: unit,
+                date: today
             });
 
-            localStorage.setItem('healthApp_dailyLog', JSON.stringify(dailyLog));
-            updateUI();
+            // 更新今日总卡路里
+            if (!calorieHistory[today]) {
+                calorieHistory[today] = 0;
+            }
+            calorieHistory[today] += calories;
 
-            // 清空输入
+            localStorage.setItem('healthApp_dailyLog', JSON.stringify(dailyLog));
+            localStorage.setItem('healthApp_calorieHistory', JSON.stringify(calorieHistory));
+            
+            updateUI();
+            renderCalendar();
+
             document.getElementById('food-name').value = '';
             document.getElementById('food-portion').value = '1';
             document.getElementById('food-calories').value = '';
@@ -643,11 +736,12 @@
             alert('📷 照片已拍摄！AI 识别功能需要接入 API，现在请用手动输入。');
         }
 
-        // 备份数据到云端
+        // 备份数据
         function backupData() {
             const backupData = {
                 user: userData,
                 dailyLog: dailyLog,
+                calorieHistory: calorieHistory,
                 backupTime: new Date().toISOString()
             };
 
@@ -659,7 +753,7 @@
             a.download = `health_backup_${userData.name}_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
 
-            alert('✅ 备份文件已下载！请保存到你的电脑或云端硬盘。');
+            alert('✅ 备份文件已下载！');
         }
 
         // 更新 UI
@@ -668,15 +762,18 @@
                 document.getElementById('user-greeting').textContent = `欢迎，${userData.name}！`;
             }
 
+            const today = new Date().toDateString();
+            const todayFoods = dailyLog.foods.filter(f => f.date === today);
+
             const logDiv = document.getElementById('food-log');
-            if (dailyLog.foods.length === 0) {
+            if (todayFoods.length === 0) {
                 logDiv.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">暂无记录</p>';
             } else {
-                logDiv.innerHTML = dailyLog.foods.map(food => `
+                logDiv.innerHTML = todayFoods.map(food => `
                     <div class="food-log-item">
                         <div>
                             <strong>${food.name}</strong>
-                            <small style="color:#999;">${food.time} ${food.method === 'manual' ? '✍️' : '📷'}</small>
+                            <small style="color:#999;">${food.time}</small>
                         </div>
                         <div style="text-align:right;">
                             <strong style="color:#4CAF50;">${food.calories} 卡</strong>
@@ -685,11 +782,52 @@
                 `).join('');
             }
 
-            const totalCalories = dailyLog.foods.reduce((sum, f) => sum + f.calories, 0);
-            const totalProtein = dailyLog.foods.reduce((sum, f) => sum + f.protein, 0);
+            const totalCalories = todayFoods.reduce((sum, f) => sum + f.calories, 0);
+            const totalProtein = todayFoods.reduce((sum, f) => sum + f.protein, 0);
             
             document.getElementById('calories-consumed').textContent = totalCalories;
             document.getElementById('protein-consumed').textContent = totalProtein + 'g';
+
+            // 生成每日建议
+            generateDailySuggestions(totalCalories);
+        }
+
+        // 生成每日建议
+        function generateDailySuggestions(currentCalories) {
+            const suggestionsDiv = document.getElementById('daily-suggestions');
+            const targetCalories = userData.goal === 'lose' ? 1800 : (userData.goal === 'gain' ? 2500 : 2000);
+            const remaining = targetCalories - currentCalories;
+
+            const suggestions = [];
+
+            if (userData.goal === 'lose') {
+                suggestions.push({ type: 'diet', text: '🥗 多吃蔬菜和高蛋白食物，增加饱腹感' });
+                suggestions.push({ type: 'exercise', text: '🏃 每天 30-45 分钟有氧运动，帮助燃脂' });
+            } else if (userData.goal === 'gain') {
+                suggestions.push({ type: 'diet', text: '🍗 增加蛋白质摄入，每餐都要有蛋白质' });
+                suggestions.push({ type: 'exercise', text: '💪 力量训练为主，每周 3-4 次' });
+            } else {
+                suggestions.push({ type: 'diet', text: '🍽️ 保持均衡饮食，三餐规律' });
+                suggestions.push({ type: 'exercise', text: '🚴 每周 150 分钟中等强度运动' });
+            }
+
+            suggestions.push({ type: 'diet', text: '💧 每天喝够 8 杯水（约 2 升）' });
+
+            if (currentCalories > 0) {
+                if (remaining < 0) {
+                    suggestions.push({ type: 'diet', text: '⚠️ 今日卡路里已超标，建议适度运动消耗' });
+                } else if (remaining < 200) {
+                    suggestions.push({ type: 'diet', text: '⚠️ 剩余卡路里不多，晚餐注意控制' });
+                } else {
+                    suggestions.push({ type: 'diet', text: `✅ 还可以摄入 ${remaining} 卡` });
+                }
+            }
+
+            suggestionsDiv.innerHTML = suggestions.map(s => `
+                <li style="padding:10px; margin:8px 0; background:#f8f9fa; border-radius:8px; border-left:4px solid ${s.type === 'diet' ? 'var(--info)' : 'var(--secondary)'}; line-height:1.5;">
+                    ${s.text}
+                </li>
+            `).join('');
         }
 
         // 加载每日记录
@@ -700,6 +838,14 @@
             }
         }
 
+        // 加载卡路里历史
+        function loadCalorieHistory() {
+            const saved = localStorage.getItem('healthApp_calorieHistory');
+            if (saved) {
+                calorieHistory = JSON.parse(saved);
+            }
+        }
+
         // 切换页面
         function switchPage(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -707,6 +853,69 @@
             
             document.getElementById('page-' + page).classList.add('active');
             event.currentTarget.classList.add('active');
+            
+            if (page === 'nutrition') {
+                renderCalendar();
+            }
+        }
+
+        // 渲染日历
+        function renderCalendar() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            
+            document.getElementById('current-month').textContent = `${year}年${month + 1}月`;
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDay = firstDay.getDay();
+            const totalDays = lastDay.getDate();
+            
+            const today = new Date();
+            const todayStr = today.toDateString();
+            
+            const calendarDays = document.getElementById('calendar-days');
+            calendarDays.innerHTML = '';
+            
+            // 空白填充
+            for (let i = 0; i < startDay; i++) {
+                const blank = document.createElement('div');
+                calendarDays.appendChild(blank);
+            }
+            
+            // 日期
+            for (let day = 1; day <= totalDays; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = date.toDateString();
+                const calories = calorieHistory[dateStr] || 0;
+                
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                
+                if (calories > 0) {
+                    dayEl.classList.add('has-data');
+                    if (calories > 2500) {
+                        dayEl.classList.add('over-limit');
+                    }
+                }
+                
+                if (dateStr === todayStr) {
+                    dayEl.classList.add('today');
+                }
+                
+                dayEl.innerHTML = `
+                    <span class="day-number">${day}</span>
+                    ${calories > 0 ? `<span class="calorie-count">${calories}卡</span>` : ''}
+                `;
+                
+                calendarDays.appendChild(dayEl);
+            }
+        }
+
+        // 切换月份
+        function changeMonth(delta) {
+            currentMonth.setMonth(currentMonth.getMonth() + delta);
+            renderCalendar();
         }
 
         // 初始化
