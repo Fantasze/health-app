@@ -215,14 +215,33 @@
                 <div id="tab-manual" style="display:none;">
                     <div class="form-group">
                         <label>食物名称</label>
-                        <input type="text" id="food-name" placeholder="例如：米饭、鸡胸肉">
+                        <input type="text" id="food-name" placeholder="例如：米饭、鸡胸肉" oninput="estimateFood()">
+                    </div>
+                    <div class="form-group">
+                        <label>分量</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="number" id="food-portion" value="1" min="0.1" step="0.1" style="flex:1;" oninput="estimateFood()">
+                            <select id="food-unit" style="flex:1;" onchange="estimateFood()">
+                                <option value="碗">碗 (150g)</option>
+                                <option value="盘">盘 (200g)</option>
+                                <option value="杯">杯 (240ml)</option>
+                                <option value="颗">颗 (鸡蛋)</option>
+                                <option value="个">个</option>
+                                <option value="片">片</option>
+                                <option value="块">块</option>
+                                <option value="勺">勺</option>
+                                <option value="克">克 (g)</option>
+                                <option value="份">份 (100g)</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="food-input-group">
-                        <input type="number" id="food-calories" placeholder="卡路里">
-                        <input type="number" id="food-protein" placeholder="蛋白质 (g)">
-                        <input type="number" id="food-carbs" placeholder="碳水 (g)">
-                        <input type="number" id="food-fat" placeholder="脂肪 (g)">
+                        <input type="number" id="food-calories" placeholder="卡路里" readonly style="background:#f5f5f5;">
+                        <input type="number" id="food-protein" placeholder="蛋白质 (g)" readonly style="background:#f5f5f5;">
+                        <input type="number" id="food-carbs" placeholder="碳水 (g)" readonly style="background:#f5f5f5;">
+                        <input type="number" id="food-fat" placeholder="脂肪 (g)" readonly style="background:#f5f5f5;">
                     </div>
+                    <p id="food-estimate-info" style="text-align:center; color:#666; font-size:0.85em; margin:10px 0;"></p>
                     <button class="btn" onclick="addManualFood()">✅ 添加食物</button>
                 </div>
             </div>
@@ -433,19 +452,19 @@
             document.getElementById('tab-manual').style.display = tab === 'manual' ? 'block' : 'none';
         }
 
-        // 简易食物数据库（每份）
+        // 食物数据库（每 100g）
         const foodDatabase = {
             '鸡胸': { calories: 165, protein: 31, carbs: 0, fat: 3.6 },
             '鸡胸肉': { calories: 165, protein: 31, carbs: 0, fat: 3.6 },
             '纳豆': { calories: 212, protein: 19, carbs: 13, fat: 11 },
-            '饭': { calories: 195, protein: 4, carbs: 42, fat: 0.5 },
-            '米饭': { calories: 195, protein: 4, carbs: 42, fat: 0.5 },
-            '鸡蛋': { calories: 78, protein: 6, carbs: 0.6, fat: 5 },
-            '蛋': { calories: 78, protein: 6, carbs: 0.6, fat: 5 },
+            '饭': { calories: 130, protein: 2.7, carbs: 28, fat: 0.3 },
+            '米饭': { calories: 130, protein: 2.7, carbs: 28, fat: 0.3 },
+            '鸡蛋': { calories: 155, protein: 13, carbs: 1.1, fat: 11 },
+            '蛋': { calories: 155, protein: 13, carbs: 1.1, fat: 11 },
             '黑咖啡': { calories: 2, protein: 0.3, carbs: 0, fat: 0 },
             '咖啡': { calories: 2, protein: 0.3, carbs: 0, fat: 0 },
-            '肉桂粉': { calories: 6, protein: 0.1, carbs: 2, fat: 0 },
-            '肉桂': { calories: 6, protein: 0.1, carbs: 2, fat: 0 },
+            '肉桂粉': { calories: 247, protein: 4, carbs: 81, fat: 1.2 },
+            '肉桂': { calories: 247, protein: 4, carbs: 81, fat: 1.2 },
             '面包': { calories: 265, protein: 9, carbs: 49, fat: 3.2 },
             '牛奶': { calories: 42, protein: 3.4, carbs: 5, fat: 1 },
             '香蕉': { calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
@@ -460,6 +479,73 @@
             '面条': { calories: 138, protein: 5, carbs: 25, fat: 1.1 },
             '豆腐': { calories: 76, protein: 8, carbs: 1.9, fat: 4.8 },
         };
+
+        // 分量单位（转换为克数）
+        const portionUnits = {
+            '碗': 150,    // 1 碗 = 150g
+            '盘': 200,
+            '杯': 240,
+            '颗': 50,     // 1 颗鸡蛋
+            '个': 100,
+            '片': 30,
+            '块': 100,
+            '勺': 15,
+            '克': 1,
+            '份': 100,
+        };
+
+        // 自动估算食物营养（带分量）
+        function estimateFood() {
+            const name = document.getElementById('food-name').value;
+            const portion = parseFloat(document.getElementById('food-portion').value) || 1;
+            const unit = document.getElementById('food-unit').value;
+            
+            if (!name) {
+                document.getElementById('food-calories').value = '';
+                document.getElementById('food-protein').value = '';
+                document.getElementById('food-carbs').value = '';
+                document.getElementById('food-fat').value = '';
+                document.getElementById('food-estimate-info').textContent = '';
+                return;
+            }
+
+            // 查找匹配的食物
+            let nutrition = null;
+            let matchedName = '';
+            for (const [key, data] of Object.entries(foodDatabase)) {
+                if (name.includes(key)) {
+                    nutrition = data;
+                    matchedName = key;
+                    break;
+                }
+            }
+
+            if (nutrition) {
+                // 计算分量
+                const grams = portion * portionUnits[unit];
+                const multiplier = grams / 100; // 数据库是每 100g
+
+                const calories = Math.round(nutrition.calories * multiplier);
+                const protein = Math.round(nutrition.protein * multiplier * 10) / 10;
+                const carbs = Math.round(nutrition.carbs * multiplier * 10) / 10;
+                const fat = Math.round(nutrition.fat * multiplier * 10) / 10;
+
+                document.getElementById('food-calories').value = calories;
+                document.getElementById('food-protein').value = protein;
+                document.getElementById('food-carbs').value = carbs;
+                document.getElementById('food-fat').value = fat;
+
+                document.getElementById('food-estimate-info').textContent = 
+                    `🤖 识别：${matchedName} | ${portion}${unit} (${grams}g) | 自动计算`;
+            } else {
+                document.getElementById('food-calories').value = '';
+                document.getElementById('food-protein').value = '';
+                document.getElementById('food-carbs').value = '';
+                document.getElementById('food-fat').value = '';
+                document.getElementById('food-estimate-info').textContent = 
+                    '⚠️ 未找到匹配食物，请手动输入营养数据';
+            }
+        }
 
         // 从食物名称估算营养（支持多个食物）
         function estimateNutrition(foodName) {
@@ -503,6 +589,8 @@
         // 手动添加食物
         function addManualFood() {
             const name = document.getElementById('food-name').value;
+            const portion = parseFloat(document.getElementById('food-portion').value) || 1;
+            const unit = document.getElementById('food-unit').value;
             let calories = parseInt(document.getElementById('food-calories').value);
             let protein = parseInt(document.getElementById('food-protein').value);
             let carbs = parseInt(document.getElementById('food-carbs').value);
@@ -513,31 +601,22 @@
                 return;
             }
 
-            // 如果用户没填营养数据，自动估算
+            // 如果用户没填营养数据，尝试自动估算
             if (isNaN(calories) || calories === 0) {
-                const estimated = estimateNutrition(name);
-                calories = estimated.calories;
-                protein = estimated.protein;
-                carbs = estimated.carbs;
-                fat = estimated.fat;
-                
-                // 显示估算详情
-                const msg = `🤖 自动识别以下食物：\n\n${name}\n\n总计：${calories}卡 | 蛋白质${protein}g | 碳水${carbs}g | 脂肪${fat}g\n\n确定添加吗？`;
-                if (confirm(msg)) {
-                    // 继续
-                } else {
-                    return;
-                }
+                alert('⚠️ 未找到匹配的食物，请手动输入营养数据！\n\n提示：输入"饭"、"鸡胸"、"鸡蛋"等常见食物会自动计算。');
+                return;
             }
 
             dailyLog.foods.push({
-                name: name,
+                name: `${name} (${portion}${unit})`,
                 calories: calories,
                 protein: protein,
                 carbs: carbs,
                 fat: fat,
                 time: new Date().toLocaleTimeString(),
-                method: 'manual'
+                method: 'manual',
+                portion: portion,
+                unit: unit
             });
 
             localStorage.setItem('healthApp_dailyLog', JSON.stringify(dailyLog));
@@ -545,10 +624,12 @@
 
             // 清空输入
             document.getElementById('food-name').value = '';
+            document.getElementById('food-portion').value = '1';
             document.getElementById('food-calories').value = '';
             document.getElementById('food-protein').value = '';
             document.getElementById('food-carbs').value = '';
             document.getElementById('food-fat').value = '';
+            document.getElementById('food-estimate-info').textContent = '';
 
             alert('✅ 食物已添加！');
         }
