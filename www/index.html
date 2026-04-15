@@ -433,17 +433,72 @@
             document.getElementById('tab-manual').style.display = tab === 'manual' ? 'block' : 'none';
         }
 
+        // 简易食物数据库（每份）
+        const foodDatabase = {
+            '鸡胸': { calories: 165, protein: 31, carbs: 0, fat: 3.6 },
+            '鸡胸肉': { calories: 165, protein: 31, carbs: 0, fat: 3.6 },
+            '纳豆': { calories: 212, protein: 19, carbs: 13, fat: 11 },
+            '饭': { calories: 195, protein: 4, carbs: 42, fat: 0.5 },
+            '米饭': { calories: 195, protein: 4, carbs: 42, fat: 0.5 },
+            '鸡蛋': { calories: 78, protein: 6, carbs: 0.6, fat: 5 },
+            '蛋': { calories: 78, protein: 6, carbs: 0.6, fat: 5 },
+            '黑咖啡': { calories: 2, protein: 0.3, carbs: 0, fat: 0 },
+            '咖啡': { calories: 2, protein: 0.3, carbs: 0, fat: 0 },
+            '肉桂粉': { calories: 6, protein: 0.1, carbs: 2, fat: 0 },
+            '肉桂': { calories: 6, protein: 0.1, carbs: 2, fat: 0 },
+            '面包': { calories: 265, protein: 9, carbs: 49, fat: 3.2 },
+            '牛奶': { calories: 42, protein: 3.4, carbs: 5, fat: 1 },
+            '香蕉': { calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
+            '苹果': { calories: 52, protein: 0.3, carbs: 14, fat: 0.2 },
+            '三文鱼': { calories: 208, protein: 20, carbs: 0, fat: 13 },
+            '鱼': { calories: 206, protein: 22, carbs: 0, fat: 12 },
+            '牛肉': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+            '猪肉': { calories: 242, protein: 27, carbs: 0, fat: 14 },
+            '菜': { calories: 25, protein: 2, carbs: 5, fat: 0.5 },
+            '蔬菜': { calories: 25, protein: 2, carbs: 5, fat: 0.5 },
+            '面': { calories: 138, protein: 5, carbs: 25, fat: 1.1 },
+            '面条': { calories: 138, protein: 5, carbs: 25, fat: 1.1 },
+            '豆腐': { calories: 76, protein: 8, carbs: 1.9, fat: 4.8 },
+        };
+
+        // 从食物名称估算营养
+        function estimateNutrition(foodName) {
+            for (const [key, nutrition] of Object.entries(foodDatabase)) {
+                if (foodName.includes(key)) {
+                    return nutrition;
+                }
+            }
+            // 默认值（中等热量食物）
+            return { calories: 150, protein: 10, carbs: 20, fat: 5 };
+        }
+
         // 手动添加食物
         function addManualFood() {
             const name = document.getElementById('food-name').value;
-            const calories = parseInt(document.getElementById('food-calories').value) || 0;
-            const protein = parseInt(document.getElementById('food-protein').value) || 0;
-            const carbs = parseInt(document.getElementById('food-carbs').value) || 0;
-            const fat = parseInt(document.getElementById('food-fat').value) || 0;
+            let calories = parseInt(document.getElementById('food-calories').value);
+            let protein = parseInt(document.getElementById('food-protein').value);
+            let carbs = parseInt(document.getElementById('food-carbs').value);
+            let fat = parseInt(document.getElementById('food-fat').value);
 
             if (!name) {
                 alert('请输入食物名称！');
                 return;
+            }
+
+            // 如果用户没填营养数据，自动估算
+            if (isNaN(calories) || calories === 0) {
+                const estimated = estimateNutrition(name);
+                calories = estimated.calories;
+                protein = estimated.protein;
+                carbs = estimated.carbs;
+                fat = estimated.fat;
+                
+                // 显示估算提示
+                if (confirm(`🤖 未找到营养数据，已自动估算：\n\n${name}\n${calories}卡 | 蛋白质${protein}g | 碳水${carbs}g | 脂肪${fat}g\n\n确定添加吗？`)) {
+                    // 继续
+                } else {
+                    return;
+                }
             }
 
             dailyLog.foods.push({
