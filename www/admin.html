@@ -164,6 +164,47 @@
         .coach-detail strong {
             color: #333;
         }
+        .code-editor {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid var(--warning);
+        }
+        .code-editor input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 3px;
+            margin-top: 10px;
+        }
+        .code-editor input:focus {
+            outline: none;
+            border-color: var(--warning);
+        }
+        .code-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .code-type-btn {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+        }
+        .code-type-btn:hover {
+            border-color: var(--warning);
+            background: #fff3cd;
+        }
         .empty-state {
             text-align: center;
             padding: 40px;
@@ -284,6 +325,23 @@
         <div class="modal-content">
             <h2 style="margin-bottom:20px;">👨‍🏫 教练详情</h2>
             <div id="coach-detail-content"></div>
+            
+            <!-- 代码编辑器 -->
+            <div class="code-editor">
+                <h3 style="margin-bottom:10px;">✏️ 自定义教练代码</h3>
+                <p style="color:#666; margin-bottom:15px;">为教练设置专属代码（支持自定义格式）</p>
+                
+                <div class="code-types">
+                    <div class="code-type-btn" onclick="setCodeFormat('random')">🎲 随机生成</div>
+                    <div class="code-type-btn" onclick="setCodeFormat('name')">👤 姓名格式</div>
+                    <div class="code-type-btn" onclick="setCodeFormat('region')">📍 地区格式</div>
+                    <div class="code-type-btn" onclick="setCodeFormat('level')">⭐ 级别格式</div>
+                </div>
+                
+                <input type="text" id="custom-coach-code" placeholder="COACH-XXXXXX" maxlength="20">
+                <button class="btn btn-warning" onclick="updateCoachCode()" style="margin-top:15px;">💾 保存新代码</button>
+            </div>
+            
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button class="btn btn-primary" onclick="approveCoach()" style="flex:1;">✅ 批准</button>
                 <button class="btn btn-danger" onclick="rejectCoach()" style="flex:1;">❌ 拒绝</button>
@@ -504,6 +562,92 @@
             renderStats();
             renderCoaches();
             alert('❌ 已拒绝该教练的申请');
+        }
+
+        // 设置代码格式
+        function setCodeFormat(format) {
+            const coach = coaches.find(c => c.id === selectedCoachId);
+            if (!coach) return;
+            
+            let newCode = '';
+            
+            switch(format) {
+                case 'random':
+                    newCode = 'COACH-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                    break;
+                case 'name':
+                    // 从姓名提取
+                    const nameParts = coach.name.split(' ');
+                    const initials = nameParts.map(p => p[0]).join('').toUpperCase();
+                    const year = new Date().getFullYear().toString().substr(-2);
+                    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                    newCode = `COACH-${initials}-${year}-${random}`;
+                    break;
+                case 'region':
+                    // 地区格式：MY-KL-001
+                    const regions = ['KL', 'SN', 'PG', 'JB', 'MK', 'SZ'];
+                    const region = regions[Math.floor(Math.random() * regions.length)];
+                    const num = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+                    newCode = `MY-${region}-${num}`;
+                    break;
+                case 'level':
+                    // 级别格式：PRO-001 / FIT-001 / YOG-001
+                    const prefixes = {
+                        '减脂': 'FIT',
+                        '增肌': 'PRO',
+                        '瑜伽': 'YOG',
+                        '体能训练': 'ATH',
+                        '产后恢复': 'MOM',
+                        '运动康复': 'REC'
+                    };
+                    const specialty = coach.specialty[0] || 'FIT';
+                    const prefix = prefixes[specialty] || 'FIT';
+                    const num = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+                    newCode = `${prefix}-${num}`;
+                    break;
+            }
+            
+            document.getElementById('custom-coach-code').value = newCode;
+        }
+
+        // 更新教练代码
+        function updateCoachCode() {
+            const newCode = document.getElementById('custom-coach-code').value.trim().toUpperCase();
+            if (!newCode) {
+                alert('请输入教练代码');
+                return;
+            }
+            
+            // 检查是否重复
+            const existing = coaches.find(c => c.coachCode === newCode && c.id !== selectedCoachId);
+            if (existing) {
+                alert('❌ 该代码已被其他教练使用，请换一个');
+                return;
+            }
+            
+            const coach = coaches.find(c => c.id === selectedCoachId);
+            if (!coach) return;
+            
+            const oldCode = coach.coachCode;
+            coach.coachCode = newCode;
+            
+            saveData();
+            
+            // 更新已绑定的学员
+            const students = JSON.parse(localStorage.getItem('admin_students') || '[]');
+            let updated = 0;
+            students.forEach(student => {
+                if (student.coachCode === oldCode) {
+                    student.coachCode = newCode;
+                    updated++;
+                }
+            });
+            localStorage.setItem('admin_students', JSON.stringify(students));
+            
+            alert(`✅ 教练代码已更新！\n\n旧代码：${oldCode}\n新代码：${newCode}\n\n已更新 ${updated} 个绑定学员`);
+            
+            // 刷新显示
+            viewCoach(selectedCoachId);
         }
 
         // 关闭弹窗
