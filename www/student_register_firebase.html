@@ -88,6 +88,10 @@
         .btn-secondary {
             background: linear-gradient(135deg, #9e9e9e, #757575);
         }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
         .coach-code-section {
             background: #e8f5e9;
             padding: 20px;
@@ -160,6 +164,19 @@
         }
         .success { color: var(--primary); }
         .error { color: var(--danger); }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -211,11 +228,19 @@
                 </ul>
             </div>
 
-            <button type="submit" class="btn">✅ 立即注册</button>
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'" style="margin-top:10px;">
+            <button type="submit" class="btn" id="submit-btn">✅ 立即注册</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='login.html'" style="margin-top:10px;">
                 返回登录
             </button>
         </form>
+    </div>
+
+    <!-- 加载中弹窗 -->
+    <div id="loading-modal" class="modal">
+        <div class="modal-content">
+            <div class="loading-spinner"></div>
+            <p style="color:#666;">正在创建账号...</p>
+        </div>
     </div>
 
     <!-- 成功弹窗 -->
@@ -247,8 +272,11 @@
     <script src="firebase-config.js"></script>
 
     <script>
+        const db = window.firebaseApp?.db;
+        const auth = window.firebaseApp?.auth;
+
         // 表单提交
-        document.getElementById('register-form').addEventListener('submit', function(e) {
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const name = document.getElementById('name').value.trim();
@@ -263,87 +291,105 @@
                 return;
             }
 
-            // 检查教练代码（如果有）
-            let coach = null;
-            if (coachCode) {
-                coach = findCoachByCode(coachCode);
-                if (!coach) {
-                    showError('教练代码无效，请检查后重试');
-                    return;
+            // 显示加载中
+            document.getElementById('loading-modal').classList.add('active');
+            document.getElementById('submit-btn').disabled = true;
+
+            try {
+                // 1. 创建 Firebase Authentication 账号
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // 2. 检查教练代码（如果有）
+                let coach = null;
+                if (coachCode) {
+                    coach = await findCoachByCode(coachCode);
+                    if (!coach) {
+                        await auth.currentUser.delete();
+                        throw new Error('教练代码无效，请检查后重试');
+                    }
+                    if (coach.status !== 'approved' && coach.status !== 'founder') {
+                        await auth.currentUser.delete();
+                        throw new Error('该教练尚未通过审核，无法绑定');
+                    }
                 }
-                if (coach.status !== 'approved' && coach.status !== 'founder') {
-                    showError('该教练尚未通过审核，无法绑定');
-                    return;
+
+                // 3. 创建学员文档
+                const student = {
+                    id: user.uid,
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    coachCode: coachCode || null,
+                    coachId: coach ? coach.id : null,
+                    coachName: coach ? coach.name : null,
+                    isPremium: false,
+                    registeredAt: new Date().toISOString(),
+                    lastActive: new Date().toISOString(),
+                    foodLogs: [],
+                    calorieHistory: {}
+                };
+
+                // 4. 保存到 Firestore
+                await db.collection('students').doc(user.uid).set(student);
+
+                // 5. 如果有教练，更新教练的学员列表
+                if (coach) {
+                    await db.collection('coaches').doc(coach.id).update({
+                        students: firebase.firestore.FieldValue.arrayUnion({
+                            id: user.uid,
+                            name: name,
+                            email: email,
+                            registeredAt: student.registeredAt
+                        })
+                    });
                 }
+
+                // 6. 隐藏加载中
+                document.getElementById('loading-modal').classList.remove('active');
+
+                // 7. 显示成功
+                let message = '欢迎加入健康管家！';
+                if (coach) {
+                    message = `欢迎加入！\n\n你的教练是：${coach.name}\n教练代码：${coachCode}\n\n现在可以开始记录饮食了！`;
+                }
+
+                document.getElementById('success-message').textContent = message;
+                document.getElementById('success-modal').classList.add('active');
+
+                // 8. 清空表单
+                this.reset();
+
+            } catch (error) {
+                console.error('注册错误:', error);
+                document.getElementById('loading-modal').classList.remove('active');
+                document.getElementById('submit-btn').disabled = false;
+
+                let errorMessage = error.message;
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = '该邮箱已被注册，请登录或更换邮箱';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = '密码太简单，请至少使用 6 位字符';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = '邮箱格式不正确';
+                }
+
+                showError(errorMessage);
             }
-
-            // 创建学员账号
-            const student = {
-                id: 'STU-' + Date.now(),
-                name: name,
-                email: email,
-                phone: phone,
-                password: password, // ⚠️ 实际应该加密
-                coachCode: coachCode || null,
-                coachId: coach ? coach.id : null,
-                coachName: coach ? coach.name : null,
-                isPremium: false,
-                registeredAt: new Date().toISOString(),
-                lastActive: new Date().toISOString(),
-                foodLogs: [],
-                calorieHistory: {}
-            };
-
-            // 保存到 localStorage
-            saveStudent(student);
-
-            // 如果有教练，添加到教练的学员列表
-            if (coach) {
-                addStudentToCoach(coach.id, student);
-            }
-
-            // 显示成功
-            let message = '欢迎加入健康管家！';
-            if (coach) {
-                message = `欢迎加入！\n\n你的教练是：${coach.name}\n教练代码：${coachCode}\n\n现在可以开始记录饮食了！`;
-            }
-
-            document.getElementById('success-message').textContent = message;
-            document.getElementById('success-modal').classList.add('active');
-
-            // 清空表单
-            this.reset();
         });
 
         // 查找教练
-        function findCoachByCode(code) {
-            const coaches = JSON.parse(localStorage.getItem('admin_coaches') || '[]');
-            return coaches.find(c => c.coachCode === code);
-        }
-
-        // 保存学员
-        function saveStudent(student) {
-            const students = JSON.parse(localStorage.getItem('admin_students') || '[]');
-            students.push(student);
-            localStorage.setItem('admin_students', JSON.stringify(students));
-
-            // 同时保存当前登录用户
-            localStorage.setItem('healthApp_currentUser', JSON.stringify(student));
-        }
-
-        // 添加到教练学员列表
-        function addStudentToCoach(coachId, student) {
-            const coaches = JSON.parse(localStorage.getItem('admin_coaches') || '[]');
-            const coach = coaches.find(c => c.id === coachId);
-            if (coach) {
-                coach.students.push({
-                    id: student.id,
-                    name: student.name,
-                    email: student.email,
-                    registeredAt: student.registeredAt
-                });
-                localStorage.setItem('admin_coaches', JSON.stringify(coaches));
+        async function findCoachByCode(code) {
+            const snapshot = await db.collection('coaches')
+                .where('coachCode', '==', code)
+                .limit(1)
+                .get();
+            
+            if (snapshot.empty) {
+                return null;
             }
+            
+            return snapshot.docs[0].data();
         }
 
         // 跳过教练代码
