@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4CAF50">
+    <title>👤 学员注册 - 健康管家</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #FF9800;
+            --danger: #f44336;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #333333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo .icon {
+            font-size: 4em;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .logo h1 {
+            color: var(--primary);
+            font-size: 1.8em;
+        }
+        .logo p {
+            color: #666;
+            margin-top: 5px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text);
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1em;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #9e9e9e, #757575);
+        }
+        .coach-code-section {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .coach-code-section h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .coach-code-section p {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+        .coach-code-input {
+            font-size: 1.5em !important;
+            text-align: center;
+            letter-spacing: 5px;
+            font-weight: bold;
+        }
+        .benefits {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        .benefits h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        .benefits ul {
+            list-style: none;
+        }
+        .benefits li {
+            padding: 8px 0;
+            color: #666;
+        }
+        .benefits li:before {
+            content: "✅ ";
+            margin-right: 8px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        .success { color: var(--primary); }
+        .error { color: var(--danger); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <span class="icon">💪</span>
+            <h1>健康管家</h1>
+            <p>你的私人健康顾问</p>
+        </div>
+
+        <form id="register-form">
+            <div class="form-group">
+                <label>姓名</label>
+                <input type="text" id="name" required placeholder="你的全名">
+            </div>
+
+            <div class="form-group">
+                <label>邮箱</label>
+                <input type="email" id="email" required placeholder="用于登录和接收通知">
+            </div>
+
+            <div class="form-group">
+                <label>电话号码</label>
+                <input type="tel" id="phone" required placeholder="+60 12-345-6789">
+            </div>
+
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="password" required minlength="6" placeholder="至少 6 位字符">
+            </div>
+
+            <div class="coach-code-section">
+                <h3>👨‍🏫 有教练推荐吗？</h3>
+                <p>输入教练代码，绑定你的专属教练</p>
+                <input type="text" id="coach-code" class="coach-code-input" placeholder="COACH-XXXXXX" maxlength="13">
+                <p style="margin-top:10px; font-size:0.85em;">
+                    没有教练？<a href="#" onclick="skipCoachCode(); return false;">跳过这一步</a>
+                </p>
+            </div>
+
+            <div class="benefits">
+                <h3>🎁 注册福利</h3>
+                <ul>
+                    <li>免费使用基础功能</li>
+                    <li>AI 拍照识别食物</li>
+                    <li>饮食追踪 + 卡路里计算</li>
+                    <li>教练指导（如有绑定）</li>
+                    <li>首月 Premium 仅需 RM 9.9</li>
+                </ul>
+            </div>
+
+            <button type="submit" class="btn">✅ 立即注册</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'" style="margin-top:10px;">
+                返回登录
+            </button>
+        </form>
+    </div>
+
+    <!-- 成功弹窗 -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon success">✅</div>
+            <h2 style="margin-bottom:15px;">注册成功！</h2>
+            <p id="success-message" style="color:#666; margin-bottom:20px;"></p>
+            <button class="btn" onclick="goToApp()">进入 App</button>
+        </div>
+    </div>
+
+    <!-- 错误弹窗 -->
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon error">❌</div>
+            <h2 style="margin-bottom:15px;">注册失败</h2>
+            <p id="error-message" style="color:#666; margin-bottom:20px;"></p>
+            <button class="btn" onclick="closeErrorModal()">重试</button>
+        </div>
+    </div>
+
+    <script>
+        // 表单提交
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const coachCode = document.getElementById('coach-code').value.trim().toUpperCase();
+
+            // 验证
+            if (!name || !email || !phone || !password) {
+                showError('请填写所有必填字段');
+                return;
+            }
+
+            // 检查教练代码（如果有）
+            let coach = null;
+            if (coachCode) {
+                coach = findCoachByCode(coachCode);
+                if (!coach) {
+                    showError('教练代码无效，请检查后重试');
+                    return;
+                }
+                if (coach.status !== 'approved' && coach.status !== 'founder') {
+                    showError('该教练尚未通过审核，无法绑定');
+                    return;
+                }
+            }
+
+            // 创建学员账号
+            const student = {
+                id: 'STU-' + Date.now(),
+                name: name,
+                email: email,
+                phone: phone,
+                password: password, // ⚠️ 实际应该加密
+                coachCode: coachCode || null,
+                coachId: coach ? coach.id : null,
+                coachName: coach ? coach.name : null,
+                isPremium: false,
+                registeredAt: new Date().toISOString(),
+                lastActive: new Date().toISOString(),
+                foodLogs: [],
+                calorieHistory: {}
+            };
+
+            // 保存到 localStorage
+            saveStudent(student);
+
+            // 如果有教练，添加到教练的学员列表
+            if (coach) {
+                addStudentToCoach(coach.id, student);
+            }
+
+            // 显示成功
+            let message = '欢迎加入健康管家！';
+            if (coach) {
+                message = `欢迎加入！\n\n你的教练是：${coach.name}\n教练代码：${coachCode}\n\n现在可以开始记录饮食了！`;
+            }
+
+            document.getElementById('success-message').textContent = message;
+            document.getElementById('success-modal').classList.add('active');
+
+            // 清空表单
+            this.reset();
+        });
+
+        // 查找教练
+        function findCoachByCode(code) {
+            const coaches = JSON.parse(localStorage.getItem('admin_coaches') || '[]');
+            return coaches.find(c => c.coachCode === code);
+        }
+
+        // 保存学员
+        function saveStudent(student) {
+            const students = JSON.parse(localStorage.getItem('admin_students') || '[]');
+            students.push(student);
+            localStorage.setItem('admin_students', JSON.stringify(students));
+
+            // 同时保存当前登录用户
+            localStorage.setItem('healthApp_currentUser', JSON.stringify(student));
+        }
+
+        // 添加到教练学员列表
+        function addStudentToCoach(coachId, student) {
+            const coaches = JSON.parse(localStorage.getItem('admin_coaches') || '[]');
+            const coach = coaches.find(c => c.id === coachId);
+            if (coach) {
+                coach.students.push({
+                    id: student.id,
+                    name: student.name,
+                    email: student.email,
+                    registeredAt: student.registeredAt
+                });
+                localStorage.setItem('admin_coaches', JSON.stringify(coaches));
+            }
+        }
+
+        // 跳过教练代码
+        function skipCoachCode() {
+            document.getElementById('coach-code').value = '';
+            alert('没问题！你可以随时在 App 内绑定教练。');
+        }
+
+        // 进入 App
+        function goToApp() {
+            window.location.href = 'index.html';
+        }
+
+        // 关闭错误弹窗
+        function closeErrorModal() {
+            document.getElementById('error-modal').classList.remove('active');
+        }
+
+        // 显示错误
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-modal').classList.add('active');
+        }
+    </script>
+</body>
+</html>
