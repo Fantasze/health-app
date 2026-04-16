@@ -278,20 +278,30 @@
 
         <!-- 学员管理 -->
         <div class="card">
-            <h2>👤 学员管理</h2>
+            <h2>
+                👤 学员管理
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="filterStudents('all')">全部</button>
+                    <button class="tab-btn" onclick="filterStudents('premium')">Premium</button>
+                    <button class="tab-btn" onclick="filterStudents('free')">免费版</button>
+                    <button class="tab-btn" onclick="filterStudents('with-coach')">有教练</button>
+                </div>
+            </h2>
             <table>
                 <thead>
                     <tr>
                         <th>姓名</th>
                         <th>邮箱</th>
+                        <th>电话</th>
                         <th>教练</th>
                         <th>订阅状态</th>
                         <th>注册日期</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody id="students-table">
                     <tr>
-                        <td colspan="5" class="empty-state">
+                        <td colspan="7" class="empty-state">
                             <div class="icon">👥</div>
                             <p>暂无学员数据</p>
                         </td>
@@ -350,12 +360,27 @@
         </div>
     </div>
 
+    <!-- 学员详情弹窗 -->
+    <div id="student-detail-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:20px;">👤 学员详情</h2>
+            <div id="student-detail-content"></div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-primary" onclick="togglePremium()" style="flex:1;">👑 切换 Premium</button>
+                <button class="btn btn-warning" onclick="changeCoach()" style="flex:1;">👨‍🏫 更换教练</button>
+                <button class="btn" onclick="closeStudentModal()" style="flex:1;">关闭</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 全局数据
         let coaches = [];
         let students = [];
         let currentFilter = 'all';
+        let currentStudentFilter = 'all';
         let selectedCoachId = null;
+        let selectedStudentId = null;
 
         // 初始化
         function init() {
@@ -660,10 +685,19 @@
         function renderStudents() {
             const tbody = document.getElementById('students-table');
             
-            if (students.length === 0) {
+            let filtered = students;
+            if (currentStudentFilter === 'premium') {
+                filtered = students.filter(s => s.isPremium);
+            } else if (currentStudentFilter === 'free') {
+                filtered = students.filter(s => !s.isPremium);
+            } else if (currentStudentFilter === 'with-coach') {
+                filtered = students.filter(s => s.coachId);
+            }
+            
+            if (filtered.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="empty-state">
+                        <td colspan="7" class="empty-state">
                             <div class="icon">👥</div>
                             <p>暂无学员数据</p>
                         </td>
@@ -672,19 +706,138 @@
                 return;
             }
             
-            tbody.innerHTML = students.map(student => `
+            tbody.innerHTML = filtered.map(student => `
                 <tr>
                     <td><strong>${student.name}</strong></td>
                     <td>${student.email}</td>
-                    <td>${student.coachName || '无'}</td>
+                    <td>${student.phone}</td>
+                    <td>${student.coachName || '<span style="color:#999;">无</span>'}</td>
                     <td>
                         <span class="status-badge ${student.isPremium ? 'status-approved' : 'status-pending'}">
                             ${student.isPremium ? 'Premium' : '免费版'}
                         </span>
                     </td>
                     <td>${new Date(student.registeredAt).toLocaleDateString('zh-MY')}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="viewStudent('${student.id}')">查看</button>
+                    </td>
                 </tr>
             `).join('');
+        }
+
+        // 筛选学员
+        function filterStudents(filter) {
+            currentStudentFilter = filter;
+            document.querySelectorAll('#students-table + .tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderStudents();
+        }
+
+        // 查看学员详情
+        function viewStudent(studentId) {
+            selectedStudentId = studentId;
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            
+            const content = document.getElementById('student-detail-content');
+            content.innerHTML = `
+                <div class="coach-detail">
+                    <p><strong>姓名：</strong>${student.name}</p>
+                    <p><strong>邮箱：</strong>${student.email}</p>
+                    <p><strong>电话：</strong>${student.phone}</p>
+                    <p><strong>订阅状态：</strong>
+                        <span class="status-badge ${student.isPremium ? 'status-approved' : 'status-pending'}">
+                            ${student.isPremium ? 'Premium' : '免费版'}
+                        </span>
+                    </p>
+                    <p><strong>教练：</strong>${student.coachName || '无'}</p>
+                    <p><strong>教练代码：</strong>${student.coachCode || '无'}</p>
+                    <p><strong>注册日期：</strong>${new Date(student.registeredAt).toLocaleDateString('zh-MY')}</p>
+                    <p><strong>最后活跃：</strong>${student.lastActive ? new Date(student.lastActive).toLocaleDateString('zh-MY') : '从未'}</p>
+                    <p><strong>饮食记录数：</strong>${student.foodLogs ? student.foodLogs.length : 0} 条</p>
+                </div>
+            `;
+            
+            document.getElementById('student-detail-modal').classList.add('active');
+        }
+
+        // 切换 Premium 状态
+        function togglePremium() {
+            const student = students.find(s => s.id === selectedStudentId);
+            if (!student) return;
+            
+            student.isPremium = !student.isPremium;
+            localStorage.setItem('admin_students', JSON.stringify(students));
+            
+            alert(`✅ 已切换为${student.isPremium ? 'Premium' : '免费版'}\n\n记得处理订阅付款！`);
+            
+            saveData();
+            closeStudentModal();
+            renderStudents();
+            renderStats();
+        }
+
+        // 更换教练
+        function changeCoach() {
+            const student = students.find(s => s.id === selectedStudentId);
+            if (!student) return;
+            
+            const newCoachCode = prompt('输入新教练代码：', student.coachCode || '');
+            if (newCoachCode === null) return;
+            
+            if (!newCoachCode.trim()) {
+                // 移除教练
+                student.coachCode = null;
+                student.coachId = null;
+                student.coachName = null;
+                alert('✅ 已移除教练绑定');
+            } else {
+                // 查找新教练
+                const newCoach = coaches.find(c => c.coachCode === newCoachCode.trim().toUpperCase());
+                if (!newCoach) {
+                    alert('❌ 教练代码无效');
+                    return;
+                }
+                if (newCoach.status !== 'approved' && newCoach.status !== 'founder') {
+                    alert('❌ 该教练尚未通过审核');
+                    return;
+                }
+                
+                // 从旧教练移除
+                if (student.coachId) {
+                    const oldCoach = coaches.find(c => c.id === student.coachId);
+                    if (oldCoach) {
+                        oldCoach.students = oldCoach.students.filter(s => s.id !== student.id);
+                    }
+                }
+                
+                // 绑定新教练
+                student.coachCode = newCoach.coachCode;
+                student.coachId = newCoach.id;
+                student.coachName = newCoach.name;
+                
+                // 添加到新教练学员列表
+                if (!newCoach.students) newCoach.students = [];
+                newCoach.students.push({
+                    id: student.id,
+                    name: student.name,
+                    email: student.email,
+                    registeredAt: student.registeredAt
+                });
+                
+                alert(`✅ 已更换教练为：${newCoach.name}`);
+            }
+            
+            saveData();
+            closeStudentModal();
+            renderStudents();
+            renderCoaches();
+        }
+
+        // 关闭学员弹窗
+        function closeStudentModal() {
+            document.getElementById('student-detail-modal').classList.remove('active');
+            selectedStudentId = null;
         }
 
         // 渲染收入统计
