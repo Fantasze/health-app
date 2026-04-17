@@ -404,24 +404,44 @@
             this.reset();
         });
 
-        // 查找教练
-        function findCoachByCode(code) {
-            const coaches = JSON.parse(localStorage.getItem('admin_coaches') || '[]');
-            return coaches.find(c => c.coachCode === code);
+        // 查找教练（Firebase 版本）
+        async function findCoachByCode(code) {
+            const snapshot = await db.collection('coaches')
+                .where('coachCode', '==', code)
+                .limit(1)
+                .get();
+            
+            if (snapshot.empty) {
+                return null;
+            }
+            
+            return snapshot.docs[0].data();
         }
 
-        // 保存学员
-        function saveStudent(student) {
-            const students = JSON.parse(localStorage.getItem('admin_students') || '[]');
-            students.push(student);
-            localStorage.setItem('admin_students', JSON.stringify(students));
-
-            // 同时保存当前登录用户
-            localStorage.setItem('healthApp_currentUser', JSON.stringify(student));
+        // 跳过教练代码
+        function skipCoachCode() {
+            document.getElementById('coach-code').value = '';
+            alert('没问题！你可以随时在 App 内绑定教练。');
         }
 
-        // 添加到教练学员列表
-        function addStudentToCoach(coachId, student) {
+        // 进入 App
+        function goToApp() {
+            window.location.href = 'index.html';
+        }
+
+        // 关闭错误弹窗
+        function closeErrorModal() {
+            document.getElementById('error-modal').classList.remove('active');
+        }
+
+        // 显示错误
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-modal').classList.add('active');
+        }
+
+        // 添加到教练学员列表（Firebase 版本）
+        async function addStudentToCoachFirebase(coachId, student) {
             const coaches = JSON.parse(localStorage.getItem('admin_coaches') || '[]');
             const coach = coaches.find(c => c.id === coachId);
             if (coach) {
