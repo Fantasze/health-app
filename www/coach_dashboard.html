@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👨‍🏫 教练仪表板 - 健康管家</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4CAF50;
+            --danger: #f44336;
+            --warning: #FF9800;
+            --info: #2196F3;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #333333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary), #388E3C);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-value { font-size: 2.5em; font-weight: bold; color: var(--primary); }
+        .stat-label { color: #666; margin-top: 5px; }
+        .card {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th { background: #f8f9fa; font-weight: bold; }
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        .status-confirmed { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .status-completed { background: #d1ecf1; color: #0c5460; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .empty-state .icon { font-size: 4em; margin-bottom: 20px; }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .calendar-day {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .calendar-day:hover { border-color: var(--primary); }
+        .calendar-day.selected { background: var(--primary); color: white; }
+        .calendar-day.disabled { opacity: 0.3; cursor: not-allowed; }
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .time-slot {
+            padding: 12px;
+            background: #e8f5e9;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .time-slot:hover { background: var(--primary); color: white; }
+        .time-slot.booked {
+            background: #ffebee;
+            border-color: var(--danger);
+            color: var(--danger);
+            cursor: not-allowed;
+        }
+        .commission-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="coach-name">👨‍🏫 教练仪表板</h1>
+        <p id="coach-email">管理学员、课程和收入</p>
+    </div>
+
+    <div class="container">
+        <!-- 统计面板 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-students">0</div>
+                <div class="stat-label">学员总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-sessions">0</div>
+                <div class="stat-label">本月课程</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="monthly-income">RM 0</div>
+                <div class="stat-label">本月收入</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="commission-rate">30%</div>
+                <div class="stat-label">平台抽成</div>
+            </div>
+        </div>
+
+        <!-- 课时费设置 -->
+        <div class="card">
+            <h2>💰 课时费设置</h2>
+            <div class="commission-info">
+                <h3 style="margin-bottom:10px;">📊 平台抽成规则</h3>
+                <p>0-49 学员：平台抽成 30%（你拿 70%）</p>
+                <p>50-99 学员：平台抽成 25%（你拿 75%）</p>
+                <p>100+ 学员：平台抽成 20%（你拿 80%）</p>
+            </div>
+            <div class="form-group">
+                <label>课时费（RM/小时）</label>
+                <input type="number" id="hourly-rate" value="90" min="50" max="500">
+            </div>
+            <button class="btn btn-primary" onclick="updateRate()">💾 更新课时费</button>
+        </div>
+
+        <!-- 日历管理 -->
+        <div class="card">
+            <h2>📅 可用时间管理</h2>
+            <div class="form-group">
+                <label>选择日期</label>
+                <input type="date" id="selected-date">
+            </div>
+            <div class="time-slots" id="time-slots-container">
+                <!-- 时间段将动态生成 -->
+            </div>
+            <button class="btn btn-primary" onclick="saveAvailability()">💾 保存可用时间</button>
+        </div>
+
+        <!-- 学员列表 -->
+        <div class="card">
+            <h2>👥 我的学员</h2>
+            <div id="students-loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>正在加载学员数据...</p>
+            </div>
+            <table style="display:none;" id="students-table-container">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>邮箱</th>
+                        <th>加入日期</th>
+                        <th>已上课时</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="students-table">
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="icon">👥</div>
+                            <p>暂无学员</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 课程预约 -->
+        <div class="card">
+            <h2>📋 课程预约</h2>
+            <div id="sessions-loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>正在加载课程数据...</p>
+            </div>
+            <table style="display:none;" id="sessions-table-container">
+                <thead>
+                    <tr>
+                        <th>学员</th>
+                        <th>日期</th>
+                        <th>时间</th>
+                        <th>状态</th>
+                        <th>金额</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="sessions-table">
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="icon">📋</div>
+                            <p>暂无课程预约</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 课程详情弹窗 -->
+    <div id="session-detail-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:20px;">📋 课程详情</h2>
+            <div id="session-detail-content"></div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-primary" onclick="approveSession()" style="flex:1;">✅ 确认课程</button>
+                <button class="btn btn-danger" onclick="cancelSession()" style="flex:1;">❌ 取消课程</button>
+                <button class="btn" onclick="closeSessionModal()" style="flex:1;">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase 配置 -->
+    <script src="firebase-config.js"></script>
+
+    <script>
+        const db = window.firebaseApp.db;
+        const auth = window.firebaseApp.auth;
+        let currentCoach = null;
+        let students = [];
+        let sessions = [];
+        let selectedSessionId = null;
+
+        // 初始化
+        async function init() {
+            // 检查登录状态
+            auth.onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // 加载教练数据
+                const coachDoc = await db.collection('coaches').doc(user.uid).get();
+                if (!coachDoc.exists) {
+                    alert('教练资料不存在，请先完成教练认证');
+                    window.location.href = 'coach.html';
+                    return;
+                }
+
+                currentCoach = { id: user.uid, ...coachDoc.data() };
+                document.getElementById('coach-name').textContent = '👨‍🏫 ' + currentCoach.name;
+                document.getElementById('coach-email').textContent = currentCoach.email;
+                document.getElementById('hourly-rate').value = currentCoach.rate || 90;
+
+                loadData();
+            });
+        }
+
+        // 加载数据
+        async function loadData() {
+            try {
+                // 加载学员数据
+                const studentsSnapshot = await db.collection('students')
+                    .where('coachId', '==', currentCoach.id)
+                    .get();
+                students = studentsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+
+                // 加载课程数据
+                const sessionsSnapshot = await db.collection('sessions')
+                    .where('coachId', '==', currentCoach.id)
+                    .orderBy('dateTime', 'desc')
+                    .limit(50)
+                    .get();
+                sessions = sessionsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+
+                // 隐藏加载动画
+                document.getElementById('students-loading').style.display = 'none';
+                document.getElementById('sessions-loading').style.display = 'none';
+                document.getElementById('students-table-container').style.display = 'table';
+                document.getElementById('sessions-table-container').style.display = 'table';
+
+                // 渲染
+                renderStats();
+                renderStudents();
+                renderSessions();
+                generateTimeSlots();
+
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            }
+        }
+
+        // 渲染统计
+        function renderStats() {
+            const studentCount = students.length;
+            const sessionCount = sessions.filter(s => {
+                const sessionDate = new Date(s.dateTime);
+                const now = new Date();
+                return sessionDate.getMonth() === now.getMonth() && 
+                       sessionDate.getFullYear() === now.getFullYear();
+            }).length;
+
+            // 计算收入
+            const rate = currentCoach.rate || 90;
+            const commissionRate = getCommissionRate(studentCount);
+            const coachShare = rate * (100 - commissionRate) / 100;
+            const income = sessionCount * coachShare;
+
+            document.getElementById('total-students').textContent = studentCount;
+            document.getElementById('total-sessions').textContent = sessionCount;
+            document.getElementById('monthly-income').textContent = 'RM ' + income.toFixed(2);
+            document.getElementById('commission-rate').textContent = commissionRate + '%';
+        }
+
+        // 获取抽成比例
+        function getCommissionRate(studentCount) {
+            if (studentCount >= 100) return 20;
+            if (studentCount >= 50) return 25;
+            return 30;
+        }
+
+        // 更新课时费
+        async function updateRate() {
+            const newRate = parseInt(document.getElementById('hourly-rate').value);
+            if (!newRate || newRate < 50 || newRate > 500) {
+                alert('课时费必须在 RM 50-500 之间');
+                return;
+            }
+
+            await db.collection('coaches').doc(currentCoach.id).update({ rate: newRate });
+            currentCoach.rate = newRate;
+            alert('✅ 课时费已更新为 RM ' + newRate + '/小时');
+            renderStats();
+        }
+
+        // 生成时间段
+        function generateTimeSlots() {
+            const container = document.getElementById('time-slots-container');
+            const hours = [
+                '09:00', '10:00', '11:00', '12:00',
+                '14:00', '15:00', '16:00', '17:00',
+                '19:00', '20:00', '21:00'
+            ];
+
+            container.innerHTML = hours.map(time => `
+                <div class="time-slot" data-time="${time}" onclick="toggleTimeSlot(this)">
+                    ${time}
+                </div>
+            `).join('');
+        }
+
+        // 切换时间段
+        function toggleTimeSlot(element) {
+            if (element.classList.contains('booked')) return;
+            element.classList.toggle('selected');
+        }
+
+        // 保存可用时间
+        async function saveAvailability() {
+            const date = document.getElementById('selected-date').value;
+            if (!date) {
+                alert('请选择日期');
+                return;
+            }
+
+            const selectedSlots = Array.from(document.querySelectorAll('.time-slot.selected'))
+                .map(slot => slot.dataset.time);
+
+            if (selectedSlots.length === 0) {
+                alert('请至少选择一个时间段');
+                return;
+            }
+
+            // 保存到 Firestore
+            await db.collection('coachAvailability').doc(currentCoach.id)
+                .collection('dates').doc(date).set({
+                    coachId: currentCoach.id,
+                    date: date,
+                    availableSlots: selectedSlots,
+                    updatedAt: new Date().toISOString()
+                });
+
+            alert('✅ 可用时间已保存！');
+        }
+
+        // 渲染学员列表
+        function renderStudents() {
+            const tbody = document.getElementById('students-table');
+            
+            if (students.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="icon">👥</div>
+                            <p>暂无学员</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td><strong>${student.name}</strong></td>
+                    <td>${student.email}</td>
+                    <td>${new Date(student.registeredAt).toLocaleDateString('zh-MY')}</td>
+                    <td>0 课时</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="viewStudent('${student.id}')">查看</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 渲染课程列表
+        function renderSessions() {
+            const tbody = document.getElementById('sessions-table');
+            
+            if (sessions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="icon">📋</div>
+                            <p>暂无课程预约</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = sessions.map(session => `
+                <tr>
+                    <td><strong>${session.studentName}</strong></td>
+                    <td>${new Date(session.dateTime).toLocaleDateString('zh-MY')}</td>
+                    <td>${session.timeSlot}</td>
+                    <td>
+                        <span class="status-badge status-${session.status}">
+                            ${getStatusText(session.status)}
+                        </span>
+                    </td>
+                    <td>RM ${session.amount}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="viewSession('${session.id}')">查看</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 获取状态文字
+        function getStatusText(status) {
+            const map = {
+                'pending': '待确认',
+                'confirmed': '已确认',
+                'cancelled': '已取消',
+                'completed': '已完成',
+                'refunded': '已退款'
+            };
+            return map[status] || status;
+        }
+
+        // 查看课程详情
+        function viewSession(sessionId) {
+            selectedSessionId = sessionId;
+            const session = sessions.find(s => s.id === sessionId);
+            if (!session) return;
+
+            const content = document.getElementById('session-detail-content');
+            content.innerHTML = `
+                <div class="student-detail">
+                    <p><strong>学员：</strong>${session.studentName}</p>
+                    <p><strong>邮箱：</strong>${session.studentEmail}</p>
+                    <p><strong>日期：</strong>${new Date(session.dateTime).toLocaleDateString('zh-MY')}</p>
+                    <p><strong>时间：</strong>${session.timeSlot}</p>
+                    <p><strong>金额：</strong>RM ${session.amount}</p>
+                    <p><strong>状态：</strong>${getStatusText(session.status)}</p>
+                    <p><strong>预约时间：</strong>${new Date(session.bookedAt).toLocaleString('zh-MY')}</p>
+                </div>
+                
+                <div style="margin-top:20px; padding:15px; background:#fff3cd; border-radius:10px;">
+                    <p><strong>⚠️ 退改政策：</strong></p>
+                    <p>✅ 上课前 24 小时：可以改期/取消 + 全额退款</p>
+                    <p>❌ 上课前 24 小时内：不能改期/取消/退款</p>
+                </div>
+            `;
+
+            document.getElementById('session-detail-modal').classList.add('active');
+        }
+
+        // 确认课程
+        async function approveSession() {
+            if (!selectedSessionId) return;
+
+            await db.collection('sessions').doc(selectedSessionId).update({
+                status: 'confirmed'
+            });
+
+            alert('✅ 课程已确认！');
+            await loadData();
+            closeSessionModal();
+        }
+
+        // 取消课程
+        async function cancelSession() {
+            if (!selectedSessionId) return;
+
+            const session = sessions.find(s => s.id === selectedSessionId);
+            const sessionTime = new Date(session.dateTime);
+            const now = new Date();
+            const hoursUntilSession = (sessionTime - now) / (1000 * 60 * 60);
+
+            if (hoursUntilSession < 24) {
+                alert('❌ 上课前 24 小时内不能取消课程');
+                return;
+            }
+
+            if (confirm('确定要取消这门课程吗？将全额退款给学员。')) {
+                await db.collection('sessions').doc(selectedSessionId).update({
+                    status: 'cancelled',
+                    refunded: true,
+                    cancelledAt: new Date().toISOString()
+                });
+
+                alert('✅ 课程已取消，款项将退还学员');
+                await loadData();
+                closeSessionModal();
+            }
+        }
+
+        // 关闭课程弹窗
+        function closeSessionModal() {
+            document.getElementById('session-detail-modal').classList.remove('active');
+            selectedSessionId = null;
+        }
+
+        // 查看学员
+        function viewStudent(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            alert(`学员：${student.name}\n邮箱：${student.email}\n\n（学员详情功能开发中...）`);
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
