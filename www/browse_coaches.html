@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👨‍🏫 选择教练 - 健康管家</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4CAF50;
+            --danger: #f44336;
+            --warning: #FF9800;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #333333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary), #388E3C);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .filters {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .filters h3 { margin-bottom: 15px; color: var(--primary); }
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .filter-group input, .filter-group select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            flex: 1;
+            min-width: 200px;
+        }
+        .coaches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .coach-card {
+            background: var(--card);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        .coach-card:hover { transform: translateY(-5px); }
+        .coach-avatar {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #e0e0e0;
+        }
+        .coach-info { padding: 20px; }
+        .coach-name { font-size: 1.5em; font-weight: bold; margin-bottom: 5px; }
+        .coach-specialty { color: #666; margin-bottom: 10px; }
+        .coach-meta {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 10px 0;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .coach-meta-item { text-align: center; }
+        .coach-meta-value { font-size: 1.2em; font-weight: bold; color: var(--primary); }
+        .coach-meta-label { font-size: 0.85em; color: #666; }
+        .coach-locations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .location-badge {
+            background: #e8f5e9;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            color: var(--primary);
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .coach-detail-header {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .coach-detail-avatar {
+            width: 100%;
+            border-radius: 15px;
+            object-fit: cover;
+        }
+        .coach-photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .coach-photo {
+            width: 100%;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .coach-photo:hover { transform: scale(1.05); }
+        .video-embed {
+            margin: 20px 0;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👨‍🏫 选择你的教练</h1>
+        <p>找到最适合你的专业健身教练</p>
+    </div>
+
+    <div class="container">
+        <!-- 筛选器 -->
+        <div class="filters">
+            <h3>🔍 筛选教练</h3>
+            <div class="filter-group">
+                <input type="text" id="search-input" placeholder="🔍 搜索教练姓名或专长..." oninput="filterCoaches()">
+            </div>
+            <div class="filter-group">
+                <select id="specialty-filter" onchange="filterCoaches()">
+                    <option value="">所有专长</option>
+                    <option value="减脂">减脂</option>
+                    <option value="增肌">增肌</option>
+                    <option value="力量训练">力量训练</option>
+                    <option value="瑜伽">瑜伽</option>
+                    <option value="产后恢复">产后恢复</option>
+                    <option value="运动康复">运动康复</option>
+                </select>
+                <select id="location-filter" onchange="filterCoaches()">
+                    <option value="">所有地点</option>
+                    <option value="KL">吉隆坡</option>
+                    <option value="SN">雪兰莪</option>
+                    <option value="PG">槟城</option>
+                    <option value="JB">新山</option>
+                    <option value="online">在线教学</option>
+                </select>
+                <select id="price-filter" onchange="filterCoaches()">
+                    <option value="">所有价格</option>
+                    <option value="0-100">RM 50-100/小时</option>
+                    <option value="100-150">RM 100-150/小时</option>
+                    <option value="150-999">RM 150+/小时</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 教练列表 -->
+        <div id="coaches-loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在加载教练资料...</p>
+        </div>
+        <div class="coaches-grid" id="coaches-grid"></div>
+    </div>
+
+    <!-- 教练详情弹窗 -->
+    <div id="coach-detail-modal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="color:var(--primary);">👨‍🏫 教练详情</h2>
+                <button class="btn" onclick="closeCoachModal()" style="width:auto; background:#9e9e9e;">✕ 关闭</button>
+            </div>
+            <div id="coach-detail-content"></div>
+            <div style="margin-top:30px;">
+                <button class="btn btn-primary" onclick="selectCoach()">✅ 选择这位教练</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase 配置 -->
+    <script src="firebase-config.js"></script>
+
+    <script>
+        const db = window.firebaseApp.db;
+        let allCoaches = [];
+        let filteredCoaches = [];
+        let selectedCoach = null;
+
+        // 初始化
+        async function init() {
+            await loadCoaches();
+        }
+
+        // 加载教练数据
+        async function loadCoaches() {
+            try {
+                const coachesSnapshot = await db.collection('coaches')
+                    .where('status', 'in', ['approved', 'founder'])
+                    .get();
+                
+                allCoaches = coachesSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                filteredCoaches = allCoaches;
+
+                document.getElementById('coaches-loading').style.display = 'none';
+                renderCoaches();
+
+            } catch (error) {
+                console.error('加载教练失败:', error);
+                document.getElementById('coaches-loading').innerHTML = '<p style="color:red;">加载失败，请刷新重试</p>';
+            }
+        }
+
+        // 渲染教练列表
+        function renderCoaches() {
+            const grid = document.getElementById('coaches-grid');
+
+            if (filteredCoaches.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:40px; color:#999;">
+                        <p style="font-size:3em; margin-bottom:20px;">😕</p>
+                        <p>没有找到符合条件的教练</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredCoaches.map(coach => {
+                const avatarUrl = coach.avatarUrl || 'https://via.placeholder.com/400x400?text=' + encodeURIComponent(coach.name);
+                const specialty = (coach.specialty || []).slice(0, 3).join(' · ');
+                const studentCount = coach.students ? coach.students.length : 0;
+                const locations = (coach.locations || []).slice(0, 2);
+
+                return `
+                    <div class="coach-card" onclick="viewCoach('${coach.id}')">
+                        <img src="${avatarUrl}" alt="${coach.name}" class="coach-avatar">
+                        <div class="coach-info">
+                            <div class="coach-name">${coach.name}</div>
+                            <div class="coach-specialty">${specialty || '健身教练'}</div>
+                            
+                            <div class="coach-meta">
+                                <div class="coach-meta-item">
+                                    <div class="coach-meta-value">RM ${coach.rate || 90}</div>
+                                    <div class="coach-meta-label">每小时</div>
+                                </div>
+                                <div class="coach-meta-item">
+                                    <div class="coach-meta-value">${studentCount}</div>
+                                    <div class="coach-meta-label">学员</div>
+                                </div>
+                                <div class="coach-meta-item">
+                                    <div class="coach-meta-value">${coach.experience || 0}年</div>
+                                    <div class="coach-meta-label">经验</div>
+                                </div>
+                            </div>
+
+                            ${locations.length > 0 ? `
+                                <div class="coach-locations">
+                                    ${locations.map(loc => `<span class="location-badge">📍 ${loc}</span>`).join('')}
+                                </div>
+                            ` : ''}
+
+                            <button class="btn btn-primary" onclick="event.stopPropagation(); viewCoach('${coach.id}')">查看详情</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 筛选教练
+        function filterCoaches() {
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            const specialtyFilter = document.getElementById('specialty-filter').value;
+            const locationFilter = document.getElementById('location-filter').value;
+            const priceRange = document.getElementById('price-filter').value;
+
+            filteredCoaches = allCoaches.filter(coach => {
+                // 搜索
+                if (searchText) {
+                    const matchName = (coach.name || '').toLowerCase().includes(searchText);
+                    const matchSpecialty = (coach.specialty || []).some(s => s.toLowerCase().includes(searchText));
+                    if (!matchName && !matchSpecialty) return false;
+                }
+
+                // 专长
+                if (specialtyFilter && !(coach.specialty || []).includes(specialtyFilter)) {
+                    return false;
+                }
+
+                // 地点
+                if (locationFilter) {
+                    const locations = (coach.locations || []).join(' ');
+                    if (locationFilter === 'online') {
+                        if (!(coach.mode || []).includes('在线')) return false;
+                    } else {
+                        if (!locations.includes(locationFilter)) return false;
+                    }
+                }
+
+                // 价格
+                if (priceRange) {
+                    const rate = coach.rate || 90;
+                    const [min, max] = priceRange.split('-').map(Number);
+                    if (rate < min || rate > max) return false;
+                }
+
+                return true;
+            });
+
+            renderCoaches();
+        }
+
+        // 查看教练详情
+        async function viewCoach(coachId) {
+            selectedCoach = allCoaches.find(c => c.id === coachId);
+            if (!selectedCoach) return;
+
+            const avatarUrl = selectedCoach.avatarUrl || 'https://via.placeholder.com/400x400?text=Coach';
+            const content = document.getElementById('coach-detail-content');
+
+            content.innerHTML = `
+                <div class="coach-detail-header">
+                    <img src="${avatarUrl}" alt="${selectedCoach.name}" class="coach-detail-avatar">
+                    <div>
+                        <h3 style="font-size:2em; margin-bottom:10px;">${selectedCoach.name}</h3>
+                        <p style="color:#666; margin-bottom:15px;">${selectedCoach.bio || '暂无简介'}</p>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin:20px 0;">
+                            <div>
+                                <p><strong>📧 邮箱：</strong>${selectedCoach.email}</p>
+                                <p><strong>📱 电话：</strong>${selectedCoach.phone || '未填写'}</p>
+                                <p><strong>💰 课时费：</strong>RM ${selectedCoach.rate || 90}/小时</p>
+                            </div>
+                            <div>
+                                <p><strong>🏆 认证：</strong>${selectedCoach.certification || '未填写'}</p>
+                                <p><strong>📊 经验：</strong>${selectedCoach.experience || 0}年</p>
+                                <p><strong>⭐ 学员：</strong>${selectedCoach.students ? selectedCoach.students.length : 0}人</p>
+                            </div>
+                        </div>
+
+                        <div style="margin:20px 0;">
+                            <p><strong>专长领域：</strong></p>
+                            <div class="coach-locations" style="margin-top:10px;">
+                                ${(selectedCoach.specialty || []).map(s => `<span class="location-badge">${s}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        ${(selectedCoach.locations || []).length > 0 ? `
+                            <div style="margin:20px 0;">
+                                <p><strong>📍 教学地点：</strong></p>
+                                <div class="coach-locations" style="margin-top:10px;">
+                                    ${selectedCoach.locations.map(loc => `<span class="location-badge">📍 ${loc}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div style="margin:20px 0;">
+                            <p><strong>💻 服务方式：</strong></p>
+                            <div class="coach-locations" style="margin-top:10px;">
+                                ${(selectedCoach.mode || []).map(m => `<span class="location-badge">${m}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${(selectedCoach.photos || []).length > 0 ? `
+                    <div style="margin:30px 0;">
+                        <h3>📸 教学照片</h3>
+                        <div class="coach-photos-grid" style="margin-top:15px;">
+                            ${selectedCoach.photos.map(url => `<img src="${url}" class="coach-photo" onclick="viewPhoto('${url}')">`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${selectedCoach.youtubeUrl ? `
+                    <div style="margin:30px 0;">
+                        <h3>🎥 介绍视频</h3>
+                        <div class="video-embed" style="margin-top:15px;">
+                            <iframe width="100%" height="400" src="https://www.youtube.com/embed/${extractYoutubeId(selectedCoach.youtubeUrl)}" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('coach-detail-modal').classList.add('active');
+        }
+
+        // 提取 YouTube ID
+        function extractYoutubeId(url) {
+            const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+            return match ? match[1] : '';
+        }
+
+        // 查看照片
+        function viewPhoto(url) {
+            window.open(url, '_blank');
+        }
+
+        // 选择教练
+        function selectCoach() {
+            if (!selectedCoach) return;
+            
+            // 检查是否已登录
+            const user = window.firebaseApp.auth.currentUser;
+            if (!user) {
+                alert('请先登录');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 更新学员资料
+            db.collection('students').doc(user.uid).update({
+                coachId: selectedCoach.id,
+                coachCode: selectedCoach.coachCode,
+                coachName: selectedCoach.name
+            }).then(() => {
+                alert(`✅ 已选择 ${selectedCoach.name} 作为你的教练！`);
+                closeCoachModal();
+                window.location.href = 'index.html';
+            }).catch(error => {
+                console.error('选择教练失败:', error);
+                alert('❌ 选择失败，请重试');
+            });
+        }
+
+        // 关闭弹窗
+        function closeCoachModal() {
+            document.getElementById('coach-detail-modal').classList.remove('active');
+            selectedCoach = null;
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✏️ 编辑教练资料 - 健康管家</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4CAF50;
+            --danger: #f44336;
+            --warning: #FF9800;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #333333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary), #388E3C);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-secondary { background: #9e9e9e; color: white; }
+        .image-upload {
+            border: 2px dashed #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .image-upload:hover { border-color: var(--primary); }
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .image-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 1;
+        }
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        .location-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .location-tag {
+            background: #e8f5e9;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .location-tag .remove {
+            cursor: pointer;
+            color: var(--danger);
+            font-weight: bold;
+        }
+        .help-text {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✏️ 编辑教练资料</h1>
+        <p>完善你的资料，吸引更多学员</p>
+    </div>
+
+    <div class="container">
+        <!-- 头像上传 -->
+        <div class="card">
+            <h2>📸 教练头像</h2>
+            <div class="image-upload" onclick="document.getElementById('avatar-input').click()">
+                <p style="font-size:3em; margin-bottom:10px;">📷</p>
+                <p>点击上传头像</p>
+                <p class="help-text">建议尺寸：400x400px，JPG/PNG 格式</p>
+            </div>
+            <input type="file" id="avatar-input" accept="image/*" style="display:none;" onchange="uploadAvatar(event)">
+            <div id="avatar-preview" class="image-preview"></div>
+        </div>
+
+        <!-- 照片墙上传 -->
+        <div class="card">
+            <h2>🖼️ 教学照片</h2>
+            <p class="help-text" style="margin-bottom:15px;">上传你的教学照片、健身房环境、学员成果等（最多 10 张）</p>
+            <div class="image-upload" onclick="document.getElementById('photos-input').click()">
+                <p style="font-size:3em; margin-bottom:10px;">📷</p>
+                <p>点击上传照片</p>
+                <p class="help-text">支持多选，JPG/PNG 格式</p>
+            </div>
+            <input type="file" id="photos-input" accept="image/*" multiple style="display:none;" onchange="uploadPhotos(event)">
+            <div id="photos-preview" class="image-preview"></div>
+        </div>
+
+        <!-- 视频链接 -->
+        <div class="card">
+            <h2>🎥 介绍视频</h2>
+            <div class="form-group">
+                <label>YouTube 视频链接</label>
+                <input type="url" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+                <p class="help-text">分享你的教学视频、介绍视频等</p>
+            </div>
+            <div class="form-group">
+                <label>TikTok 视频链接</label>
+                <input type="url" id="tiktok-url" placeholder="https://www.tiktok.com/@...">
+                <p class="help-text">分享你的 TikTok 教学片段</p>
+            </div>
+        </div>
+
+        <!-- 基本信息 -->
+        <div class="card">
+            <h2>📝 基本信息</h2>
+            <div class="form-group">
+                <label>个人简介</label>
+                <textarea id="bio" placeholder="介绍你的教学经验、风格、专长等..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>专长领域</label>
+                <select id="specialty" multiple>
+                    <option value="减脂">减脂</option>
+                    <option value="增肌">增肌</option>
+                    <option value="力量训练">力量训练</option>
+                    <option value="体能训练">体能训练</option>
+                    <option value="瑜伽">瑜伽</option>
+                    <option value="普拉提">普拉提</option>
+                    <option value="产后恢复">产后恢复</option>
+                    <option value="运动康复">运动康复</option>
+                    <option value="拳击">拳击</option>
+                    <option value="HIIT">HIIT</option>
+                </select>
+                <p class="help-text">按住 Ctrl/Cmd 多选</p>
+            </div>
+            <div class="form-group">
+                <label>认证资质</label>
+                <input type="text" id="certification" placeholder="例如：ACE-CPT, NASM-CPT, REPS">
+                <p class="help-text">多个认证用逗号分隔</p>
+            </div>
+            <div class="form-group">
+                <label>教学经验（年）</label>
+                <input type="number" id="experience" min="0" max="50" placeholder="例如：5">
+            </div>
+        </div>
+
+        <!-- 教学地点 -->
+        <div class="card">
+            <h2>📍 教学地点</h2>
+            <div class="form-group">
+                <label>添加教学地点</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="location-input" placeholder="例如：Celebrity Fitness - Pavilion KL">
+                    <button type="button" class="btn btn-secondary" onclick="addLocation()" style="width:auto;">➕ 添加</button>
+                </div>
+                <p class="help-text">可以添加多个教学地点（健身房、工作室、在线等）</p>
+            </div>
+            <div class="location-tags" id="location-tags"></div>
+        </div>
+
+        <!-- 服务方式 -->
+        <div class="card">
+            <h2>💻 服务方式</h2>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="mode-offline" checked> 线下训练
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="mode-online" checked> 在线指导
+                </label>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveProfile()">💾 保存资料</button>
+        <button class="btn btn-secondary" onclick="window.location.href='coach_dashboard.html'" style="margin-top:10px; width:100%;">返回仪表板</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase 配置 -->
+    <script src="firebase-config.js"></script>
+
+    <script>
+        const db = window.firebaseApp.db;
+        const auth = window.firebaseApp.auth;
+        let currentCoach = null;
+        let avatarUrl = '';
+        let photoUrls = [];
+        let locations = [];
+
+        // 初始化
+        async function init() {
+            auth.onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const coachDoc = await db.collection('coaches').doc(user.uid).get();
+                if (!coachDoc.exists) {
+                    alert('教练资料不存在');
+                    window.location.href = 'coach.html';
+                    return;
+                }
+
+                currentCoach = { id: user.uid, ...coachDoc.data() };
+                loadProfile();
+            });
+        }
+
+        // 加载资料
+        function loadProfile() {
+            document.getElementById('bio').value = currentCoach.bio || '';
+            document.getElementById('certification').value = currentCoach.certification || '';
+            document.getElementById('experience').value = currentCoach.experience || 0;
+            document.getElementById('youtube-url').value = currentCoach.youtubeUrl || '';
+            document.getElementById('tiktok-url').value = currentCoach.tiktokUrl || '';
+            document.getElementById('mode-offline').checked = (currentCoach.mode || []).includes('线下');
+            document.getElementById('mode-online').checked = (currentCoach.mode || []).includes('在线');
+
+            // 加载头像
+            if (currentCoach.avatarUrl) {
+                avatarUrl = currentCoach.avatarUrl;
+                document.getElementById('avatar-preview').innerHTML = `
+                    <div class="image-item">
+                        <img src="${avatarUrl}" alt="头像">
+                        <button class="remove-btn" onclick="removeAvatar()">×</button>
+                    </div>
+                `;
+            }
+
+            // 加载照片
+            if (currentCoach.photos && currentCoach.photos.length > 0) {
+                photoUrls = currentCoach.photos;
+                renderPhotos();
+            }
+
+            // 加载地点
+            if (currentCoach.locations && currentCoach.locations.length > 0) {
+                locations = currentCoach.locations;
+                renderLocations();
+            }
+        }
+
+        // 上传头像
+        async function uploadAvatar(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // 这里应该上传到 Firebase Storage，暂时用 placeholder
+            avatarUrl = 'https://via.placeholder.com/400x400?text=' + encodeURIComponent(file.name);
+            
+            document.getElementById('avatar-preview').innerHTML = `
+                <div class="image-item">
+                    <img src="${avatarUrl}" alt="头像">
+                    <button class="remove-btn" onclick="removeAvatar()">×</button>
+                </div>
+            `;
+
+            alert('✅ 头像已上传！（演示模式，实际需接 Storage）');
+        }
+
+        // 移除头像
+        function removeAvatar() {
+            avatarUrl = '';
+            document.getElementById('avatar-preview').innerHTML = '';
+        }
+
+        // 上传照片
+        async function uploadPhotos(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            for (let i = 0; i < files.length; i++) {
+                if (photoUrls.length >= 10) {
+                    alert('最多上传 10 张照片');
+                    break;
+                }
+                const file = files[i];
+                const url = 'https://via.placeholder.com/400x400?text=' + encodeURIComponent(file.name);
+                photoUrls.push(url);
+            }
+
+            renderPhotos();
+            alert('✅ 照片已上传！（演示模式，实际需接 Storage）');
+        }
+
+        // 渲染照片
+        function renderPhotos() {
+            document.getElementById('photos-preview').innerHTML = photoUrls.map((url, index) => `
+                <div class="image-item">
+                    <img src="${url}" alt="照片">
+                    <button class="remove-btn" onclick="removePhoto(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        // 移除照片
+        function removePhoto(index) {
+            photoUrls.splice(index, 1);
+            renderPhotos();
+        }
+
+        // 添加地点
+        function addLocation() {
+            const location = document.getElementById('location-input').value.trim();
+            if (!location) return;
+
+            locations.push(location);
+            document.getElementById('location-input').value = '';
+            renderLocations();
+        }
+
+        // 渲染地点
+        function renderLocations() {
+            document.getElementById('location-tags').innerHTML = locations.map((location, index) => `
+                <div class="location-tag">
+                    📍 ${location}
+                    <span class="remove" onclick="removeLocation(${index})">×</span>
+                </div>
+            `).join('');
+        }
+
+        // 移除地点
+        function removeLocation(index) {
+            locations.splice(index, 1);
+            renderLocations();
+        }
+
+        // 保存资料
+        async function saveProfile() {
+            const bio = document.getElementById('bio').value.trim();
+            const certification = document.getElementById('certification').value.trim();
+            const experience = parseInt(document.getElementById('experience').value) || 0;
+            const youtubeUrl = document.getElementById('youtube-url').value.trim();
+            const tiktokUrl = document.getElementById('tiktok-url').value.trim();
+            
+            const specialty = Array.from(document.getElementById('specialty').selectedOptions).map(opt => opt.value);
+            const mode = [];
+            if (document.getElementById('mode-offline').checked) mode.push('线下');
+            if (document.getElementById('mode-online').checked) mode.push('在线');
+
+            await db.collection('coaches').doc(currentCoach.id).update({
+                bio,
+                certification,
+                experience,
+                youtubeUrl,
+                tiktokUrl,
+                specialty,
+                mode,
+                avatarUrl,
+                photos: photoUrls,
+                locations,
+                updatedAt: new Date().toISOString()
+            });
+
+            alert('✅ 教练资料已保存！');
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
