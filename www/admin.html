@@ -20,15 +20,18 @@
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            padding: 20px;
         }
         .header {
             background: linear-gradient(135deg, var(--primary), #388E3C);
             color: white;
-            padding: 20px;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
             text-align: center;
         }
-        .header h1 { font-size: 1.8em; margin-bottom: 5px; }
-        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .container { max-width: 1400px; margin: 0 auto; }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -47,7 +50,7 @@
         .card {
             background: var(--card);
             border-radius: 15px;
-            padding: 20px;
+            padding: 25px;
             margin-bottom: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
@@ -55,11 +58,8 @@
             color: var(--primary);
             margin-bottom: 20px;
             font-size: 1.5em;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .tab-btn {
             padding: 12px 24px;
             border: none;
@@ -96,6 +96,7 @@
         .status-approved { background: #d4edda; color: #155724; }
         .status-rejected { background: #f8d7da; color: #721c24; }
         .status-founder { background: #d1ecf1; color: #0c5460; }
+        .status-premium { background: #e2e8f0; color: #4a5568; }
         .btn {
             padding: 10px 20px;
             border: none;
@@ -104,25 +105,13 @@
             font-size: 0.95em;
             font-weight: bold;
         }
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.5);
             z-index: 1000;
             align-items: center;
@@ -151,75 +140,57 @@
             border-radius: 8px;
             font-size: 1em;
         }
-        .coach-detail {
+        .coach-detail, .student-detail {
             background: #f8f9fa;
             padding: 15px;
             border-radius: 10px;
             margin: 10px 0;
         }
-        .coach-detail p {
+        .coach-detail p, .student-detail p {
             margin: 8px 0;
             color: #666;
         }
-        .coach-detail strong {
+        .coach-detail strong, .student-detail strong {
             color: #333;
-        }
-        .code-editor {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border-left: 4px solid var(--warning);
-        }
-        .code-editor input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1.2em;
-            font-weight: bold;
-            text-align: center;
-            letter-spacing: 3px;
-            margin-top: 10px;
-        }
-        .code-editor input:focus {
-            outline: none;
-            border-color: var(--warning);
-        }
-        .code-types {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .code-type-btn {
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            text-align: center;
-            font-weight: bold;
-        }
-        .code-type-btn:hover {
-            border-color: var(--warning);
-            background: #fff3cd;
         }
         .empty-state {
             text-align: center;
             padding: 40px;
             color: #999;
         }
-        .empty-state .icon {
-            font-size: 4em;
-            margin-bottom: 20px;
+        .empty-state .icon { font-size: 4em; margin-bottom: 20px; }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
         }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .commission-tier {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .commission-tier p { margin: 5px 0; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>👨‍💼 后台管理系统</h1>
-        <p>健康管家 - 教练 + 学员管理平台</p>
+        <p>健康管家 - 教练 + 学员管理平台（Firebase 版本）</p>
     </div>
 
     <div class="container">
@@ -254,20 +225,26 @@
                     <button class="tab-btn" onclick="filterCoaches('founder')">创始教练</button>
                 </div>
             </h2>
-            <table>
+            <div id="coaches-loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>正在加载教练数据...</p>
+            </div>
+            <table style="display:none;" id="coaches-table-container">
                 <thead>
                     <tr>
                         <th>姓名</th>
                         <th>邮箱</th>
                         <th>专长</th>
+                        <th>课时费</th>
                         <th>学员数</th>
+                        <th>抽成比例</th>
                         <th>状态</th>
                         <th>操作</th>
                     </tr>
                 </thead>
                 <tbody id="coaches-table">
                     <tr>
-                        <td colspan="6" class="empty-state">
+                        <td colspan="8" class="empty-state">
                             <div class="icon">📋</div>
                             <p>暂无教练数据</p>
                         </td>
@@ -287,7 +264,11 @@
                     <button class="tab-btn" onclick="filterStudents('with-coach')">有教练</button>
                 </div>
             </h2>
-            <table>
+            <div id="students-loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>正在加载学员数据...</p>
+            </div>
+            <table style="display:none;" id="students-table-container">
                 <thead>
                     <tr>
                         <th>姓名</th>
@@ -313,7 +294,13 @@
         <!-- 收入统计 -->
         <div class="card">
             <h2>💰 收入统计</h2>
-            <div class="stats-grid">
+            <div class="commission-tier">
+                <h3 style="margin-bottom:10px;">📊 平台抽成规则</h3>
+                <p>0-49 学员：平台抽成 30%</p>
+                <p>50-99 学员：平台抽成 25%</p>
+                <p>100+ 学员：平台抽成 20%</p>
+            </div>
+            <div class="stats-grid" style="margin-top:20px;">
                 <div class="stat-card">
                     <div class="stat-value" id="monthly-revenue">RM 0</div>
                     <div class="stat-label">本月收入</div>
@@ -337,19 +324,19 @@
             <div id="coach-detail-content"></div>
             
             <!-- 代码编辑器 -->
-            <div class="code-editor">
+            <div class="code-editor" style="background:#fff3cd; padding:15px; border-radius:10px; margin:15px 0; border-left:4px solid var(--warning);">
                 <h3 style="margin-bottom:10px;">✏️ 自定义教练代码</h3>
                 <p style="color:#666; margin-bottom:15px;">为教练设置专属代码（支持自定义格式）</p>
                 
-                <div class="code-types">
-                    <div class="code-type-btn" onclick="setCodeFormat('random')">🎲 随机生成</div>
-                    <div class="code-type-btn" onclick="setCodeFormat('name')">👤 姓名格式</div>
-                    <div class="code-type-btn" onclick="setCodeFormat('region')">📍 地区格式</div>
-                    <div class="code-type-btn" onclick="setCodeFormat('level')">⭐ 级别格式</div>
+                <div class="code-types" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin:15px 0;">
+                    <div class="code-type-btn" onclick="setCodeFormat('random')" style="padding:12px; border:2px solid #e0e0e0; border-radius:8px; background:white; cursor:pointer; text-align:center; font-weight:bold;">🎲 随机生成</div>
+                    <div class="code-type-btn" onclick="setCodeFormat('name')" style="padding:12px; border:2px solid #e0e0e0; border-radius:8px; background:white; cursor:pointer; text-align:center; font-weight:bold;">👤 姓名格式</div>
+                    <div class="code-type-btn" onclick="setCodeFormat('region')" style="padding:12px; border:2px solid #e0e0e0; border-radius:8px; background:white; cursor:pointer; text-align:center; font-weight:bold;">📍 地区格式</div>
+                    <div class="code-type-btn" onclick="setCodeFormat('level')" style="padding:12px; border:2px solid #e0e0e0; border-radius:8px; background:white; cursor:pointer; text-align:center; font-weight:bold;">⭐ 级别格式</div>
                 </div>
                 
-                <input type="text" id="custom-coach-code" placeholder="COACH-XXXXXX" maxlength="20">
-                <button class="btn btn-warning" onclick="updateCoachCode()" style="margin-top:15px;">💾 保存新代码</button>
+                <input type="text" id="custom-coach-code" placeholder="COACH-XXXXXX" maxlength="20" style="width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px; font-size:1.2em; font-weight:bold; text-align:center; letter-spacing:3px; margin-top:10px;">
+                <button class="btn btn-warning" onclick="updateCoachCode()" style="margin-top:15px; width:100%;">💾 保存新代码</button>
             </div>
             
             <div style="display:flex; gap:10px; margin-top:20px;">
@@ -373,6 +360,14 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase 配置 -->
+    <script src="firebase-config.js"></script>
+
     <script>
         // 全局数据
         let coaches = [];
@@ -381,70 +376,41 @@
         let currentStudentFilter = 'all';
         let selectedCoachId = null;
         let selectedStudentId = null;
+        const db = window.firebaseApp.db;
 
         // 初始化
         function init() {
             loadData();
-            renderStats();
-            renderCoaches();
-            renderStudents();
-            renderRevenue();
         }
 
-        // 加载数据
-        function loadData() {
-            // 从 localStorage 加载
-            const savedCoaches = localStorage.getItem('admin_coaches');
-            const savedStudents = localStorage.getItem('admin_students');
-            
-            if (savedCoaches) {
-                coaches = JSON.parse(savedCoaches);
-            } else {
-                // 初始化一些测试数据
-                coaches = [
-                    {
-                        id: '1',
-                        name: '阿强教练',
-                        email: 'coach1@example.com',
-                        phone: '+60 12-345-6789',
-                        certification: 'ACE-CPT',
-                        specialty: ['减脂', '增肌'],
-                        bio: '5 年经验，帮助 100+ 学员达成目标',
-                        rate: 90,
-                        mode: ['线下', '在线'],
-                        coachCode: 'COACH-A1B2C3',
-                        status: 'founder',
-                        registeredAt: new Date().toISOString(),
-                        students: []
-                    },
-                    {
-                        id: '2',
-                        name: 'Mei Ling 教练',
-                        email: 'coach2@example.com',
-                        phone: '+60 16-789-0123',
-                        certification: 'NASM-CPT',
-                        specialty: ['瑜伽', '产后恢复'],
-                        bio: '专注女性健康，产后恢复专家',
-                        rate: 100,
-                        mode: ['线下'],
-                        coachCode: 'COACH-D4E5F6',
-                        status: 'pending',
-                        registeredAt: new Date().toISOString(),
-                        students: []
-                    }
-                ];
-                saveData();
+        // 加载数据（从 Firebase）
+        async function loadData() {
+            try {
+                // 加载教练数据
+                const coachesSnapshot = await db.collection('coaches').get();
+                coaches = coachesSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                
+                // 加载学员数据
+                const studentsSnapshot = await db.collection('students').get();
+                students = studentsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                
+                // 隐藏加载动画
+                document.getElementById('coaches-loading').style.display = 'none';
+                document.getElementById('students-loading').style.display = 'none';
+                document.getElementById('coaches-table-container').style.display = 'table';
+                document.getElementById('students-table-container').style.display = 'table';
+                
+                // 渲染
+                renderStats();
+                renderCoaches();
+                renderStudents();
+                renderRevenue();
+                
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                document.getElementById('coaches-loading').innerHTML = '<p style="color:red;">加载失败，请刷新重试</p>';
+                document.getElementById('students-loading').innerHTML = '<p style="color:red;">加载失败，请刷新重试</p>';
             }
-            
-            if (savedStudents) {
-                students = JSON.parse(savedStudents);
-            }
-        }
-
-        // 保存数据
-        function saveData() {
-            localStorage.setItem('admin_coaches', JSON.stringify(coaches));
-            localStorage.setItem('admin_students', JSON.stringify(students));
         }
 
         // 渲染统计
@@ -458,6 +424,13 @@
             document.getElementById('pending-coaches').textContent = pending;
             document.getElementById('founder-coaches').textContent = founder;
             document.getElementById('total-students').textContent = totalStudents;
+        }
+
+        // 获取抽成比例
+        function getCommissionRate(studentCount) {
+            if (studentCount >= 100) return 20;
+            if (studentCount >= 50) return 25;
+            return 30;
         }
 
         // 渲染教练列表
@@ -476,7 +449,7 @@
             if (filtered.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="empty-state">
+                        <td colspan="8" class="empty-state">
                             <div class="icon">📋</div>
                             <p>暂无教练数据</p>
                         </td>
@@ -485,23 +458,30 @@
                 return;
             }
             
-            tbody.innerHTML = filtered.map(coach => `
-                <tr>
-                    <td><strong>${coach.name}</strong></td>
-                    <td>${coach.email}</td>
-                    <td>${coach.specialty.join(', ')}</td>
-                    <td>${coach.students.length} 人</td>
-                    <td>
-                        <span class="status-badge status-${coach.status}">
-                            ${getStatusText(coach.status)}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary" onclick="viewCoach('${coach.id}')">查看</button>
-                        ${coach.status === 'pending' ? '<button class="btn btn-warning" onclick="viewCoach(\'' + coach.id + '\')">审核</button>' : ''}
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = filtered.map(coach => {
+                const studentCount = coach.students ? coach.students.length : 0;
+                const commissionRate = getCommissionRate(studentCount);
+                
+                return `
+                    <tr>
+                        <td><strong>${coach.name}</strong></td>
+                        <td>${coach.email}</td>
+                        <td>${(coach.specialty || []).join(', ')}</td>
+                        <td>RM ${coach.rate || 90}/堂</td>
+                        <td>${studentCount} 人</td>
+                        <td>${commissionRate}%</td>
+                        <td>
+                            <span class="status-badge status-${coach.status}">
+                                ${getStatusText(coach.status)}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" onclick="viewCoach('${coach.id}')">查看</button>
+                            ${coach.status === 'pending' ? '<button class="btn btn-warning" onclick="viewCoach(\'' + coach.id + '\')">审核</button>' : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // 获取状态文字
@@ -534,16 +514,17 @@
                 <div class="coach-detail">
                     <p><strong>姓名：</strong>${coach.name}</p>
                     <p><strong>邮箱：</strong>${coach.email}</p>
-                    <p><strong>电话：</strong>${coach.phone}</p>
+                    <p><strong>电话：</strong>${coach.phone || '未填写'}</p>
                     <p><strong>认证：</strong>${coach.certification || '未填写'}</p>
-                    <p><strong>专长：</strong>${coach.specialty.join(', ')}</p>
+                    <p><strong>专长：</strong>${(coach.specialty || []).join(', ')}</p>
                     <p><strong>简介：</strong>${coach.bio || '未填写'}</p>
-                    <p><strong>课时费：</strong>RM ${coach.rate}/堂</p>
-                    <p><strong>服务方式：</strong>${coach.mode.join(', ')}</p>
+                    <p><strong>课时费：</strong>RM ${coach.rate || 90}/堂</p>
+                    <p><strong>服务方式：</strong>${(coach.mode || []).join(', ')}</p>
                     <p><strong>教练代码：</strong><span style="font-size:1.2em; color:var(--primary); letter-spacing:3px;">${coach.coachCode}</span></p>
                     <p><strong>注册日期：</strong>${new Date(coach.registeredAt).toLocaleDateString('zh-MY')}</p>
-                    <p><strong>学员数：</strong>${coach.students.length} 人</p>
+                    <p><strong>学员数：</strong>${coach.students ? coach.students.length : 0} 人</p>
                     <p><strong>状态：</strong><span class="status-badge status-${coach.status}">${getStatusText(coach.status)}</span></p>
+                    <p><strong>平台抽成：</strong>${getCommissionRate(coach.students ? coach.students.length : 0)}%</p>
                 </div>
             `;
             
@@ -551,41 +532,39 @@
         }
 
         // 批准教练
-        function approveCoach() {
+        async function approveCoach() {
             const coach = coaches.find(c => c.id === selectedCoachId);
             if (!coach) return;
             
             // 检查是否是前 100 名
             const founderCount = coaches.filter(c => c.status === 'founder').length;
             if (founderCount < 100 && coach.status === 'pending') {
-                coach.status = 'founder'; // 前 100 名自动成为创始教练
+                await db.collection('coaches').doc(coach.id).update({ status: 'founder' });
                 alert('✅ 已批准！\n\n该教练是前 100 名，自动成为「创始教练」\n享有永久免费资格！');
             } else {
-                coach.status = 'approved';
+                await db.collection('coaches').doc(coach.id).update({ status: 'approved' });
                 alert('✅ 已批准！');
             }
             
-            saveData();
+            await loadData();
             closeModal();
-            renderStats();
-            renderCoaches();
         }
 
         // 拒绝教练
-        function rejectCoach() {
+        async function rejectCoach() {
             const reason = prompt('请输入拒绝原因：');
             if (!reason) return;
             
             const coach = coaches.find(c => c.id === selectedCoachId);
             if (!coach) return;
             
-            coach.status = 'rejected';
-            coach.rejectionReason = reason;
+            await db.collection('coaches').doc(coach.id).update({
+                status: 'rejected',
+                rejectionReason: reason
+            });
             
-            saveData();
+            await loadData();
             closeModal();
-            renderStats();
-            renderCoaches();
             alert('❌ 已拒绝该教练的申请');
         }
 
@@ -601,7 +580,6 @@
                     newCode = 'COACH-' + Math.random().toString(36).substring(2, 8).toUpperCase();
                     break;
                 case 'name':
-                    // 从姓名提取
                     const nameParts = coach.name.split(' ');
                     const initials = nameParts.map(p => p[0]).join('').toUpperCase();
                     const year = new Date().getFullYear().toString().substr(-2);
@@ -609,14 +587,12 @@
                     newCode = `COACH-${initials}-${year}-${random}`;
                     break;
                 case 'region':
-                    // 地区格式：MY-KL-001
                     const regions = ['KL', 'SN', 'PG', 'JB', 'MK', 'SZ'];
                     const region = regions[Math.floor(Math.random() * regions.length)];
                     const num = Math.floor(Math.random() * 999).toString().padStart(3, '0');
                     newCode = `MY-${region}-${num}`;
                     break;
                 case 'level':
-                    // 级别格式：PRO-001 / FIT-001 / YOG-001
                     const prefixes = {
                         '减脂': 'FIT',
                         '增肌': 'PRO',
@@ -625,7 +601,7 @@
                         '产后恢复': 'MOM',
                         '运动康复': 'REC'
                     };
-                    const specialty = coach.specialty[0] || 'FIT';
+                    const specialty = (coach.specialty || [])[0] || 'FIT';
                     const prefix = prefixes[specialty] || 'FIT';
                     const num = Math.floor(Math.random() * 999).toString().padStart(3, '0');
                     newCode = `${prefix}-${num}`;
@@ -636,7 +612,7 @@
         }
 
         // 更新教练代码
-        function updateCoachCode() {
+        async function updateCoachCode() {
             const newCode = document.getElementById('custom-coach-code').value.trim().toUpperCase();
             if (!newCode) {
                 alert('请输入教练代码');
@@ -654,24 +630,24 @@
             if (!coach) return;
             
             const oldCode = coach.coachCode;
-            coach.coachCode = newCode;
-            
-            saveData();
+            await db.collection('coaches').doc(coach.id).update({ coachCode: newCode });
             
             // 更新已绑定的学员
-            const students = JSON.parse(localStorage.getItem('admin_students') || '[]');
-            let updated = 0;
+            const batch = db.batch();
             students.forEach(student => {
                 if (student.coachCode === oldCode) {
-                    student.coachCode = newCode;
-                    updated++;
+                    batch.update(db.collection('students').doc(student.id), {
+                        coachCode: newCode,
+                        coachId: coach.id,
+                        coachName: coach.name
+                    });
                 }
             });
-            localStorage.setItem('admin_students', JSON.stringify(students));
+            await batch.commit();
             
-            alert(`✅ 教练代码已更新！\n\n旧代码：${oldCode}\n新代码：${newCode}\n\n已更新 ${updated} 个绑定学员`);
+            alert(`✅ 教练代码已更新！\n\n旧代码：${oldCode}\n新代码：${newCode}`);
             
-            // 刷新显示
+            await loadData();
             viewCoach(selectedCoachId);
         }
 
@@ -710,7 +686,7 @@
                 <tr>
                     <td><strong>${student.name}</strong></td>
                     <td>${student.email}</td>
-                    <td>${student.phone}</td>
+                    <td>${student.phone || '-'}</td>
                     <td>${student.coachName || '<span style="color:#999;">无</span>'}</td>
                     <td>
                         <span class="status-badge ${student.isPremium ? 'status-approved' : 'status-pending'}">
@@ -741,10 +717,10 @@
             
             const content = document.getElementById('student-detail-content');
             content.innerHTML = `
-                <div class="coach-detail">
+                <div class="student-detail">
                     <p><strong>姓名：</strong>${student.name}</p>
                     <p><strong>邮箱：</strong>${student.email}</p>
-                    <p><strong>电话：</strong>${student.phone}</p>
+                    <p><strong>电话：</strong>${student.phone || '-'}</p>
                     <p><strong>订阅状态：</strong>
                         <span class="status-badge ${student.isPremium ? 'status-approved' : 'status-pending'}">
                             ${student.isPremium ? 'Premium' : '免费版'}
@@ -754,7 +730,6 @@
                     <p><strong>教练代码：</strong>${student.coachCode || '无'}</p>
                     <p><strong>注册日期：</strong>${new Date(student.registeredAt).toLocaleDateString('zh-MY')}</p>
                     <p><strong>最后活跃：</strong>${student.lastActive ? new Date(student.lastActive).toLocaleDateString('zh-MY') : '从未'}</p>
-                    <p><strong>饮食记录数：</strong>${student.foodLogs ? student.foodLogs.length : 0} 条</p>
                 </div>
             `;
             
@@ -762,23 +737,21 @@
         }
 
         // 切换 Premium 状态
-        function togglePremium() {
+        async function togglePremium() {
             const student = students.find(s => s.id === selectedStudentId);
             if (!student) return;
             
-            student.isPremium = !student.isPremium;
-            localStorage.setItem('admin_students', JSON.stringify(students));
+            const newStatus = !student.isPremium;
+            await db.collection('students').doc(student.id).update({ isPremium: newStatus });
             
-            alert(`✅ 已切换为${student.isPremium ? 'Premium' : '免费版'}\n\n记得处理订阅付款！`);
+            alert(`✅ 已切换为${newStatus ? 'Premium' : '免费版'}\n\n记得处理订阅付款！`);
             
-            saveData();
+            await loadData();
             closeStudentModal();
-            renderStudents();
-            renderStats();
         }
 
         // 更换教练
-        function changeCoach() {
+        async function changeCoach() {
             const student = students.find(s => s.id === selectedStudentId);
             if (!student) return;
             
@@ -787,17 +760,25 @@
             
             if (!newCoachCode.trim()) {
                 // 移除教练
-                student.coachCode = null;
-                student.coachId = null;
-                student.coachName = null;
+                await db.collection('students').doc(student.id).update({
+                    coachCode: null,
+                    coachId: null,
+                    coachName: null
+                });
                 alert('✅ 已移除教练绑定');
             } else {
                 // 查找新教练
-                const newCoach = coaches.find(c => c.coachCode === newCoachCode.trim().toUpperCase());
-                if (!newCoach) {
+                const newCoachSnapshot = await db.collection('coaches')
+                    .where('coachCode', '==', newCoachCode.trim().toUpperCase())
+                    .limit(1)
+                    .get();
+                
+                if (newCoachSnapshot.empty) {
                     alert('❌ 教练代码无效');
                     return;
                 }
+                
+                const newCoach = newCoachSnapshot.docs[0].data();
                 if (newCoach.status !== 'approved' && newCoach.status !== 'founder') {
                     alert('❌ 该教练尚未通过审核');
                     return;
@@ -805,33 +786,38 @@
                 
                 // 从旧教练移除
                 if (student.coachId) {
-                    const oldCoach = coaches.find(c => c.id === student.coachId);
-                    if (oldCoach) {
-                        oldCoach.students = oldCoach.students.filter(s => s.id !== student.id);
-                    }
+                    const oldCoachRef = db.collection('coaches').doc(student.coachId);
+                    await oldCoachRef.update({
+                        students: firebase.firestore.FieldValue.arrayRemove({
+                            id: student.id,
+                            name: student.name,
+                            email: student.email
+                        })
+                    });
                 }
                 
                 // 绑定新教练
-                student.coachCode = newCoach.coachCode;
-                student.coachId = newCoach.id;
-                student.coachName = newCoach.name;
+                await db.collection('students').doc(student.id).update({
+                    coachCode: newCoach.coachCode,
+                    coachId: newCoach.id,
+                    coachName: newCoach.name
+                });
                 
                 // 添加到新教练学员列表
-                if (!newCoach.students) newCoach.students = [];
-                newCoach.students.push({
-                    id: student.id,
-                    name: student.name,
-                    email: student.email,
-                    registeredAt: student.registeredAt
+                await db.collection('coaches').doc(newCoach.id).update({
+                    students: firebase.firestore.FieldValue.arrayUnion({
+                        id: student.id,
+                        name: student.name,
+                        email: student.email,
+                        registeredAt: student.registeredAt
+                    })
                 });
                 
                 alert(`✅ 已更换教练为：${newCoach.name}`);
             }
             
-            saveData();
+            await loadData();
             closeStudentModal();
-            renderStudents();
-            renderCoaches();
         }
 
         // 关闭学员弹窗
@@ -842,9 +828,9 @@
 
         // 渲染收入统计
         function renderRevenue() {
-            // 模拟数据
+            // 模拟数据（实际应该从 Firestore 读取交易记录）
             const revenue = 15000;
-            const commission = 3000;
+            const commission = 4500; // 30%
             const profit = revenue - commission;
             
             document.getElementById('monthly-revenue').textContent = 'RM ' + revenue.toLocaleString();
