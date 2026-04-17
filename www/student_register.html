@@ -220,9 +220,8 @@
     <script src="firebase-config.js"></script>
 
     <script>
-        // 从全局获取 Firebase 服务（已在 firebase-config.js 声明）
-        const db = window.firebaseApp.db;
-        const auth = window.firebaseApp.auth;
+        // 使用全局 Firebase 服务
+        // db 和 auth 已在 firebase-config.js 中声明
 
         // 表单提交
         document.getElementById('register-form').addEventListener('submit', async function(e) {
@@ -244,7 +243,7 @@
             try {
                 // 1. 创建 Firebase Authentication 账号
                 console.log('创建用户账号...');
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const userCredential = await window.firebaseApp.auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
                 console.log('用户创建成功:', user.uid);
 
@@ -254,11 +253,11 @@
                     console.log('检查教练代码:', coachCode);
                     coach = await findCoachByCode(coachCode);
                     if (!coach) {
-                        await auth.currentUser.delete();
+                        await window.firebaseApp.auth.currentUser.delete();
                         throw new Error('教练代码无效，请检查后重试');
                     }
                     if (coach.status !== 'approved' && coach.status !== 'founder') {
-                        await auth.currentUser.delete();
+                        await window.firebaseApp.auth.currentUser.delete();
                         throw new Error('该教练尚未通过审核，无法绑定');
                     }
                     console.log('教练验证成功:', coach.name);
@@ -282,12 +281,12 @@
 
                 // 4. 保存到 Firestore
                 console.log('保存学员数据到 Firestore...');
-                await db.collection('students').doc(user.uid).set(student);
+                await window.firebaseApp.db.collection('students').doc(user.uid).set(student);
                 console.log('学员数据保存成功！');
 
                 // 5. 更新教练学员列表
                 if (coach) {
-                    await db.collection('coaches').doc(coach.id).update({
+                    await window.firebaseApp.db.collection('coaches').doc(coach.id).update({
                         students: firebase.firestore.FieldValue.arrayUnion({
                             id: user.uid,
                             name: name,
@@ -324,7 +323,7 @@
 
         // 查找教练
         async function findCoachByCode(code) {
-            const snapshot = await db.collection('coaches')
+            const snapshot = await window.firebaseApp.db.collection('coaches')
                 .where('coachCode', '==', code)
                 .limit(1)
                 .get();
