@@ -418,11 +418,11 @@
             document.getElementById('commission-rate').textContent = commissionRate + '%';
         }
 
-        // 获取抽成比例
+        // 获取抽成比例（优化版：防止私下交易）
         function getCommissionRate(studentCount) {
-            if (studentCount >= 100) return 20;
-            if (studentCount >= 50) return 25;
-            return 30;
+            if (studentCount >= 100) return 10;  // 100+ 学员：10% 抽成
+            if (studentCount >= 50) return 15;   // 50-99 学员：15% 抽成
+            return 20;                            // 0-49 学员：20% 抽成
         }
 
         // 更新课时费
