@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>健康管家 - 测试版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #FF9800;
+            --danger: #f44336;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        /* 顶部导航 */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .app-header h1 {
+            font-size: 1.5em;
+            text-align: center;
+        }
+        .app-header .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .app-header .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        /* 底部导航 */
+        .app-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.8em;
+            padding: 5px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        .nav-item.active {
+            color: var(--primary);
+            background: #e8f5e9;
+        }
+        .nav-item .icon {
+            font-size: 1.5em;
+            margin-bottom: 3px;
+        }
+
+        /* 主内容区 */
+        .app-content {
+            padding: 20px;
+            padding-bottom: 80px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 卡片 */
+        .card {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        /* 按钮 */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        /* 表单 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text);
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        /* 统计 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        /* 食物列表 */
+        .food-list {
+            list-style: none;
+        }
+        .food-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .food-name {
+            font-weight: bold;
+        }
+        .food-calories {
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        /* 教练卡片 */
+        .coach-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 15px 0;
+        }
+        .coach-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            margin-right: 15px;
+        }
+        .coach-info {
+            flex: 1;
+        }
+        .coach-name {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .coach-specialty {
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+        .coach-price {
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        /* 欢迎页面 */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .welcome-banner h2 {
+            color: white;
+            margin-bottom: 10px;
+        }
+        .trial-badge {
+            background: var(--secondary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        /* 页面切换 */
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+
+        /* 登录注册覆盖层 */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .auth-card h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .auth-card .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+        .auth-toggle {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-light);
+        }
+        .auth-toggle a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* 通知 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--danger);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- 通知 -->
+    <div class="notification" id="notification"></div>
+
+    <!-- 登录注册覆盖层 -->
+    <div class="auth-overlay" id="auth-overlay">
+        <div class="auth-card">
+            <h1>💪 健康管家</h1>
+            <p class="subtitle">你的私人健身教练和饮食追踪器</p>
+            
+            <!-- 登录表单 -->
+            <form id="login-form">
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="login-email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="login-password" placeholder="至少 6 位" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary">登录</button>
+                <div class="auth-toggle">
+                    还没有账号？<a onclick="showRegister()">注册</a>
+                </div>
+            </form>
+
+            <!-- 注册表单 -->
+            <form id="register-form" style="display:none;">
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="register-name" placeholder="你的名字" required>
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="register-email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>电话</label>
+                    <input type="tel" id="register-phone" placeholder="+60 12-345-6789" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="register-password" placeholder="至少 6 位" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary">注册</button>
+                <div class="auth-toggle">
+                    已有账号？<a onclick="showLogin()">登录</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <div class="app-header" id="app-header" style="display:none;">
+        <h1>💪 健康管家</h1>
+        <div class="user-info">
+            <span id="user-name">欢迎</span>
+            <button class="logout-btn" onclick="logout()">退出</button>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="app-content" id="app-content" style="display:none;">
+        
+        <!-- 首页 -->
+        <div class="page active" id="page-home">
+            <div class="welcome-banner">
+                <h2>🎉 欢迎回来！</h2>
+                <div class="trial-badge">🎁 30 天免费试用</div>
+                <p>还剩 <strong id="trial-days">30</strong> 天</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value" id="today-calories">0</span>
+                    <span class="stat-label">今日卡路里</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="total-meals">0</span>
+                    <span class="stat-label">今日餐数</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="goal-progress">0%</span>
+                    <span class="stat-label">目标进度</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🍽️ 添加食物</h2>
+                <div class="form-group">
+                    <label>食物名称</label>
+                    <input type="text" id="food-name" placeholder="例如：Nasi Lemak">
+                </div>
+                <div class="form-group">
+                    <label>分量</label>
+                    <select id="food-portion">
+                        <option value="1">1 份</option>
+                        <option value="0.5">半份</option>
+                        <option value="1.5">1.5 份</option>
+                        <option value="2">2 份</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>卡路里（每份）</label>
+                    <input type="number" id="food-calories" placeholder="例如：600">
+                </div>
+                <button class="btn btn-primary" onclick="addFood()">添加</button>
+            </div>
+
+            <div class="card">
+                <h2>📋 今日饮食</h2>
+                <ul class="food-list" id="today-foods">
+                    <li style="text-align:center; color:#999; padding:20px;">暂无记录</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 教练页面 -->
+        <div class="page" id="page-coaches">
+            <div class="card">
+                <h2>👨‍🏫 浏览教练</h2>
+                <div class="form-group">
+                    <label>筛选专长</label>
+                    <select id="coach-filter">
+                        <option value="">全部</option>
+                        <option value="减脂">减脂</option>
+                        <option value="增肌">增肌</option>
+                        <option value="瑜伽">瑜伽</option>
+                        <option value="拳击">拳击</option>
+                    </select>
+                </div>
+                <div id="coach-list">
+                    <!-- 教练列表将在这里加载 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的页面 -->
+        <div class="page" id="page-profile">
+            <div class="card">
+                <h2>👤 我的资料</h2>
+                <p><strong>姓名：</strong><span id="profile-name">-</span></p>
+                <p><strong>邮箱：</strong><span id="profile-email">-</span></p>
+                <p><strong>会员状态：</strong><span style="color:var(--primary); font-weight:bold;">Premium 试用中</span></p>
+            </div>
+
+            <div class="card">
+                <h2>🎯 我的目标</h2>
+                <div class="form-group">
+                    <label>每日卡路里目标</label>
+                    <input type="number" id="daily-goal" value="2000">
+                </div>
+                <button class="btn btn-primary" onclick="saveGoal()">保存</button>
+            </div>
+
+            <div class="card">
+                <h2>📊 试用信息</h2>
+                <p>免费试用还剩：<strong id="profile-trial-days">30</strong> 天</p>
+                <p>试用结束后：RM 19.9/月</p>
+                <button class="btn btn-secondary" onclick="showPremiumInfo()">查看 Premium 详情</button>
+            </div>
+
+            <div class="card">
+                <h2>⚙️ 设置</h2>
+                <button class="btn btn-outline" onclick="clearData()">清除所有数据</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="app-nav" id="app-nav" style="display:none;">
+        <a class="nav-item active" onclick="switchPage('home')" id="nav-home">
+            <span class="icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a class="nav-item" onclick="switchPage('coaches')" id="nav-coaches">
+            <span class="icon">👨‍🏫</span>
+            <span>教练</span>
+        </a>
+        <a class="nav-item" onclick="switchPage('profile')" id="nav-profile">
+            <span class="icon">👤</span>
+            <span>我的</span>
+        </a>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase 配置 -->
+    <script src="firebase-config.js"></script>
+
+    <script>
+        const db = window.firebaseApp.db;
+        const auth = window.firebaseApp.auth;
+        let currentUser = null;
+        let userData = {};
+
+        // 初始化
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('app-header').style.display = 'block';
+                document.getElementById('app-content').style.display = 'block';
+                document.getElementById('app-nav').style.display = 'flex';
+                
+                // 加载用户数据
+                await loadUserData();
+            } else {
+                currentUser = null;
+                document.getElementById('auth-overlay').style.display = 'flex';
+                document.getElementById('app-header').style.display = 'none';
+                document.getElementById('app-content').style.display = 'none';
+                document.getElementById('app-nav').style.display = 'none';
+            }
+        });
+
+        // 显示登录
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+        }
+
+        // 显示注册
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+        }
+
+        // 登录
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                showNotification('登录成功！');
+            } catch (error) {
+                showNotification('登录失败：' + error.message);
+            }
+        });
+
+        // 注册
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const phone = document.getElementById('register-phone').value;
+            const password = document.getElementById('register-password').value;
+
+            try {
+                const credential = await auth.createUserWithEmailAndPassword(email, password);
+                
+                // 保存用户信息到 Firestore
+                await db.collection('students').doc(credential.user.uid).set({
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    createdAt: new Date().toISOString(),
+                    trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    isPremium: true,
+                    dailyGoal: 2000,
+                    foods: []
+                });
+
+                showNotification('注册成功！已开通 30 天免费试用！');
+            } catch (error) {
+                showNotification('注册失败：' + error.message);
+            }
+        });
+
+        // 退出
+        function logout() {
+            auth.signOut();
+            showNotification('已退出登录');
+        }
+
+        // 加载用户数据
+        async function loadUserData() {
+            if (!currentUser) return;
+
+            const doc = await db.collection('students').doc(currentUser.uid).get();
+            if (doc.exists) {
+                userData = doc.data();
+                
+                // 更新 UI
+                document.getElementById('user-name').textContent = userData.name || '用户';
+                document.getElementById('profile-name').textContent = userData.name || '-';
+                document.getElementById('profile-email').textContent = userData.email || '-';
+                document.getElementById('daily-goal').value = userData.dailyGoal || 2000;
+
+                // 计算试用剩余天数
+                if (userData.trialEndsAt) {
+                    const trialEnds = new Date(userData.trialEndsAt);
+                    const now = new Date();
+                    const daysLeft = Math.max(0, Math.ceil((trialEnds - now) / (1000 * 60 * 60 * 24)));
+                    document.getElementById('trial-days').textContent = daysLeft;
+                    document.getElementById('profile-trial-days').textContent = daysLeft;
+                }
+
+                // 加载今日食物
+                loadTodayFoods();
+            }
+        }
+
+        // 加载今日食物
+        function loadTodayFoods() {
+            const foods = userData.foods || [];
+            const today = new Date().toDateString();
+            const todayFoods = foods.filter(f => new Date(f.date).toDateString() === today);
+
+            const list = document.getElementById('today-foods');
+            if (todayFoods.length === 0) {
+                list.innerHTML = '<li style="text-align:center; color:#999; padding:20px;">暂无记录</li>';
+            } else {
+                list.innerHTML = todayFoods.map(f => `
+                    <li class="food-item">
+                        <div>
+                            <div class="food-name">${f.name}</div>
+                            <div style="color:#999; font-size:0.9em;">${f.portion} 份</div>
+                        </div>
+                        <div class="food-calories">${f.calories} cal</div>
+                    </li>
+                `).join('');
+            }
+
+            // 更新统计
+            const totalCalories = todayFoods.reduce((sum, f) => sum + (f.calories * f.portion), 0);
+            document.getElementById('today-calories').textContent = Math.round(totalCalories);
+            document.getElementById('total-meals').textContent = todayFoods.length;
+            
+            const goal = userData.dailyGoal || 2000;
+            const progress = Math.min(100, Math.round((totalCalories / goal) * 100));
+            document.getElementById('goal-progress').textContent = progress + '%';
+        }
+
+        // 添加食物
+        async function addFood() {
+            const name = document.getElementById('food-name').value.trim();
+            const portion = parseFloat(document.getElementById('food-portion').value);
+            const calories = parseInt(document.getElementById('food-calories').value);
+
+            if (!name || !calories) {
+                showNotification('请填写食物名称和卡路里');
+                return;
+            }
+
+            if (!userData.foods) userData.foods = [];
+            
+            userData.foods.push({
+                name: name,
+                portion: portion,
+                calories: calories,
+                date: new Date().toISOString()
+            });
+
+            await db.collection('students').doc(currentUser.uid).update({
+                foods: userData.foods
+            });
+
+            showNotification('添加成功！');
+            
+            // 清空表单
+            document.getElementById('food-name').value = '';
+            document.getElementById('food-calories').value = '';
+            
+            loadTodayFoods();
+        }
+
+        // 保存目标
+        async function saveGoal() {
+            const goal = parseInt(document.getElementById('daily-goal').value);
+            await db.collection('students').doc(currentUser.uid).update({
+                dailyGoal: goal
+            });
+            showNotification('目标已保存！');
+            loadUserData();
+        }
+
+        // 切换页面
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('page-' + page).classList.add('active');
+            document.getElementById('nav-' + page).classList.add('active');
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.style.display = 'block';
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 3000);
+        }
+
+        // 清除数据
+        async function clearData() {
+            if (confirm('确定要清除所有数据吗？此操作不可恢复！')) {
+                await db.collection('students').doc(currentUser.uid).update({
+                    foods: []
+                });
+                showNotification('数据已清除');
+                loadUserData();
+            }
+        }
+
+        // 查看 Premium 详情
+        function showPremiumInfo() {
+            window.open('premium_trial.html', '_blank');
+        }
+    </script>
+</body>
+</html>
