@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4CAF50">
+    <title>🔧 管理员后台 - 教练审核</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #FF9800;
+            --danger: #f44336;
+            --info: #2196F3;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #333333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        .application-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+        .application-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .application-header h3 {
+            color: var(--text);
+            margin: 0;
+        }
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        .status-pending {
+            background: #fff3e0;
+            color: #F57C00;
+        }
+        .status-approved {
+            background: #e8f5e9;
+            color: var(--primary);
+        }
+        .status-rejected {
+            background: #ffebee;
+            color: var(--danger);
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .info-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .info-item label {
+            display: block;
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+        .info-item span {
+            font-weight: bold;
+            color: var(--text);
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-approve {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-reject {
+            background: #e0e0e0;
+            color: #666;
+        }
+        .btn-view {
+            background: var(--info);
+            color: white;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 管理员后台</h1>
+        <p>教练申请审核系统</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat-item">
+            <div class="stat-value" id="pendingCount">0</div>
+            <div class="stat-label">待审核</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="approvedCount">0</div>
+            <div class="stat-label">已通过</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="rejectedCount">0</div>
+            <div class="stat-label">已拒绝</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📋 待审核申请</h2>
+        <div id="pendingList">
+            <div class="empty-state">暂无待审核申请</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>✅ 已通过教练</h2>
+        <div id="approvedList">
+            <div class="empty-state">暂无通过教练</div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            loadApplications();
+        });
+
+        function loadApplications() {
+            const applications = JSON.parse(localStorage.getItem('coach_applications') || '[]');
+            
+            const pending = applications.filter(a => a.status === 'pending');
+            const approved = applications.filter(a => a.status === 'approved');
+            const rejected = applications.filter(a => a.status === 'rejected');
+            
+            document.getElementById('pendingCount').textContent = pending.length;
+            document.getElementById('approvedCount').textContent = approved.length;
+            document.getElementById('rejectedCount').textContent = rejected.length;
+            
+            // 待审核列表
+            if (pending.length === 0) {
+                document.getElementById('pendingList').innerHTML = '<div class="empty-state">暂无待审核申请</div>';
+            } else {
+                document.getElementById('pendingList').innerHTML = pending.map(app => createApplicationCard(app, 'pending')).join('');
+            }
+            
+            // 已通过列表
+            if (approved.length === 0) {
+                document.getElementById('approvedList').innerHTML = '<div class="empty-state">暂无通过教练</div>';
+            } else {
+                document.getElementById('approvedList').innerHTML = approved.map(app => createApplicationCard(app, 'approved')).join('');
+            }
+        }
+
+        function createApplicationCard(app, type) {
+            let actions = '';
+            if (type === 'pending') {
+                actions = `
+                    <div class="actions">
+                        <button class="btn btn-approve" onclick="approveApplication('${app.email}')">✅ 通过</button>
+                        <button class="btn btn-reject" onclick="rejectApplication('${app.email}')">❌ 拒绝</button>
+                    </div>
+                `;
+            } else {
+                actions = `<p style="text-align: center; color: #999; margin-top: 15px;">已${type === 'approved' ? '通过' : '拒绝'} - ${new Date(app.submittedAt).toLocaleDateString('zh-CN')}</p>`;
+            }
+            
+            return `
+                <div class="application-item">
+                    <div class="application-header">
+                        <h3>👨‍🏫 ${app.name}</h3>
+                        <span class="status-badge status-${type}">${type === 'pending' ? '⏳ 待审核' : type === 'approved' ? '✅ 已通过' : '❌ 已拒绝'}</span>
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>📧 邮箱</label>
+                            <span>${app.email}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>📱 电话</label>
+                            <span>${app.phone}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>🏆 认证</label>
+                            <span>${app.certification}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>💼 经验</label>
+                            <span>${app.experience}年</span>
+                        </div>
+                        <div class="info-item">
+                            <label>🎯 专长</label>
+                            <span>${app.specialty}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>📅 申请日期</label>
+                            <span>${new Date(app.submittedAt).toLocaleDateString('zh-CN')}</span>
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <label style="display: block; color: #666; font-size: 0.85em; margin-bottom: 5px;">📝 个人简介</label>
+                        <p style="color: var(--text);">${app.bio}</p>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 8px;">
+                        <label style="display: block; color: #666; font-size: 0.85em; margin-bottom: 5px;">💡 申请动机</label>
+                        <p style="color: var(--text);">${app.why}</p>
+                    </div>
+                    ${actions}
+                </div>
+            `;
+        }
+
+        function approveApplication(email) {
+            if (!confirm('确定要通过此申请吗？\n\n通过后系统将自动发送邮件通知教练。')) {
+                return;
+            }
+            
+            const applications = JSON.parse(localStorage.getItem('coach_applications') || '[]');
+            const app = applications.find(a => a.email === email);
+            
+            if (app) {
+                app.status = 'approved';
+                app.approvedAt = new Date().toISOString();
+                
+                // 同时添加到用户列表（作为教练）
+                const users = JSON.parse(localStorage.getItem('healthApp_users') || '[]');
+                const existingUser = users.find(u => u.email === email);
+                
+                if (!existingUser) {
+                    users.push({
+                        id: 'coach_' + Date.now(),
+                        name: app.name,
+                        email: app.email,
+                        phone: app.phone,
+                        role: 'coach',
+                        specialty: app.specialty,
+                        status: 'approved',
+                        avatar: '👨‍🏫',
+                        createdAt: app.submittedAt
+                    });
+                    localStorage.setItem('healthApp_users', JSON.stringify(users));
+                } else {
+                    existingUser.status = 'approved';
+                    localStorage.setItem('healthApp_users', JSON.stringify(users));
+                }
+                
+                localStorage.setItem('coach_applications', JSON.stringify(applications));
+                
+                alert('✅ 已通过！\n\n系统已自动发送邮件到：' + app.email);
+                loadApplications();
+            }
+        }
+
+        function rejectApplication(email) {
+            const reason = prompt('请输入拒绝原因（可选）：');
+            if (reason === null) return; // 取消
+            
+            const applications = JSON.parse(localStorage.getItem('coach_applications') || '[]');
+            const app = applications.find(a => a.email === email);
+            
+            if (app) {
+                app.status = 'rejected';
+                app.rejectedAt = new Date().toISOString();
+                app.rejectReason = reason || '未通过审核';
+                
+                localStorage.setItem('coach_applications', JSON.stringify(applications));
+                
+                alert('❌ 已拒绝申请\n\n' + (reason ? '原因：' + reason : ''));
+                loadApplications();
+            }
+        }
+    </script>
+</body>
+</html>

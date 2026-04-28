@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4CAF50">
+    <title>👨‍🏫 教练申请 - 健康管家</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #FF9800;
+            --danger: #f44336;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #333333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        .back-btn:hover {
+            color: var(--primary);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo .icon {
+            font-size: 4em;
+            display: block;
+        }
+        .logo h1 {
+            color: var(--primary);
+            font-size: 1.8em;
+            margin-top: 10px;
+        }
+        .logo p {
+            color: #666;
+            margin-top: 5px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid #2196F3;
+        }
+        .info-box h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .info-box p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 0.9em;
+        }
+        .info-box ol {
+            margin-top: 10px;
+            padding-left: 20px;
+            color: #555;
+        }
+        .info-box li {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text);
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 0.85em;
+        }
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #9e9e9e, #757575);
+        }
+        .requirements {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--secondary);
+        }
+        .requirements h4 {
+            color: #F57C00;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        .requirements ul {
+            padding-left: 20px;
+            color: #555;
+        }
+        .requirements li {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .success-message.show {
+            display: block;
+        }
+        .success-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        .success-message h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        .success-message p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .form-content {
+            display: block;
+        }
+        .form-content.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="register_choice.html" class="back-btn">
+            <span>←</span>
+            <span>返回</span>
+        </a>
+
+        <!-- 申请表单 -->
+        <div id="formContent" class="form-content">
+            <div class="logo">
+                <span class="icon">👨‍🏫</span>
+                <h1>教练申请</h1>
+                <p>填写资料，等待审核</p>
+            </div>
+
+            <div class="info-box">
+                <h3>📋 申请流程</h3>
+                <ol>
+                    <li>填写以下申请表格</li>
+                    <li>提交后等待我们审核（1-3 个工作日）</li>
+                    <li>审核通过后，您会收到确认邮件</li>
+                    <li>使用邮箱和密码登录教练后台</li>
+                </ol>
+            </div>
+
+            <div class="requirements">
+                <h4>✅ 教练要求</h4>
+                <ul>
+                    <li>持有相关健身/营养认证</li>
+                    <li>至少 1 年以上教学经验</li>
+                    <li>良好的沟通能力</li>
+                    <li>愿意帮助学员达成目标</li>
+                </ul>
+            </div>
+
+            <form id="coachApplyForm" onsubmit="submitApplication(event)">
+                <div class="form-group">
+                    <label for="name">姓名 *</label>
+                    <input type="text" id="name" name="name" required placeholder="请输入您的姓名">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">电子邮箱 *</label>
+                    <input type="email" id="email" name="email" required placeholder="example@email.com">
+                    <small>审核结果将发送到此邮箱</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">电话号码 *</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="012-3456789">
+                </div>
+
+                <div class="form-group">
+                    <label for="certification">专业认证 *</label>
+                    <input type="text" id="certification" name="certification" required placeholder="例如：ACE-CPT, NASM-CPT">
+                    <small>请填写您持有的健身/营养相关认证</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="experience">教学经验（年） *</label>
+                    <select id="experience" name="experience" required>
+                        <option value="">请选择</option>
+                        <option value="1-2">1-2 年</option>
+                        <option value="3-5">3-5 年</option>
+                        <option value="5-10">5-10 年</option>
+                        <option value="10+">10 年以上</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="specialty">专长领域 *</label>
+                    <input type="text" id="specialty" name="specialty" required placeholder="例如：减脂、增肌、产后恢复">
+                </div>
+
+                <div class="form-group">
+                    <label for="bio">个人简介 *</label>
+                    <textarea id="bio" name="bio" required placeholder="介绍一下您的教学风格、理念等（至少 50 字）"></textarea>
+                    <small>简介将显示在您的公开资料页</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="why">为什么想成为我们的教练？ *</label>
+                    <textarea id="why" name="why" required placeholder="请告诉我们您的动机和期望"></textarea>
+                </div>
+
+                <button type="submit" class="btn">
+                    <span>📤</span>
+                    <span>提交申请</span>
+                </button>
+
+                <button type="button" class="btn btn-secondary" onclick="goBack()" style="margin-top: 10px;">
+                    取消
+                </button>
+            </form>
+        </div>
+
+        <!-- 成功消息 -->
+        <div id="successMessage" class="success-message">
+            <div class="success-icon">✅</div>
+            <h2>申请已提交！</h2>
+            <p>
+                感谢您的申请！<br><br>
+                我们会在 <strong>1-3 个工作日</strong> 内审核您的资料。<br><br>
+                审核结果将发送至：<br>
+                <strong id="submittedEmail" style="color: var(--primary);"></strong>
+            </p>
+            <p style="margin-top: 20px; color: #666;">
+                请留意您的邮箱（包括垃圾邮件箱）<br>
+                如有任何问题，请联系客服
+            </p>
+            <button class="btn" onclick="goBack()" style="margin-top: 20px;">
+                返回主页
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function submitApplication(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            const application = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                certification: formData.get('certification'),
+                experience: formData.get('experience'),
+                specialty: formData.get('specialty'),
+                bio: formData.get('bio'),
+                why: formData.get('why'),
+                status: 'pending',
+                submittedAt: new Date().toISOString()
+            };
+            
+            console.log('📝 教练申请提交:', application);
+            
+            // 保存到本地存储（实际应该发送到服务器）
+            const applications = JSON.parse(localStorage.getItem('coach_applications') || '[]');
+            applications.push(application);
+            localStorage.setItem('coach_applications', JSON.stringify(applications));
+            
+            // 显示成功消息
+            document.getElementById('submittedEmail').textContent = application.email;
+            document.getElementById('formContent').classList.add('hidden');
+            document.getElementById('successMessage').classList.add('show');
+            
+            // 这里可以添加发送到后端的代码
+            // fetch('/api/coach/apply', { method: 'POST', body: JSON.stringify(application) })
+        }
+        
+        function goBack() {
+            window.location.href = 'splash.html';
+        }
+    </script>
+</body>
+</html>

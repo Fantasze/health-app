@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>App 图标设计 - 健康管家</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f5;
+            padding: 40px;
+            text-align: center;
+        }
+        .icon-container {
+            display: inline-block;
+            margin: 20px;
+        }
+        .icon-1024 {
+            width: 1024px;
+            height: 1024px;
+            background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+            border-radius: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .icon-text {
+            font-size: 400px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .icon-emoji {
+            font-size: 500px;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+        }
+        .preview-small {
+            width: 102px;
+            height: 102px;
+            border-radius: 20px;
+            margin: 10px auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        h2 { margin: 30px 0 10px; }
+        .download-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 20px;
+        }
+        .download-btn:hover {
+            background: #388E3C;
+        }
+        .variants {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .variant {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 健康管家 App 图标设计</h1>
+    
+    <h2>方案 1：💪 肌肉手臂</h2>
+    <div class="icon-container">
+        <div class="icon-1024">
+            <div class="icon-emoji">💪</div>
+        </div>
+        <img class="preview-small" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Crect width='1024' height='1024' rx='200' fill='%234CAF50'/%3E%3Ctext x='512' y='650' font-size='500' text-anchor='middle' fill='white'%3E💪%3C/text%3E%3C/svg%3E">
+        <p>力量、健康、健身</p>
+    </div>
+
+    <h2>方案 2：🏋️ 举重</h2>
+    <div class="icon-container">
+        <div class="icon-1024">
+            <div class="icon-emoji">🏋️</div>
+        </div>
+        <p>专业健身、力量训练</p>
+    </div>
+
+    <h2>方案 3：🥗 健康饮食</h2>
+    <div class="icon-container">
+        <div class="icon-1024">
+            <div class="icon-emoji">🥗</div>
+        </div>
+        <p>健康饮食、营养管理</p>
+    </div>
+
+    <h2>方案 4：❤️ 心率健康</h2>
+    <div class="icon-container">
+        <div class="icon-1024">
+            <div class="icon-emoji">❤️</div>
+        </div>
+        <p>心脏健康、全面健康</p>
+    </div>
+
+    <h2>方案 5：文字图标</h2>
+    <div class="icon-container">
+        <div class="icon-1024">
+            <div class="icon-text">健</div>
+        </div>
+        <p>中文字"健"，简洁易记</p>
+    </div>
+
+    <div class="variants">
+        <div class="variant">
+            <h3>🎯 我的推荐</h3>
+            <p><strong>方案 1：💪 肌肉手臂</strong></p>
+            <p>理由：</p>
+            <ul style="text-align:left;">
+                <li>一眼看出是健身 App</li>
+                <li>表情符号全球通用</li>
+                <li>绿色代表健康</li>
+                <li>简单好记</li>
+            </ul>
+        </div>
+        <div class="variant">
+            <h3>📐 需要的尺寸</h3>
+            <ul style="text-align:left;">
+                <li>Google Play: 512x512px</li>
+                <li>App Store: 1024x1024px</li>
+                <li>Android 启动图：1242x2436px</li>
+                <li>iOS 启动图：1242x2688px</li>
+            </ul>
+        </div>
+        <div class="variant">
+            <h3>🛠️ 下一步</h3>
+            <ol style="text-align:left;">
+                <li>选择喜欢的方案</li>
+                <li>我帮你生成高清图标</li>
+                <li>导出所有需要的尺寸</li>
+                <li>放到 App 项目里</li>
+            </ol>
+        </div>
+    </div>
+
+    <button class="download-btn" onclick="alert('告诉我你选哪个方案，我帮你生成高清图标文件！')">选择这个图标</button>
+
+    <script>
+        // 这里可以添加生成 PNG 的代码
+        // 需要用户选择方案后生成
+    </script>
+</body>
+</html>
