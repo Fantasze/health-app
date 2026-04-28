@@ -1,251 +1,23 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#4CAF50">
-    <title>💪 我的健康 - 健康管家</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康管家 - 学员</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #4CAF50;
-            --primary-dark: #388E3C;
-            --secondary: #FF9800;
-            --danger: #f44336;
-            --info: #2196F3;
-            --bg: #f5f5f5;
-            --card: #ffffff;
-            --text: #333333;
-            --text-light: #666666;
-        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background: #f5f6fa;
             min-height: 100vh;
-            padding-bottom: 80px;
         }
-        
-        /* 顶部 */
         .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px 20px 80px;
         }
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .header h1 {
-            font-size: 1.5em;
-        }
-        .logout-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-        .user-greeting {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-        }
-        .user-info h2 {
-            font-size: 1.2em;
-            margin-bottom: 3px;
-        }
-        .user-info p {
-            font-size: 0.85em;
-            opacity: 0.9;
-        }
-
-        /* 容器 */
-        .container {
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* 卡片 */
-        .card {
-            background: var(--card);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .card h2 {
-            color: var(--primary);
-            font-size: 1.2em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* 教练信息卡片 */
-        .coach-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: #e8f5e9;
-            border-radius: 12px;
-            margin-bottom: 15px;
-        }
-        .coach-avatar {
-            width: 60px;
-            height: 60px;
-            background: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8em;
-        }
-        .coach-details {
-            flex: 1;
-        }
-        .coach-details h3 {
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-        .coach-details p {
-            color: var(--text-light);
-            font-size: 0.85em;
-        }
-        .change-coach-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-            white-space: nowrap;
-        }
-
-        /* 统计网格 */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        .stat-item {
-            background: linear-gradient(135deg, #f8f9fa, #ffffff);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            border: 2px solid #e0e0e0;
-        }
-        .stat-value {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        .stat-label {
-            color: var(--text-light);
-            font-size: 0.85em;
-            margin-top: 5px;
-        }
-
-        /* 按钮 */
-        .btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .btn-secondary {
-            background: linear-gradient(135deg, var(--secondary), #F57C00);
-        }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        /* 饮食记录 */
-        .meal-entry {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin-bottom: 10px;
-        }
-        .meal-icon {
-            font-size: 2em;
-        }
-        .meal-info {
-            flex: 1;
-        }
-        .meal-info h4 {
-            color: var(--text);
-            margin-bottom: 3px;
-        }
-        .meal-info p {
-            color: var(--text-light);
-            font-size: 0.85em;
-        }
-        .meal-calories {
-            font-weight: bold;
-            color: var(--secondary);
-        }
-
-        /* 运动计划 */
-        .workout-item {
-            padding: 15px;
-            background: #e3f2fd;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border-left: 4px solid var(--info);
-        }
-        .workout-item h4 {
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-        .workout-item p {
-            color: var(--text-light);
-            font-size: 0.85em;
-        }
-        .workout-time {
-            display: inline-block;
-            background: var(--info);
-            color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            margin-top: 8px;
-        }
-
-        /* 底部导航 */
+        .header h1 { font-size: 24px; margin-bottom: 5px; }
+        .header p { opacity: 0.9; font-size: 14px; }
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -255,456 +27,119 @@
             display: flex;
             justify-content: space-around;
             padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
         }
         .nav-item {
             text-align: center;
-            padding: 5px 15px;
+            color: #999;
+            font-size: 12px;
             cursor: pointer;
-            color: var(--text-light);
         }
-        .nav-item.active {
-            color: var(--primary);
+        .nav-item.active { color: #667eea; }
+        .nav-icon { font-size: 24px; display: block; margin-bottom: 3px; }
+        .content {
+            padding: 20px;
+            margin-top: -60px;
         }
-        .nav-item .icon {
-            font-size: 1.5em;
-            display: block;
-            margin-bottom: 3px;
-        }
-        .nav-item .label {
-            font-size: 0.75em;
-        }
-
-        /* 页面切换 */
-        .page {
-            display: none;
-        }
-        .page.active {
-            display: block;
-        }
-
-        /* 选择教练页面 */
-        .coach-card {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
+        .card {
             background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
+            border-radius: 15px;
+            padding: 20px;
             margin-bottom: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
-        .coach-card:hover {
-            border-color: var(--primary);
-            background: #e8f5e9;
+        .card h3 { color: #333; margin-bottom: 10px; font-size: 18px; }
+        .card p { color: #666; font-size: 14px; line-height: 1.6; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
         }
-        .coach-card.selected {
-            border-color: var(--primary);
-            background: #e8f5e9;
+        .stat-item {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
-        .coach-card-avatar {
-            width: 50px;
-            height: 50px;
-            background: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-        }
-        .coach-card-info {
-            flex: 1;
-        }
-        .coach-card-info h3 {
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-        .coach-card-info p {
-            color: var(--text-light);
-            font-size: 0.85em;
-        }
-        .select-btn {
-            background: var(--primary);
+        .stat-value { font-size: 24px; font-weight: 700; color: #667eea; }
+        .stat-label { font-size: 12px; color: #999; margin-top: 5px; }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- 主页 -->
-    <div id="homePage" class="page active">
-        <div class="header">
-            <div class="header-top">
-                <h1>💪 我的健康</h1>
-                <button class="logout-btn" onclick="logout()">退出</button>
+    <div class="header">
+        <h1>👋 欢迎回来！</h1>
+        <p>今天也要保持健康哦</p>
+    </div>
+    
+    <div class="content">
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="calories">0</div>
+                <div class="stat-label">卡路里</div>
             </div>
-            <div class="user-greeting">
-                <div class="user-avatar" id="userAvatar">👤</div>
-                <div class="user-info">
-                    <h2 id="userName">加载中...</h2>
-                    <p>加油！你今天也很棒！</p>
-                </div>
+            <div class="stat-item">
+                <div class="stat-value" id="water">0</div>
+                <div class="stat-label">杯水</div>
             </div>
-        </div>
-
-        <div class="container">
-            <!-- 教练信息 -->
-            <div class="card">
-                <h2><span>👨‍🏫</span> 我的教练</h2>
-                <div class="coach-info" id="coachInfo">
-                    <div class="coach-avatar">👨‍🏫</div>
-                    <div class="coach-details">
-                        <h3>暂未分配教练</h3>
-                        <p>选择一位专业教练指导你</p>
-                    </div>
-                    <button class="change-coach-btn" onclick="goToBrowseCoaches()">选择教练</button>
-                </div>
-            </div>
-
-            <!-- 今日统计 -->
-            <div class="card">
-                <h2><span>📊</span> 今日进度</h2>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="caloriesToday">0</div>
-                        <div class="stat-label">摄入卡路里</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="mealsToday">0</div>
-                        <div class="stat-label">已记录餐数</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="waterToday">0</div>
-                        <div class="stat-label">喝水杯数</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="workoutToday">0</div>
-                        <div class="stat-label">运动分钟</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 快速操作 -->
-            <div class="card">
-                <h2><span>⚡</span> 快速记录</h2>
-                <button class="btn" onclick="addMeal()" style="margin-bottom: 10px;">
-                    <span>🍽️</span>
-                    <span>记录饮食</span>
-                </button>
-                <button class="btn btn-secondary" onclick="addWater()">
-                    <span>💧</span>
-                    <span>喝水打卡</span>
-                </button>
-            </div>
-
-            <!-- 今日饮食 -->
-            <div class="card">
-                <h2><span>🍽️</span> 今日饮食</h2>
-                <div id="mealsList">
-                    <p style="text-align: center; color: #999; padding: 20px;">暂无记录</p>
-                </div>
-            </div>
-
-            <!-- 运动计划 -->
-            <div class="card">
-                <h2><span>🏋️</span> 本周运动计划</h2>
-                <div id="workoutPlan">
-                    <p style="text-align: center; color: #999; padding: 20px;">暂无计划</p>
-                </div>
+            <div class="stat-item">
+                <div class="stat-value" id="days">0</div>
+                <div class="stat-label">坚持天数</div>
             </div>
         </div>
-
-        <!-- 底部导航 -->
-        <div class="nav-bar">
-            <div class="nav-item active" onclick="showPage('homePage')">
-                <span class="icon">🏠</span>
-                <span class="label">主页</span>
-            </div>
-            <div class="nav-item" onclick="goToBrowseCoaches()">
-                <span class="icon">👨‍🏫</span>
-                <span class="label">选教练</span>
-            </div>
-            <div class="nav-item" onclick="showPage('profilePage')">
-                <span class="icon">👤</span>
-                <span class="label">我的</span>
-            </div>
+        
+        <div class="card">
+            <h3>🍽️ 今日饮食</h3>
+            <p>记录今天的饮食，追踪营养摄入</p>
+            <button class="btn" onclick="alert('饮食记录功能开发中')">记录饮食</button>
+        </div>
+        
+        <div class="card">
+            <h3>💪 训练计划</h3>
+            <p>查看你的专属训练计划</p>
+            <button class="btn" onclick="alert('训练计划功能开发中')">查看计划</button>
+        </div>
+        
+        <div class="card">
+            <h3>👨‍🏫 我的教练</h3>
+            <p>需要专业指导？找教练帮你</p>
+            <button class="btn" onclick="window.location.href='browse_coaches.html'">浏览教练</button>
         </div>
     </div>
-
+    
+    <div class="nav-bar">
+        <div class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            首页
+        </div>
+        <div class="nav-item">
+            <span class="nav-icon">📊</span>
+            统计
+        </div>
+        <div class="nav-item">
+            <span class="nav-icon">👤</span>
+            我的
+        </div>
+    </div>
+    
     <script>
-        function goToBrowseCoaches() {
-            window.location.href = 'browse_coaches.html';
-        }
-        <div class="header">
-            <div class="header-top">
-                <h1>👨‍🏫 选择教练</h1>
-                <button class="logout-btn" onclick="showPage('homePage')">返回</button>
-            </div>
-        </div>
-        <div class="container">
-            <div class="card">
-                <h2><span>📋</span> 可选教练</h2>
-                <div id="coachesList">
-                    <!-- 教练列表将由 JS 动态生成 -->
-                </div>
-            </div>
-        </div>
-        <div class="nav-bar">
-            <div class="nav-item" onclick="showPage('homePage')">
-                <span class="icon">🏠</span>
-                <span class="label">主页</span>
-            </div>
-            <div class="nav-item active" onclick="showPage('coachSelectPage')">
-                <span class="icon">👨‍🏫</span>
-                <span class="label">选教练</span>
-            </div>
-            <div class="nav-item" onclick="showPage('profilePage')">
-                <span class="icon">👤</span>
-                <span class="label">我的</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 个人主页 -->
-    <div id="profilePage" class="page">
-        <div class="header">
-            <div class="header-top">
-                <h1>👤 我的</h1>
-                <button class="logout-btn" onclick="logout()">退出</button>
-            </div>
-        </div>
-        <div class="container">
-            <div class="card">
-                <h2><span>👤</span> 个人信息</h2>
-                <p><strong>姓名：</strong><span id="profileName">-</span></p>
-                <p><strong>邮箱：</strong><span id="profileEmail">-</span></p>
-            </div>
-            <div class="card">
-                <h2><span>📊</span> 健康数据</h2>
-                <p><strong>体重：</strong>待设置</p>
-                <p><strong>身高：</strong>待设置</p>
-                <p><strong>目标：</strong>待设置</p>
-            </div>
-            <button class="btn" onclick="logout()" style="background: linear-gradient(135deg, #f44336, #d32f2f);">
-                <span>🚪</span>
-                <span>退出登录</span>
-            </button>
-        </div>
-        <div class="nav-bar">
-            <div class="nav-item" onclick="showPage('homePage')">
-                <span class="icon">🏠</span>
-                <span class="label">主页</span>
-            </div>
-            <div class="nav-item" onclick="goToBrowseCoaches()">
-                <span class="icon">👨‍🏫</span>
-                <span class="label">选教练</span>
-            </div>
-            <div class="nav-item active" onclick="showPage('profilePage')">
-                <span class="icon">👤</span>
-                <span class="label">我的</span>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 页面加载时检查登录状态
-        window.addEventListener('load', function() {
-            const userData = localStorage.getItem('healthApp_user');
-            if (!userData) {
-                window.location.href = 'splash.html';
-                return;
-            }
-            
-            const user = JSON.parse(userData);
-            document.getElementById('userName').textContent = user.name;
-            document.getElementById('userAvatar').textContent = user.avatar || '👤';
-            document.getElementById('profileName').textContent = user.name;
-            document.getElementById('profileEmail').textContent = user.email;
-            
-            loadCoach();
-            loadMeals();
-            loadWorkoutPlan();
-        });
-
-        // 页面切换
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            
-            document.getElementById(pageId).classList.add('active');
-            
-        }
-
-        function goToBrowseCoaches() {
-            window.location.href = 'browse_coaches.html';
-        }
-
-        // 加载教练信息
-        function loadCoach() {
-            const userData = JSON.parse(localStorage.getItem('healthApp_user'));
-            const selectedCoach = localStorage.getItem('healthApp_coach_' + userData.id);
-            
-            if (selectedCoach) {
-                const coach = JSON.parse(selectedCoach);
-                document.getElementById('coachInfo').innerHTML = `
-                    <div class="coach-avatar">${coach.avatar || '👨‍🏫'}</div>
-                    <div class="coach-details">
-                        <h3>${coach.name}</h3>
-                        <p>${coach.specialty || '专业健身教练'}</p>
-                    </div>
-                    <button class="change-coach-btn" onclick="showPage('coachSelectPage')">更换教练</button>
-                `;
-            }
-        }
-
-        // 加载教练列表
-        function loadCoaches() {
-            const coaches = [
-                { id: 1, name: '陈教练', specialty: '减脂塑形', experience: '5 年', avatar: '👨‍🏫' },
-                { id: 2, name: '李教练', specialty: '增肌训练', experience: '3 年', avatar: '👩‍🏫' },
-                { id: 3, name: '王教练', specialty: '瑜伽拉伸', experience: '4 年', avatar: '🧘‍♀️' },
-                { id: 4, name: '张教练', specialty: '营养指导', experience: '6 年', avatar: '👨‍🏫' }
-            ];
-            
-            const userData = JSON.parse(localStorage.getItem('healthApp_user'));
-            const selectedCoach = localStorage.getItem('healthApp_coach_' + userData.id);
-            const selectedCoachId = selectedCoach ? JSON.parse(selectedCoach).id : null;
-            
-            const html = coaches.map(coach => `
-                <div class="coach-card ${coach.id === selectedCoachId ? 'selected' : ''}" onclick="selectCoach(${coach.id})">
-                    <div class="coach-card-avatar">${coach.avatar}</div>
-                    <div class="coach-card-info">
-                        <h3>${coach.name}</h3>
-                        <p>${coach.specialty} · ${coach.experience}经验</p>
-                    </div>
-                    <button class="select-btn">${coach.id === selectedCoachId ? '已选择' : '选择'}</button>
-                </div>
-            `).join('');
-            
-            document.getElementById('coachesList').innerHTML = html;
-        }
-
-        // 选择教练
-        function selectCoach(coachId) {
-            const coaches = [
-                { id: 1, name: '陈教练', specialty: '减脂塑形', experience: '5 年', avatar: '👨‍🏫' },
-                { id: 2, name: '李教练', specialty: '增肌训练', experience: '3 年', avatar: '👩‍🏫' },
-                { id: 3, name: '王教练', specialty: '瑜伽拉伸', experience: '4 年', avatar: '🧘‍♀️' },
-                { id: 4, name: '张教练', specialty: '营养指导', experience: '6 年', avatar: '👨‍🏫' }
-            ];
-            
-            const coach = coaches.find(c => c.id === coachId);
-            const userData = JSON.parse(localStorage.getItem('healthApp_user'));
-            
-            localStorage.setItem('healthApp_coach_' + userData.id, JSON.stringify(coach));
-            
-            alert(`✅ 已选择 ${coach.name} 作为你的教练！`);
-            loadCoach();
-            showPage('homePage');
-        }
-
-        // 加载饮食记录
-        function loadMeals() {
-            const userData = JSON.parse(localStorage.getItem('healthApp_user'));
-            const meals = JSON.parse(localStorage.getItem('healthApp_meals_' + userData.id) || '[]');
-            
-            if (meals.length === 0) {
-                document.getElementById('mealsList').innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">暂无记录</p>';
-                document.getElementById('mealsToday').textContent = '0';
-                document.getElementById('caloriesToday').textContent = '0';
-                return;
-            }
-            
-            const today = new Date().toDateString();
-            const todayMeals = meals.filter(m => new Date(m.date).toDateString() === today);
-            
-            document.getElementById('mealsToday').textContent = todayMeals.length;
-            
-            const totalCalories = todayMeals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
-            document.getElementById('caloriesToday').textContent = totalCalories;
-            
-            const html = todayMeals.map(meal => `
-                <div class="meal-entry">
-                    <div class="meal-icon">${meal.icon || '🍽️'}</div>
-                    <div class="meal-info">
-                        <h4>${meal.name}</h4>
-                        <p>${meal.time || '刚刚'}</p>
-                    </div>
-                    <div class="meal-calories">${meal.calories || 0} 卡</div>
-                </div>
-            `).join('');
-            
-            document.getElementById('mealsList').innerHTML = html;
-        }
-
-        // 添加饮食记录
-        function addMeal() {
-            const name = prompt('请输入食物名称：');
-            if (!name) return;
-            
-            const calories = prompt('请输入卡路里（克）：', '300');
-            if (!calories) return;
-            
-            const userData = JSON.parse(localStorage.getItem('healthApp_user'));
-            const meals = JSON.parse(localStorage.getItem('healthApp_meals_' + userData.id) || '[]');
-            
-            meals.push({
-                name: name,
-                calories: parseInt(calories),
-                date: new Date().toISOString(),
-                time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
-                icon: '🍽️'
-            });
-            
-            localStorage.setItem('healthApp_meals_' + userData.id, JSON.stringify(meals));
-            
-            alert('✅ 饮食记录已添加！');
-            loadMeals();
-        }
-
-        // 喝水打卡
-        function addWater() {
-            const userData = JSON.parse(localStorage.getItem('healthApp_user'));
-            const waterCount = parseInt(localStorage.getItem('healthApp_water_' + userData.id) || '0');
-            
-            localStorage.setItem('healthApp_water_' + userData.id, (waterCount + 1).toString());
-            document.getElementById('waterToday').textContent = waterCount + 1;
-            
-            alert('💧 喝水打卡成功！继续加油！');
-        }
-
-        // 加载运动计划
-        function loadWorkoutPlan() {
-            const workouts = [
-                { name: '有氧运动', duration: '30 分钟', day: '周一' },
-                { name: '力量训练', duration: '45 分钟', day: '周三' },
-                { name: '瑜伽拉伸', duration: '20 分钟', day: '周五' }
-            ];
-            
-            const html = workouts.map(workout => `
-                <div class="workout-item">
-                    <h4>${workout.name}</h4>
-                    <p>${workout.duration}</p>
-                    <span class="workout-time">${workout.day}</span>
-                </div>
-            `).join('');
-            
-            document.getElementById('workoutPlan').innerHTML = html;
-        }
-
-        // 退出登录
-        function logout() {
-            if (confirm('确定要退出登录吗？')) {
-                localStorage.removeItem('healthApp_user');
-                window.location.href = 'splash.html';
-            }
-        }
+        // 初始化数据
+        document.getElementById('calories').textContent = localStorage.getItem('calories') || 0;
+        document.getElementById('water').textContent = localStorage.getItem('water') || 0;
+        document.getElementById('days').textContent = localStorage.getItem('days') || 1;
     </script>
 </body>
 </html>

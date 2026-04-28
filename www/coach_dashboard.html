@@ -1,270 +1,23 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#4CAF50">
-    <title>👨‍🏫 教练后台 - 健康管家</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教练后台 - 健康管家</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #4CAF50;
-            --primary-dark: #388E3C;
-            --secondary: #FF9800;
-            --danger: #f44336;
-            --info: #2196F3;
-            --bg: #f5f5f5;
-            --card: #ffffff;
-            --text: #333333;
-            --text-light: #666666;
-        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background: #f5f6fa;
             min-height: 100vh;
-            padding-bottom: 80px;
         }
-        
-        /* 顶部 */
         .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px 20px 80px;
         }
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .header h1 {
-            font-size: 1.5em;
-        }
-        .logout-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-        .coach-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .coach-avatar {
-            width: 50px;
-            height: 50px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-        }
-        
-        /* 容器 */
-        .container {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        /* 卡片 */
-        .card {
-            background: var(--card);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .card h2 {
-            color: var(--primary);
-            font-size: 1.2em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        /* 统计网格 */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        @media (min-width: 600px) {
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-        .stat-item {
-            background: linear-gradient(135deg, #f8f9fa, #ffffff);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            border: 2px solid #e0e0e0;
-        }
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        .stat-label {
-            color: var(--text-light);
-            font-size: 0.85em;
-            margin-top: 5px;
-        }
-        .stat-item.warning .stat-value { color: var(--secondary); }
-        .stat-item.danger .stat-value { color: var(--danger); }
-        .stat-item.info .stat-value { color: var(--info); }
-        
-        /* 待确认申请 */
-        .pending-item {
-            padding: 15px;
-            background: #fff3e0;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border-left: 4px solid var(--secondary);
-        }
-        .pending-item h4 {
-            color: var(--text);
-            margin-bottom: 8px;
-        }
-        .pending-item p {
-            color: var(--text-light);
-            font-size: 0.85em;
-            margin: 5px 0;
-        }
-        .pending-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .btn-approve {
-            flex: 1;
-            padding: 10px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-reject {
-            flex: 1;
-            padding: 10px;
-            background: #e0e0e0;
-            color: #666;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        /* 学员列表 */
-        .student-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin-bottom: 10px;
-        }
-        .student-avatar {
-            width: 50px;
-            height: 50px;
-            background: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-        }
-        .student-info {
-            flex: 1;
-        }
-        .student-info h4 {
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-        .student-info p {
-            color: var(--text-light);
-            font-size: 0.85em;
-        }
-        .student-progress {
-            text-align: right;
-        }
-        .progress-bar {
-            width: 100px;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            transition: width 0.3s;
-        }
-        
-        /* 课程表 */
-        .schedule-item {
-            padding: 15px;
-            background: #e3f2fd;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border-left: 4px solid var(--info);
-        }
-        .schedule-item h4 {
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-        .schedule-item p {
-            color: var(--text-light);
-            font-size: 0.85em;
-        }
-        .schedule-time {
-            display: inline-block;
-            background: var(--info);
-            color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            margin-top: 8px;
-        }
-        
-        /* 收入图表 */
-        .income-summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .income-item {
-            text-align: center;
-            padding: 15px;
-            background: linear-gradient(135deg, #e8f5e9, #ffffff);
-            border-radius: 12px;
-        }
-        .income-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        .income-label {
-            color: var(--text-light);
-            font-size: 0.85em;
-            margin-top: 5px;
-        }
-        
-        /* 底部导航 */
+        .header h1 { font-size: 24px; margin-bottom: 5px; }
+        .header p { opacity: 0.9; font-size: 14px; }
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -274,449 +27,148 @@
             display: flex;
             justify-content: space-around;
             padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
         }
         .nav-item {
             text-align: center;
-            padding: 5px 15px;
+            color: #999;
+            font-size: 12px;
             cursor: pointer;
-            color: var(--text-light);
         }
-        .nav-item.active {
-            color: var(--primary);
+        .nav-item.active { color: #11998e; }
+        .nav-icon { font-size: 24px; display: block; margin-bottom: 3px; }
+        .content {
+            padding: 20px;
+            margin-top: -60px;
         }
-        .nav-item .icon {
-            font-size: 1.5em;
-            display: block;
-            margin-bottom: 3px;
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
-        .nav-item .label {
-            font-size: 0.75em;
+        .card h3 { color: #333; margin-bottom: 10px; font-size: 18px; }
+        .card p { color: #666; font-size: 14px; line-height: 1.6; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
         }
-        
-        /* 页面切换 */
-        .page {
-            display: none;
+        .stat-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
-        .page.active {
-            display: block;
-        }
-        
-        /* 添加课程按钮 */
-        .fab {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: var(--primary);
+        .stat-value { font-size: 28px; font-weight: 700; color: #11998e; }
+        .stat-label { font-size: 12px; color: #999; margin-top: 5px; }
+        .btn {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
-            border-radius: 50%;
             border: none;
-            font-size: 2em;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 5px 20px rgba(76,175,80,0.4);
+            width: 100%;
+            margin-top: 10px;
+        }
+        .student-list {
+            margin-top: 15px;
+        }
+        .student-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin-right: 15px;
         }
+        .student-info { flex: 1; }
+        .student-name { font-weight: 600; color: #333; }
+        .student-plan { font-size: 12px; color: #999; }
     </style>
 </head>
 <body>
-    <!-- 主页 -->
-    <div id="homePage" class="page active">
-        <div class="header">
-            <div class="header-top">
-                <h1>👨‍🏫 教练后台</h1>
-                <button class="logout-btn" onclick="logout()">退出</button>
-            </div>
-            <div class="coach-info">
-                <div class="coach-avatar" id="coachAvatar">👨‍🏫</div>
-                <div>
-                    <h2 id="coachName" style="color: white; margin: 0;">加载中...</h2>
-                    <p style="opacity: 0.9; font-size: 0.9em;">专业健身教练</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="container">
-            <!-- 统计 -->
-            <div class="card">
-                <h2><span>📊</span> 数据概览</h2>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value" id="studentCount">0</div>
-                        <div class="stat-label">学员数</div>
-                    </div>
-                    <div class="stat-item info">
-                        <div class="stat-value" id="pendingCount">0</div>
-                        <div class="stat-label">待确认</div>
-                    </div>
-                    <div class="stat-item warning">
-                        <div class="stat-value" id="classCount">0</div>
-                        <div class="stat-label">本周课程</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="todayIncome">¥0</div>
-                        <div class="stat-label">今日收入</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 收入摘要 -->
-            <div class="card">
-                <h2><span>💰</span> 收入统计</h2>
-                <div class="income-summary">
-                    <div class="income-item">
-                        <div class="income-value" id="weekIncome">¥0</div>
-                        <div class="income-label">本周</div>
-                    </div>
-                    <div class="income-item">
-                        <div class="income-value" id="monthIncome">¥0</div>
-                        <div class="income-label">本月</div>
-                    </div>
-                    <div class="income-item">
-                        <div class="income-value" id="totalIncome">¥0</div>
-                        <div class="income-label">总计</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 待确认申请 -->
-            <div class="card">
-                <h2><span>⏳</span> 待确认课程申请</h2>
-                <div id="pendingList">
-                    <p style="text-align: center; color: #999; padding: 20px;">暂无待确认申请</p>
-                </div>
-            </div>
-
-            <!-- 学员列表 -->
-            <div class="card">
-                <h2><span>👥</span> 我的学员</h2>
-                <div id="studentList">
-                    <p style="text-align: center; color: #999; padding: 20px;">暂无学员</p>
-                </div>
-            </div>
-        </div>
-
-        <button class="fab" onclick="addClass()" title="添加课程">+</button>
-
-        <!-- 底部导航 -->
-        <div class="nav-bar">
-            <div class="nav-item active" onclick="showPage('homePage')">
-                <span class="icon">🏠</span>
-                <span class="label">主页</span>
-            </div>
-            <div class="nav-item" onclick="showPage('schedulePage')">
-                <span class="icon">📅</span>
-                <span class="label">课程表</span>
-            </div>
-            <div class="nav-item" onclick="showPage('incomePage')">
-                <span class="icon">💰</span>
-                <span class="label">收入</span>
-            </div>
-            <div class="nav-item" onclick="showPage('profilePage')">
-                <span class="icon">👤</span>
-                <span class="label">我的</span>
-            </div>
-        </div>
+    <div class="header">
+        <h1>👨‍🏫 教练后台</h1>
+        <p>管理你的学员和课程</p>
     </div>
-
-    <!-- 课程表页面 -->
-    <div id="schedulePage" class="page">
-        <div class="header">
-            <div class="header-top">
-                <h1>📅 课程表</h1>
-                <button class="logout-btn" onclick="showPage('homePage')">返回</button>
+    
+    <div class="content">
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="students">0</div>
+                <div class="stat-label">学员数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="income">¥0</div>
+                <div class="stat-label">本月收入</div>
             </div>
         </div>
-        <div class="container">
-            <div class="card">
-                <h2><span>📋</span> 本周课程</h2>
-                <div id="scheduleList">
-                    <p style="text-align: center; color: #999; padding: 20px;">暂无课程</p>
-                </div>
-            </div>
+        
+        <div class="card">
+            <h3>📅 今日课程</h3>
+            <p>今天下午 3:00 - 张三（减脂计划）</p>
+            <button class="btn" onclick="alert('课程管理功能开发中')">查看课表</button>
         </div>
-        <div class="nav-bar">
-            <div class="nav-item" onclick="showPage('homePage')">
-                <span class="icon">🏠</span>
-                <span class="label">主页</span>
-            </div>
-            <div class="nav-item active" onclick="showPage('schedulePage')">
-                <span class="icon">📅</span>
-                <span class="label">课程表</span>
-            </div>
-            <div class="nav-item" onclick="showPage('incomePage')">
-                <span class="icon">💰</span>
-                <span class="label">收入</span>
-            </div>
-            <div class="nav-item" onclick="showPage('profilePage')">
-                <span class="icon">👤</span>
-                <span class="label">我的</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 收入页面 -->
-    <div id="incomePage" class="page">
-        <div class="header">
-            <div class="header-top">
-                <h1>💰 收入明细</h1>
-                <button class="logout-btn" onclick="showPage('homePage')">返回</button>
-            </div>
-        </div>
-        <div class="container">
-            <div class="card">
-                <h2><span>📊</span> 收入统计</h2>
-                <div class="income-summary">
-                    <div class="income-item">
-                        <div class="income-value" id="incomeWeek">¥0</div>
-                        <div class="income-label">本周</div>
-                    </div>
-                    <div class="income-item">
-                        <div class="income-value" id="incomeMonth">¥0</div>
-                        <div class="income-label">本月</div>
-                    </div>
-                    <div class="income-item">
-                        <div class="income-value" id="incomeTotal">¥0</div>
-                        <div class="income-label">总计</div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h2><span>📝</span> 收入明细</h2>
-                <div id="incomeList">
-                    <p style="text-align: center; color: #999; padding: 20px;">暂无收入记录</p>
-                </div>
-            </div>
-        </div>
-        <div class="nav-bar">
-            <div class="nav-item" onclick="showPage('homePage')">
-                <span class="icon">🏠</span>
-                <span class="label">主页</span>
-            </div>
-            <div class="nav-item" onclick="showPage('schedulePage')">
-                <span class="icon">📅</span>
-                <span class="label">课程表</span>
-            </div>
-            <div class="nav-item active" onclick="showPage('incomePage')">
-                <span class="icon">💰</span>
-                <span class="label">收入</span>
-            </div>
-            <div class="nav-item" onclick="showPage('profilePage')">
-                <span class="icon">👤</span>
-                <span class="label">我的</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 个人页面 -->
-    <div id="profilePage" class="page">
-        <div class="header">
-            <div class="header-top">
-                <h1>👤 个人中心</h1>
-                <button class="logout-btn" onclick="logout()">退出</button>
-            </div>
-        </div>
-        <div class="container">
-            <div class="card">
-                <h2><span>👤</span> 个人信息</h2>
-                <p><strong>姓名：</strong><span id="profileName">-</span></p>
-                <p><strong>邮箱：</strong><span id="profileEmail">-</span></p>
-                <p><strong>专长：</strong><span id="profileSpecialty">-</span></p>
-                <p><strong>状态：</strong><span id="profileStatus">-</span></p>
-            </div>
-            <button class="btn" onclick="logout()" style="background: linear-gradient(135deg, #f44336, #d32f2f); width: 100%; padding: 15px; border-radius: 12px; border: none; color: white; font-size: 1.1em; font-weight: bold; cursor: pointer;">
-                <span>🚪</span>
-                <span>退出登录</span>
-            </button>
-        </div>
-        <div class="nav-bar">
-            <div class="nav-item" onclick="showPage('homePage')">
-                <span class="icon">🏠</span>
-                <span class="label">主页</span>
-            </div>
-            <div class="nav-item" onclick="showPage('schedulePage')">
-                <span class="icon">📅</span>
-                <span class="label">课程表</span>
-            </div>
-            <div class="nav-item" onclick="showPage('incomePage')">
-                <span class="icon">💰</span>
-                <span class="label">收入</span>
-            </div>
-            <div class="nav-item active" onclick="showPage('profilePage')">
-                <span class="icon">👤</span>
-                <span class="label">我的</span>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 页面加载时检查登录状态
-        window.addEventListener('load', function() {
-            const userData = localStorage.getItem('healthApp_user');
-            if (!userData) {
-                window.location.href = 'splash.html';
-                return;
-            }
-            
-            const coach = JSON.parse(userData);
-            document.getElementById('coachName').textContent = coach.name;
-            document.getElementById('coachAvatar').textContent = coach.avatar || '👨‍🏫';
-            document.getElementById('profileName').textContent = coach.name;
-            document.getElementById('profileEmail').textContent = coach.email;
-            document.getElementById('profileSpecialty').textContent = coach.specialty || '专业健身教练';
-            document.getElementById('profileStatus').textContent = coach.status === 'approved' ? '✅ 已认证' : '⏳ 审核中';
-            
-            loadDashboard();
-        });
-
-        // 页面切换
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            
-            document.getElementById(pageId).classList.add('active');
-            
-            if (pageId === 'homePage') {
-                loadDashboard();
-            } else if (pageId === 'schedulePage') {
-                loadSchedule();
-            } else if (pageId === 'incomePage') {
-                loadIncome();
-            }
-        }
-
-        // 加载 Dashboard 数据
-        function loadDashboard() {
-            const coach = JSON.parse(localStorage.getItem('healthApp_user'));
-            
-            // 模拟数据
-            const students = [
-                { id: 1, name: '张三', goal: '减脂', progress: 65 },
-                { id: 2, name: '李四', goal: '增肌', progress: 40 },
-                { id: 3, name: '王五', goal: '塑形', progress: 80 }
-            ];
-            
-            const pending = [
-                { id: 1, student: '赵六', type: '减脂课程', time: '本周五 19:00' },
-                { id: 2, student: '钱七', type: '增肌课程', time: '本周六 10:00' }
-            ];
-            
-            // 更新统计
-            document.getElementById('studentCount').textContent = students.length;
-            document.getElementById('pendingCount').textContent = pending.length;
-            document.getElementById('classCount').textContent = '5';
-            document.getElementById('todayIncome').textContent = '¥300';
-            
-            // 收入
-            document.getElementById('weekIncome').textContent = '¥1,500';
-            document.getElementById('monthIncome').textContent = '¥6,000';
-            document.getElementById('totalIncome').textContent = '¥18,000';
-            
-            // 学员列表
-            const studentHtml = students.map(s => `
+        
+        <div class="card">
+            <h3>👥 我的学员</h3>
+            <div class="student-list">
                 <div class="student-item">
-                    <div class="student-avatar">👤</div>
+                    <div class="student-avatar">李</div>
                     <div class="student-info">
-                        <h4>${s.name}</h4>
-                        <p>目标：${s.goal}</p>
-                    </div>
-                    <div class="student-progress">
-                        <p style="font-size: 0.85em; color: #666;">进度 ${s.progress}%</p>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${s.progress}%"></div>
-                        </div>
+                        <div class="student-name">李四</div>
+                        <div class="student-plan">增肌计划 · 第 15 天</div>
                     </div>
                 </div>
-            `).join('');
-            document.getElementById('studentList').innerHTML = studentHtml;
-            
-            // 待确认申请
-            const pendingHtml = pending.map(p => `
-                <div class="pending-item">
-                    <h4>${p.student} - ${p.type}</h4>
-                    <p>🕐 ${p.time}</p>
-                    <div class="pending-actions">
-                        <button class="btn-approve" onclick="approveClass(${p.id})">✅ 接受</button>
-                        <button class="btn-reject" onclick="rejectClass(${p.id})">❌ 拒绝</button>
+                <div class="student-item">
+                    <div class="student-avatar">王</div>
+                    <div class="student-info">
+                        <div class="student-name">王五</div>
+                        <div class="student-plan">减脂计划 · 第 8 天</div>
                     </div>
                 </div>
-            `).join('');
-            document.getElementById('pendingList').innerHTML = pendingHtml;
-        }
-
-        // 加载课程表
-        function loadSchedule() {
-            const schedule = [
-                { day: '周一', time: '19:00-20:00', student: '张三', type: '减脂训练' },
-                { day: '周三', time: '18:00-19:00', student: '李四', type: '增肌训练' },
-                { day: '周五', time: '19:00-20:00', student: '王五', type: '塑形训练' },
-                { day: '周六', time: '10:00-11:00', student: '赵六', type: '体验课' }
-            ];
-            
-            const html = schedule.map(s => `
-                <div class="schedule-item">
-                    <h4>${s.day} - ${s.type}</h4>
-                    <p>👤 ${s.student}</p>
-                    <span class="schedule-time">🕐 ${s.time}</span>
-                </div>
-            `).join('');
-            
-            document.getElementById('scheduleList').innerHTML = html || '<p style="text-align: center; color: #999; padding: 20px;">暂无课程</p>';
-        }
-
-        // 加载收入
-        function loadIncome() {
-            document.getElementById('incomeWeek').textContent = '¥1,500';
-            document.getElementById('incomeMonth').textContent = '¥6,000';
-            document.getElementById('incomeTotal').textContent = '¥18,000';
-            
-            const incomeList = [
-                { date: '2026-04-28', student: '张三', amount: 300, type: '私教课' },
-                { date: '2026-04-27', student: '李四', amount: 300, type: '私教课' },
-                { date: '2026-04-26', student: '王五', amount: 300, type: '私教课' }
-            ];
-            
-            const html = incomeList.map(i => `
-                <div style="padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h4 style="color: var(--text);">${i.type}</h4>
-                        <p style="color: #666; font-size: 0.85em;">${i.date} · ${i.student}</p>
-                    </div>
-                    <div style="font-size: 1.2em; font-weight: bold; color: var(--primary);">+¥${i.amount}</div>
-                </div>
-            `).join('');
-            
-            document.getElementById('incomeList').innerHTML = html;
-        }
-
-        // 添加课程
-        function addClass() {
-            alert('💡 添加课程功能待开发\n\n可以添加：\n- 选择学员\n- 选择日期时间\n- 选择课程类型');
-        }
-
-        // 接受课程申请
-        function approveClass(id) {
-            alert('✅ 已接受课程申请！\n课程已添加到日程表');
-            loadDashboard();
-        }
-
-        // 拒绝课程申请
-        function rejectClass(id) {
-            alert('❌ 已拒绝课程申请');
-            loadDashboard();
-        }
-
-        // 退出登录
-        function logout() {
-            if (confirm('确定要退出登录吗？')) {
-                localStorage.removeItem('healthApp_user');
-                window.location.href = 'splash.html';
-            }
-        }
+            </div>
+            <button class="btn" onclick="alert('学员管理功能开发中')">管理学员</button>
+        </div>
+    </div>
+    
+    <div class="nav-bar">
+        <div class="nav-item active">
+            <span class="nav-icon">📊</span>
+            后台
+        </div>
+        <div class="nav-item">
+            <span class="nav-icon">📅</span>
+            课程
+        </div>
+        <div class="nav-item">
+            <span class="nav-icon">👤</span>
+            我的
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('students').textContent = localStorage.getItem('coachStudents') || 2;
+        document.getElementById('income').textContent = '¥' + (localStorage.getItem('coachIncome') || 8500);
     </script>
 </body>
 </html>
