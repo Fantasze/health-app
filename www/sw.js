@@ -1,6 +1,6 @@
 // Service Worker for PWA
-// v7.16: network-first to avoid stale login/register pages during testing
-const CACHE_NAME = 'health-app-v716';
+// v7.17: network-first to avoid stale login/register pages during testing
+const CACHE_NAME = 'health-app-v717';
 const ASSETS = [
   './index.html',
   './login.html',
