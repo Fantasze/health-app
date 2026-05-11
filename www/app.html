@@ -67,6 +67,8 @@
         .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
         .empty-state{text-align:center;padding:30px;color:#999}
         .empty-icon{font-size:48px;margin-bottom:10px}
+        .advice-item{background:#f0f9ff;border-left:4px solid #0ea5e9;border-radius:12px;padding:14px;margin-bottom:10px;color:#0f172a;line-height:1.45}
+        .advice-meta{font-size:12px;color:#64748b;margin-top:8px}
     </style>
 </head>
 <body>
@@ -126,6 +128,16 @@
             </div>
         </div>
         
+        <div class="card">
+            <div class="card-header">
+                <h3>💬 教练建议</h3>
+                <span style="color:#667eea;font-size:13px">最新反馈</span>
+            </div>
+            <div id="coachAdviceList">
+                <div class="empty-state"><div class="empty-icon">💬</div><div>暂无教练建议</div></div>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-header">
                 <h3>📅 教练课程</h3>
@@ -205,30 +217,61 @@
             }
         }
         
-        function loadNutrition(){
-            // 暂时使用 localStorage
-            const today=new Date().toISOString().split('T')[0];
-            const meals=JSON.parse(localStorage.getItem('meals_'+today)||'[]');
-            
-            let totalCalories=0;
-            let totalProtein=0;
-            let totalCarbs=0;
-            let totalFat=0;
-            
-            meals.forEach(meal=>{
-                totalCalories+=meal.calories||0;
-                totalProtein+=meal.protein||0;
-                totalCarbs+=meal.carbs||0;
-                totalFat+=meal.fat||0;
-            });
-            
-            document.getElementById('calorieValue').textContent=totalCalories;
-            document.getElementById('proteinValue').textContent=totalProtein+'g';
-            document.getElementById('carbsValue').textContent=totalCarbs+'g';
-            document.getElementById('fatValue').textContent=totalFat+'g';
-            
-            const percentage=(totalCalories/2000)*100;
-            document.getElementById('calorieRing').style.background=`conic-gradient(#667eea 0% ${percentage}%,#e0e0e0 ${percentage}% 100%)`;
+        async function loadNutrition(){
+            try{
+                const today=new Date().toISOString().split('T')[0];
+                const mealsSnapshot=await db.collection('meals')
+                    .where('userId','==',userSession.id)
+                    .where('date','==',today)
+                    .get();
+                
+                let totalCalories=0,totalProtein=0,totalCarbs=0,totalFat=0;
+                mealsSnapshot.docs.forEach(doc=>{
+                    const meal=doc.data();
+                    totalCalories+=meal.calories||0;
+                    totalProtein+=meal.protein||0;
+                    totalCarbs+=meal.carbs||0;
+                    totalFat+=meal.fat||0;
+                });
+                
+                document.getElementById('calorieValue').textContent=totalCalories;
+                document.getElementById('proteinValue').textContent=totalProtein+'g';
+                document.getElementById('carbsValue').textContent=totalCarbs+'g';
+                document.getElementById('fatValue').textContent=totalFat+'g';
+                
+                const percentage=Math.min(100,(totalCalories/2000)*100);
+                document.getElementById('calorieRing').style.background=`conic-gradient(#667eea 0% ${percentage}%,#e0e0e0 ${percentage}% 100%)`;
+            }catch(error){
+                console.error('加载营养失败:',error);
+            }
+        }
+
+        function escapeHtml(text){
+            return String(text||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
+
+        async function loadCoachAdvice(){
+            try{
+                const snapshot=await db.collection('coachAdvice')
+                    .where('userId','==',userSession.id)
+                    .orderBy('createdAt','desc')
+                    .limit(3)
+                    .get();
+                const box=document.getElementById('coachAdviceList');
+                if(snapshot.empty){
+                    box.innerHTML='<div class="empty-state"><div class="empty-icon">💬</div><div>暂无教练建议</div></div>';
+                    return;
+                }
+                box.innerHTML=snapshot.docs.map(doc=>{
+                    const item=doc.data();
+                    return `<div class="advice-item">
+                        ${escapeHtml(item.message)}
+                        <div class="advice-meta">${escapeHtml(item.coachName||'教练')} · ${item.createdAt?new Date(item.createdAt).toLocaleString('zh-MY'):''}</div>
+                    </div>`;
+                }).join('');
+            }catch(error){
+                console.error('加载教练建议失败:',error);
+            }
         }
         
         async function loadSessions(){
@@ -343,6 +386,7 @@
         checkLogin();
         loadBmi();
         loadNutrition();
+        loadCoachAdvice();
         loadSessions();
         renderCalendar();
     </script>

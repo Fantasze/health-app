@@ -47,6 +47,16 @@
         .empty-icon{font-size:48px;margin-bottom:10px}
         .schedule-item{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid #f0f0f0}
         .schedule-item:last-child{border-bottom:none}
+        .student-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+        .mini-btn{border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;background:#eef2ff;color:#4f46e5}
+        .mini-btn.primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .detail-panel{display:none;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-top:12px}
+        .detail-panel.show{display:block}
+        .section-title{font-size:14px;font-weight:800;color:#333;margin:12px 0 8px}
+        .meal-row,.weight-row,.advice-row{background:#f8f9fa;border-radius:10px;padding:10px;margin-bottom:8px;font-size:13px;color:#444;line-height:1.45}
+        .meal-row strong,.weight-row strong{color:#667eea}
+        .advice-box{width:100%;min-height:70px;border:1px solid #ddd;border-radius:10px;padding:10px;font-size:14px;margin-top:8px;resize:vertical}
+        .hint{font-size:12px;color:#777;line-height:1.4;margin-top:6px}
     </style>
 </head>
 <body>
@@ -128,9 +138,22 @@
             window.location.href='index.html';
         }
         
+        function escapeHtml(text){
+            return String(text||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
+
+        async function ensureFirebaseAuth(){
+            if(window.firebaseApp.auth.currentUser)return;
+            try{
+                await window.firebaseApp.auth.signInAnonymously();
+            }catch(err){
+                console.warn('匿名登录失败，可能未启用 Anonymous Auth:',err);
+            }
+        }
+
         async function loadStudents(){
             try{
-                // 通过教练名字查询学生
+                await ensureFirebaseAuth();
                 const studentsSnapshot=await db.collection('students')
                     .where('coachName','==',coachSession.name)
                     .where('status','==','active')
@@ -138,52 +161,132 @@
                 
                 const students=studentsSnapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
                 document.getElementById('studentCount').textContent=students.length;
+                document.getElementById('monthlyIncome').textContent='RM '+(students.length*99).toFixed(0);
                 
                 const studentList=document.getElementById('studentList');
                 if(students.length===0){
-                    studentList.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><div>暂无学生</div></div>';
+                    studentList.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><div>暂无学生</div><div class="hint">学员在“浏览教练”选择你后，会出现在这里。</div></div>';
                     return;
                 }
                 
                 studentList.innerHTML=students.map(student=>{
-                    const weightProgress=((student.currentWeight-student.startWeight)/(student.targetWeight-student.startWeight))*100;
-                    const remainingClasses=student.totalClasses-student.usedClasses;
-                    
+                    const name=student.userName||student.name||'未命名学员';
+                    const email=student.userEmail||student.email||'';
+                    const studentId=student.userId||student.id;
                     return `
                     <div class="student-item">
                         <div class="student-header">
-                            <div class="student-name">${student.name}</div>
-                            <div class="student-booked">📅 Booked: ${new Date(student.bookDate).toLocaleDateString()}</div>
-                        </div>
-                        <div class="student-stats">
-                            <div class="stat-item">
-                                <div class="stat-item-label">初始体重</div>
-                                <div class="stat-item-value">${student.startWeight} kg</div>
+                            <div>
+                                <div class="student-name">${escapeHtml(name)}</div>
+                                <div style="font-size:12px;color:#999;margin-top:3px">${escapeHtml(email||studentId)}</div>
                             </div>
-                            <div class="stat-item">
-                                <div class="stat-item-label">当前体重</div>
-                                <div class="stat-item-value">${student.currentWeight} kg</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-item-label">目标体重</div>
-                                <div class="stat-item-value">${student.targetWeight} kg</div>
-                            </div>
+                            <div class="student-booked">${student.joinDate?new Date(student.joinDate).toLocaleDateString('zh-MY'):'新学员'}</div>
                         </div>
-                        <div style="font-size:12px;color:#666;margin-bottom:5px">体重进度</div>
-                        <div class="weight-progress">
-                            <div class="weight-bar" style="width:${Math.min(100,Math.max(0,weightProgress))}%"></div>
+                        <div class="student-stats" id="quickStats-${student.id}">
+                            <div class="stat-item"><div class="stat-item-label">今日卡路里</div><div class="stat-item-value">--</div></div>
+                            <div class="stat-item"><div class="stat-item-label">最新体重</div><div class="stat-item-value">--</div></div>
+                            <div class="stat-item"><div class="stat-item-label">饮食记录</div><div class="stat-item-value">--</div></div>
                         </div>
-                        <div class="remaining-classes">
-                            📚 剩余 ${remainingClasses} / ${student.totalClasses} 堂课
+                        <div class="student-actions">
+                            <button class="mini-btn primary" onclick="toggleStudentDetail('${student.id}','${studentId}')">查看饮食/体重</button>
+                            <button class="mini-btn" onclick="focusAdvice('${student.id}','${studentId}')">写建议</button>
+                        </div>
+                        <div class="detail-panel" id="detail-${student.id}">
+                            <div class="hint">正在加载学员资料...</div>
                         </div>
                     </div>
                     `;
                 }).join('');
+
+                students.forEach(st=>loadStudentQuickStats(st.id, st.userId||st.id));
             }catch(error){
                 console.error('加载学生失败:',error);
+                document.getElementById('studentList').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><div>加载学生失败</div><div class="hint">'+escapeHtml(error.message)+'</div></div>';
             }
         }
-        
+
+        async function loadStudentQuickStats(rowId,userId){
+            try{
+                const today=new Date().toISOString().split('T')[0];
+                const [mealsSnap,weightSnap]=await Promise.all([
+                    db.collection('meals').where('userId','==',userId).where('date','==',today).get(),
+                    db.collection('weights').where('userId','==',userId).orderBy('date','desc').limit(1).get()
+                ]);
+                let calories=0;
+                mealsSnap.docs.forEach(doc=>calories+=doc.data().calories||0);
+                const latestWeight=weightSnap.empty?'--':(weightSnap.docs[0].data().weight+'kg');
+                document.getElementById('quickStats-'+rowId).innerHTML=`
+                    <div class="stat-item"><div class="stat-item-label">今日卡路里</div><div class="stat-item-value">${calories}</div></div>
+                    <div class="stat-item"><div class="stat-item-label">最新体重</div><div class="stat-item-value">${latestWeight}</div></div>
+                    <div class="stat-item"><div class="stat-item-label">今日饮食</div><div class="stat-item-value">${mealsSnap.size} 条</div></div>
+                `;
+            }catch(err){
+                console.warn('quick stats failed',err);
+            }
+        }
+
+        async function toggleStudentDetail(rowId,userId){
+            const panel=document.getElementById('detail-'+rowId);
+            if(panel.classList.contains('show')){panel.classList.remove('show');return;}
+            panel.classList.add('show');
+            panel.innerHTML='<div class="hint">正在加载饮食、体重和建议...</div>';
+            await loadStudentDetail(rowId,userId);
+        }
+
+        function focusAdvice(rowId,userId){
+            const panel=document.getElementById('detail-'+rowId);
+            if(!panel.classList.contains('show'))toggleStudentDetail(rowId,userId).then(()=>setTimeout(()=>document.getElementById('advice-'+rowId)?.focus(),100));
+            else document.getElementById('advice-'+rowId)?.focus();
+        }
+
+        async function loadStudentDetail(rowId,userId){
+            try{
+                const today=new Date();
+                const weekAgo=new Date(today.getTime()-7*24*60*60*1000).toISOString().split('T')[0];
+                const [mealsSnap,weightsSnap,adviceSnap]=await Promise.all([
+                    db.collection('meals').where('userId','==',userId).where('date','>=',weekAgo).get(),
+                    db.collection('weights').where('userId','==',userId).orderBy('date','desc').limit(7).get(),
+                    db.collection('coachAdvice').where('userId','==',userId).orderBy('createdAt','desc').limit(3).get()
+                ]);
+                const meals=mealsSnap.docs.map(doc=>({id:doc.id,...doc.data()})).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+                const weights=weightsSnap.docs.map(doc=>({id:doc.id,...doc.data()}));
+                const advices=adviceSnap.docs.map(doc=>doc.data());
+                const mealHtml=meals.length?meals.slice(0,10).map(m=>`<div class="meal-row"><strong>${escapeHtml(m.date)}</strong> ${escapeHtml(m.name)} · ${m.calories||0} kcal · P${m.protein||0} C${m.carbs||0} F${m.fat||0}${m.note?'<br>'+escapeHtml(m.note):''}</div>`).join(''):'<div class="hint">近 7 天暂无饮食记录</div>';
+                const weightHtml=weights.length?weights.map(w=>`<div class="weight-row"><strong>${escapeHtml(w.date)}</strong> ${w.weight||'--'} kg</div>`).join(''):'<div class="hint">暂无体重记录</div>';
+                const adviceHtml=advices.length?advices.map(a=>`<div class="advice-row">💬 ${escapeHtml(a.message)}<br><span style="font-size:12px;color:#999">${a.createdAt?new Date(a.createdAt).toLocaleString('zh-MY'):''}</span></div>`).join(''):'<div class="hint">还没有给过建议</div>';
+                document.getElementById('detail-'+rowId).innerHTML=`
+                    <div class="section-title">🍽️ 近 7 天饮食</div>${mealHtml}
+                    <div class="section-title">⚖️ 最近体重</div>${weightHtml}
+                    <div class="section-title">💬 已发送建议</div>${adviceHtml}
+                    <div class="section-title">✍️ 给学员建议</div>
+                    <textarea class="advice-box" id="advice-${rowId}" placeholder="例如：今天蛋白质不错，晚餐少饭多菜。"></textarea>
+                    <button class="mini-btn primary" style="width:100%;margin-top:8px" onclick="sendAdvice('${rowId}','${userId}')">发送建议给学员</button>
+                `;
+            }catch(err){
+                document.getElementById('detail-'+rowId).innerHTML='<div class="hint">加载失败：'+escapeHtml(err.message)+'</div>';
+            }
+        }
+
+        async function sendAdvice(rowId,userId){
+            const input=document.getElementById('advice-'+rowId);
+            const message=input.value.trim();
+            if(!message){alert('请先输入建议');return;}
+            try{
+                await db.collection('coachAdvice').add({
+                    userId:userId,
+                    coachId:coachSession.id,
+                    coachName:coachSession.name,
+                    message:message,
+                    createdAt:new Date().toISOString(),
+                    read:false
+                });
+                alert('✅ 已发送给学员');
+                await loadStudentDetail(rowId,userId);
+            }catch(err){
+                alert('发送失败：'+err.message);
+            }
+        }
+
         async function loadSchedule(){
             try{
                 const today=new Date().toISOString().split('T')[0];
