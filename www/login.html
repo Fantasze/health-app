@@ -37,8 +37,8 @@
         <h1 class="title">健康管家</h1>
         
         <div class="form-group">
-            <label>电话号码</label>
-            <input type="tel" id="phone" placeholder="输入电话号码">
+            <label>电邮 / 电话号码</label>
+            <input type="text" id="phone" placeholder="输入电邮或电话号码">
         </div>
         
         <div class="form-group">
@@ -78,10 +78,20 @@
                 return;
             }
             
-            // 检查是否是学员
+            // 学员 Firebase Email 登录（支持忘记密码/重置链接）
+            if(phone.includes('@')){
+                window.authUtils.loginUser(phone,password).then(()=>{
+                    alert('✅ 登录成功！');
+                    window.location.href='app.html';
+                }).catch(error=>{
+                    alert('❌ '+error.message);
+                });
+                return;
+            }
+            
+            // 旧版电话学员账号 fallback（旧资料仍可登录，但不能用邮件重置密码）
             const users=JSON.parse(localStorage.getItem('users')||'[]');
             const user=users.find(u=>u.phone===phone&&u.password===password);
-            
             if(user){
                 localStorage.setItem('userSession',JSON.stringify(user));
                 alert('✅ 登录成功！');

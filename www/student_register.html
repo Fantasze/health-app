@@ -45,6 +45,11 @@
             </div>
             
             <div class="form-group">
+                <label>电邮（用于登录和重置密码）</label>
+                <input type="email" id="userEmail" placeholder="yourname@example.com">
+            </div>
+            
+            <div class="form-group">
                 <label>密码</label>
                 <input type="password" id="userPassword" placeholder="至少 6 位">
             </div>
@@ -81,13 +86,19 @@
         async function register(){
             const name=document.getElementById('userName').value.trim();
             const phone=document.getElementById('userPhone').value.trim();
+            const email=document.getElementById('userEmail').value.trim();
             const password=document.getElementById('userPassword').value;
             const height=parseFloat(document.getElementById('userHeight').value);
             const weight=parseFloat(document.getElementById('userWeight').value);
             const targetWeight=parseFloat(document.getElementById('userTargetWeight').value);
             
-            if(!name||!phone||!password){
+            if(!name||!phone||!email||!password){
                 alert('请填写所有必填字段');
+                return;
+            }
+            
+            if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+                alert('请输入有效的电邮地址');
                 return;
             }
             
@@ -123,10 +134,16 @@
                     return;
                 }
                 
-                // 创建用户
+                // 创建 Firebase Auth 账号（用于登录和重置密码）
+                const credential=await auth.createUserWithEmailAndPassword(email,password);
+                const firebaseUser=credential.user;
+                
+                // 创建用户资料
                 const userData={
+                    id:firebaseUser.uid,
                     name:name,
                     phone:phone,
+                    email:email,
                     role:'student',
                     height:height/100, // 转换为米
                     weight:weight,
@@ -136,14 +153,11 @@
                     lastLogin:new Date()
                 };
                 
-                const docRef=await db.collection('users').add(userData);
-                const userId=docRef.id;
+                await db.collection('users').doc(firebaseUser.uid).set(userData);
+                const userId=firebaseUser.uid;
                 
                 // 保存用户 session
-                const userSession={
-                    id:userId,
-                    ...userData
-                };
+                const userSession={...userData};
                 localStorage.setItem('userSession',JSON.stringify(userSession));
                 
                 // 保存初始体重记录
