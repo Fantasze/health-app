@@ -3,6 +3,18 @@
   "appName": "健康管家",
   "webDir": "www",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "cleartext": true,
+    "allowNavigation": [
+      "*.googleapis.com",
+      "*.gstatic.com",
+      "*.firebaseio.com",
+      "*.firebaseapp.com"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
   }
 }
