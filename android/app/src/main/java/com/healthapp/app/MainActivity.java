@@ -11,7 +11,7 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     private static final String TAG = "HealthApp";
-    private static final String DATA_RESET_VERSION = "7.19";
+    private static final String DATA_RESET_VERSION = "7.20";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
