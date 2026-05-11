@@ -68,6 +68,7 @@
         .api-key-row input{padding:11px;border:1px solid #ddd;border-radius:10px;font-size:13px;min-width:0}
         .api-key-row button{border:none;background:#111827;color:white;border-radius:10px;padding:0 12px;font-weight:700}
         .api-help{display:none;font-size:12px;color:#666;margin-top:6px;line-height:1.4}
+        .error-banner{display:none;background:#fef2f2;color:#991b1b;border-left:4px solid #ef4444;padding:12px;border-radius:10px;margin-bottom:12px;font-size:13px;line-height:1.45}
     </style>
 </head>
 <body>
@@ -76,6 +77,7 @@
     </div>
     
     <div class="content">
+        <div class="error-banner" id="errorBanner"></div>
         <div class="card">
             <div class="date-selector">
                 <button class="date-btn" onclick="changeDate(-1)">◀ 前一天</button>
@@ -107,8 +109,8 @@
             <h3>🇲🇾 常用食物快捷添加</h3>
             <div class="quick-foods" id="quickFoods"></div>
             <div class="ai-actions">
-                <button class="ai-btn primary" onclick="captureFoodPhoto()">📷 拍照 AI 识别</button>
-                <button class="ai-btn" onclick="chooseFoodPhoto()">🖼️ 上传照片识别</button>
+                <button class="ai-btn primary" id="captureFoodBtn" onclick="captureFoodPhoto()">📷 拍照 AI 识别</button>
+                <button class="ai-btn" id="uploadFoodBtn" onclick="chooseFoodPhoto()">🖼️ 上传照片识别</button>
             </div>
             <input type="file" id="foodImageInput" accept="image/*" style="display:none" onchange="handleImageFile(event)">
             <div class="photo-preview" id="photoPreview"><img id="photoPreviewImg" alt="食物照片预览"></div>
@@ -120,12 +122,12 @@
             <div class="api-help" id="apiHelp">第一次使用 AI 识别需要 Gemini API Key；保存后只存在这台手机。</div>
             <div class="tools-row">
                 <button class="tool-btn" onclick="copyYesterdayMeals()">复制昨天饮食</button>
-                <button class="tool-btn" onclick="openMealModal('manual')">手动添加</button>
+                <button class="tool-btn" id="manualFoodBtn" onclick="openMealModal('manual')">手动添加</button>
             </div>
             <div class="advice-box" id="dietAdvice">记录今天第一餐后，我会给你简单建议。</div>
         </div>
         
-        <button class="add-btn" onclick="openMealModal('manual')">+ 手动添加饮食</button>
+        <button class="add-btn" id="manualFoodBtn2" onclick="openMealModal('manual')">+ 手动添加饮食</button>
         
         <div class="card">
             <h3>今日饮食</h3>
@@ -185,13 +187,25 @@
     <script>
         let userSession=null;
         let currentDate=new Date().toISOString().split('T')[0];
-        const db=window.firebaseApp.db;
+        const db=window.firebaseApp&&window.firebaseApp.db;
+        function showError(message){
+            const el=document.getElementById('errorBanner');
+            if(el){el.style.display='block';el.textContent=message;}
+            console.error(message);
+        }
         
         function checkLogin(){
-            userSession=JSON.parse(localStorage.getItem('userSession'));
+            try{userSession=JSON.parse(localStorage.getItem('userSession')||'null');}
+            catch(e){userSession=null;}
             if(!userSession){
                 window.location.href='index.html';
+                return false;
             }
+            if(!db){
+                showError('Firebase 尚未初始化，请关闭 App 后重新打开，或重新安装最新版。');
+                return false;
+            }
+            return true;
         }
         
         function updateDateDisplay(){
@@ -286,6 +300,7 @@
         }
 
         function addMealToDb(food,source){
+            if(!db){showError('Firebase 未连接，无法保存。');return Promise.reject(new Error('Firebase 未连接'));}
             return db.collection('meals').add({
                 userId:userSession.id,
                 date:currentDate,
@@ -555,10 +570,44 @@
             }
         }
         
-        checkLogin();
-        renderQuickFoods();
-        updateDateDisplay();
-        loadMeals();
+        function bindDietButtons(){
+            const binds=[
+                ['captureFoodBtn',captureFoodPhoto],
+                ['uploadFoodBtn',chooseFoodPhoto],
+                ['manualFoodBtn',()=>openMealModal('manual')],
+                ['manualFoodBtn2',()=>openMealModal('manual')]
+            ];
+            binds.forEach(([id,fn])=>{
+                const el=document.getElementById(id);
+                if(el){
+                    el.onclick=(event)=>{event.preventDefault();fn();};
+                    el.addEventListener('touchend',(event)=>{event.preventDefault();fn();},{passive:false});
+                }
+            });
+        }
+
+        window.captureFoodPhoto=captureFoodPhoto;
+        window.chooseFoodPhoto=chooseFoodPhoto;
+        window.openMealModal=openMealModal;
+        window.saveMealFromModal=saveMealFromModal;
+        window.closeMealModal=closeMealModal;
+        window.copyYesterdayMeals=copyYesterdayMeals;
+        window.addFoodFromLibrary=addFoodFromLibrary;
+        window.deleteMeal=deleteMeal;
+        window.saveGeminiApiKey=saveGeminiApiKey;
+        window.changeDate=changeDate;
+        window.goToToday=goToToday;
+
+        try{
+            if(checkLogin()){
+                renderQuickFoods();
+                bindDietButtons();
+                updateDateDisplay();
+                loadMeals();
+            }
+        }catch(error){
+            showError('饮食页加载失败：'+(error.message||error));
+        }
     </script>
 </body>
 </html>
