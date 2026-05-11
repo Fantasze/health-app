@@ -31,6 +31,13 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.auth.uid == userId;
     }
     
+    // Phone login mapping - 测试版允许用电话号码找到对应电邮登录
+    match /phoneLogins/{phone} {
+      allow read: if true;
+      allow create, update: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+    
     // Coaches collection - 教练信息可公开读，只有管理员可写
     match /coaches/{coachId} {
       allow read: if true; // 教练信息可以公开读

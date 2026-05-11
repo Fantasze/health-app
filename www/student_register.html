@@ -154,6 +154,13 @@
                 };
                 
                 await db.collection('users').doc(firebaseUser.uid).set(userData);
+                await db.collection('phoneLogins').doc(phone).set({
+                    phone:phone,
+                    email:email,
+                    uid:firebaseUser.uid,
+                    role:'student',
+                    updatedAt:new Date().toISOString()
+                });
                 const userId=firebaseUser.uid;
                 
                 // 保存用户 session

@@ -69,29 +69,39 @@
     </div>
     
     <script>
-        function login(){
-            const phone=document.getElementById('phone').value;
+        async function login(){
+            const account=document.getElementById('phone').value.trim();
             const password=document.getElementById('password').value;
             
-            if(!phone||!password){
-                alert('请输入电话号码和密码');
+            if(!account||!password){
+                alert('请输入电邮/电话号码和密码');
                 return;
             }
             
-            // 学员 Firebase Email 登录（支持忘记密码/重置链接）
-            if(phone.includes('@')){
-                window.authUtils.loginUser(phone,password).then(()=>{
+            try{
+                let loginEmail=account;
+                if(!account.includes('@')){
+                    const phoneDoc=await window.firebaseApp.db.collection('phoneLogins').doc(account).get();
+                    if(phoneDoc.exists&&phoneDoc.data().email){
+                        loginEmail=phoneDoc.data().email;
+                    }
+                }
+
+                if(loginEmail.includes('@')){
+                    await window.authUtils.loginUser(loginEmail,password);
                     alert('✅ 登录成功！');
                     window.location.href='app.html';
-                }).catch(error=>{
-                    alert('❌ '+error.message);
-                });
+                    return;
+                }
+            }catch(error){
+                console.error('Firebase 登录失败:',error);
+                alert('❌ '+error.message+'\n\n提示：如果你用电话号码登录，请确认电话号码和注册时完全一样。');
                 return;
             }
             
             // 旧版电话学员账号 fallback（旧资料仍可登录，但不能用邮件重置密码）
             const users=JSON.parse(localStorage.getItem('users')||'[]');
-            const user=users.find(u=>u.phone===phone&&u.password===password);
+            const user=users.find(u=>u.phone===account&&u.password===password);
             if(user){
                 localStorage.setItem('userSession',JSON.stringify(user));
                 alert('✅ 登录成功！');
@@ -101,7 +111,7 @@
             
             // 检查是否是教练
             const coaches=JSON.parse(localStorage.getItem('coaches')||'[]');
-            const coach=coaches.find(c=>c.phone===phone&&c.password===password);
+            const coach=coaches.find(c=>c.phone===account&&c.password===password);
             
             if(coach){
                 localStorage.setItem('coachSession',JSON.stringify(coach));
