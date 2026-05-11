@@ -88,14 +88,26 @@
                 }
 
                 if(loginEmail.includes('@')){
-                    await window.authUtils.loginUser(loginEmail,password);
+                    const auth=window.firebaseApp.auth;
+                    const db=window.firebaseApp.db;
+                    const credential=await auth.signInWithEmailAndPassword(loginEmail,password);
+                    const firebaseUser=credential.user;
+                    const userDoc=await db.collection('users').doc(firebaseUser.uid).get();
+                    if(!userDoc.exists){
+                        throw new Error('用户资料不存在，请重新注册或联系管理员');
+                    }
+                    const userData={id:firebaseUser.uid,...userDoc.data()};
+                    localStorage.setItem('userSession',JSON.stringify(userData));
                     alert('✅ 登录成功！');
                     window.location.href='app.html';
                     return;
                 }
             }catch(error){
                 console.error('Firebase 登录失败:',error);
-                alert('❌ '+error.message+'\n\n提示：如果你用电话号码登录，请确认电话号码和注册时完全一样。');
+                let message=error.message||'登录失败';
+                if(error.code==='auth/invalid-credential'||error.code==='auth/wrong-password')message='账号或密码错误';
+                if(error.code==='auth/user-not-found')message='账号不存在，请先注册';
+                alert('❌ '+message+'\n\n提示：可以用电邮或注册时的电话号码登录。');
                 return;
             }
             
