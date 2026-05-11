@@ -120,20 +120,6 @@
                 const db=window.firebaseApp.db;
                 const auth=window.firebaseApp.auth;
                 
-                // 检查用户是否已存在
-                const existingUser=await db.collection('users')
-                    .where('phone','==',phone)
-                    .where('role','==','student')
-                    .limit(1)
-                    .get();
-                
-                if(!existingUser.empty){
-                    alert('❌ 该电话号码已注册');
-                    document.getElementById('registerForm').style.display='block';
-                    document.getElementById('loading').style.display='none';
-                    return;
-                }
-                
                 // 创建 Firebase Auth 账号（用于登录和重置密码）
                 const credential=await auth.createUserWithEmailAndPassword(email,password);
                 const firebaseUser=credential.user;
@@ -180,7 +166,11 @@
                 
             }catch(error){
                 console.error('注册错误:',error);
-                alert('❌ 注册失败：'+error.message);
+                let message=error.message||'未知错误';
+                if(error.code==='auth/email-already-in-use')message='这个电邮已经注册过，请直接登录或使用忘记密码。';
+                if(error.code==='auth/weak-password')message='密码太短，请至少 6 位。';
+                if(error.code==='auth/invalid-email')message='电邮格式不正确。';
+                alert('❌ 注册失败：'+message);
                 document.getElementById('registerForm').style.display='block';
                 document.getElementById('loading').style.display='none';
             }
