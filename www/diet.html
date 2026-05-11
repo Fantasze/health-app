@@ -3,49 +3,37 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>饮食记录 - 健康管家</title>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
 <link rel="stylesheet" href="common.css">
 <style>
-*{box-sizing:border-box}body{font-family:Arial,-apple-system,sans-serif;background:#f5f6fa;margin:0;padding-bottom:80px;color:#333}.header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:20px}.content{padding:16px}.card{background:white;border-radius:15px;padding:16px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,.08)}.version{background:#dcfce7;color:#166534;border:2px solid #22c55e;padding:12px;border-radius:12px;font-weight:900;margin-bottom:12px}.err{background:#fee2e2;color:#991b1b;border-color:#ef4444}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.sum{text-align:center;background:#f8f9fa;border-radius:10px;padding:10px 4px}.sum b{display:block;color:#667eea;font-size:18px}label{font-weight:800;font-size:13px;display:block;margin:10px 0 5px}input,textarea{width:100%;padding:13px;border:1px solid #ddd;border-radius:10px;font-size:16px}textarea{min-height:60px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.save{width:100%;border:0;border-radius:12px;padding:16px;background:#16a34a;color:white;font-size:17px;font-weight:900;margin-top:12px}.test{background:#f97316}.small{font-size:12px;color:#666;line-height:1.4}.meal{border-left:4px solid #667eea;background:#f8f9fa;border-radius:10px;padding:12px;margin:8px 0}.meal-name{font-weight:900}.meal-meta{font-size:13px;color:#666;display:flex;justify-content:space-between;margin-top:5px}.nav-bar{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -5px 20px rgba(0,0,0,.1);z-index:100}.nav-item{text-align:center;color:#999;font-size:11px;text-decoration:none}.nav-item.active{color:#667eea}.nav-icon{font-size:22px;display:block;margin-bottom:2px}
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#f5f6fa;margin:0;padding-bottom:90px;color:#333}.header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:20px}.content{padding:16px}.card{background:white;border-radius:15px;padding:16px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,.08)}.version{background:#dcfce7;color:#166534;border:2px solid #22c55e;padding:12px;border-radius:12px;font-weight:900;margin-bottom:12px}.err{background:#fee2e2;color:#991b1b;border-color:#ef4444}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.sum{text-align:center;background:#f8f9fa;border-radius:10px;padding:10px 4px}.sum b{display:block;color:#667eea;font-size:18px}label{font-weight:800;font-size:13px;display:block;margin:10px 0 5px}input,textarea{width:100%;padding:13px;border:1px solid #ddd;border-radius:10px;font-size:16px}textarea{min-height:60px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.save{width:100%;border:0;border-radius:12px;padding:16px;background:#16a34a;color:white;font-size:17px;font-weight:900;margin-top:12px}.test{background:#f97316}.clear{background:#dc2626}.small{font-size:12px;color:#666;line-height:1.4}.meal{border-left:4px solid #667eea;background:#f8f9fa;border-radius:10px;padding:12px;margin:8px 0}.meal-name{font-weight:900}.meal-meta{font-size:13px;color:#666;display:flex;justify-content:space-between;margin-top:5px}.nav-bar{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -5px 20px rgba(0,0,0,.1);z-index:100}.nav-item{text-align:center;color:#999;font-size:11px;text-decoration:none}.nav-item.active{color:#667eea}.nav-icon{font-size:22px;display:block;margin-bottom:2px}
 </style>
 </head>
-<body onload="init()">
+<body>
 <div class="header"><h2>🍽️ 饮食记录</h2></div>
 <div class="content">
-  <div id="status" class="version">v7.17 页面已打开；如果你看到这行，就是新版。</div>
-  <div class="card">
-    <h3>今日总计</h3>
-    <div class="grid4"><div class="sum"><b id="cal">0</b><span>卡路里</span></div><div class="sum"><b id="pro">0g</b><span>蛋白质</span></div><div class="sum"><b id="carb">0g</b><span>碳水</span></div><div class="sum"><b id="fat">0g</b><span>脂肪</span></div></div>
-    <div class="small" id="countInfo" style="margin-top:10px">记录数：0</div>
-  </div>
-  <div class="card">
-    <h3>直接添加饮食</h3>
-    <label>食物名称</label><input id="name" value="鸡饭">
-    <div class="row2"><div><label>卡路里 kcal</label><input id="kcal" type="number" value="607"></div><div><label>蛋白质 g</label><input id="protein" type="number" value="28"></div></div>
-    <div class="row2"><div><label>碳水 g</label><input id="carbs" type="number" value="72"></div><div><label>脂肪 g</label><input id="fats" type="number" value="22"></div></div>
-    <label>备注</label><textarea id="note">测试添加</textarea>
-    <button class="save" ontouchstart="saveFromForm()" onclick="saveFromForm()">保存到饮食记录</button>
-    <button class="save test" ontouchstart="addChickenRice()" onclick="addChickenRice()">一键加入鸡饭并计算</button>
-    <p class="small">如果这两个按钮都没反应，请截图这一页给我，尤其是上面的 v7.17 状态。</p>
-  </div>
+  <div id="status" class="version">v7.18 静态页面已打开；等待 JS 启动...</div>
+  <div class="card"><h3>今日总计</h3><div class="grid4"><div class="sum"><b id="cal">0</b><span>卡路里</span></div><div class="sum"><b id="pro">0g</b><span>蛋白质</span></div><div class="sum"><b id="carb">0g</b><span>碳水</span></div><div class="sum"><b id="fat">0g</b><span>脂肪</span></div></div><div class="small" id="countInfo" style="margin-top:10px">记录数：0</div></div>
+  <div class="card"><h3>直接添加饮食</h3><label>食物名称</label><input id="name" value="鸡饭"><div class="row2"><div><label>卡路里 kcal</label><input id="kcal" type="number" value="607"></div><div><label>蛋白质 g</label><input id="protein" type="number" value="28"></div></div><div class="row2"><div><label>碳水 g</label><input id="carbs" type="number" value="72"></div><div><label>脂肪 g</label><input id="fats" type="number" value="22"></div></div><label>备注</label><textarea id="note">测试添加</textarea><button id="saveBtn" class="save">保存到饮食记录</button><button id="testBtn" class="save test">一键加入鸡饭并计算</button><button id="clearBtn" class="save clear">清空今日测试记录</button><p class="small">v7.18：这一版不加载 Firebase，先只测试本机保存和计算。</p></div>
   <div class="card"><h3>今日饮食列表</h3><div id="list"></div></div>
 </div>
 <div class="nav-bar"><a href="app.html" class="nav-item"><span class="nav-icon">🏠</span>首页</a><div class="nav-item active"><span class="nav-icon">🍽️</span>饮食</div><a href="stats.html" class="nav-item"><span class="nav-icon">📊</span>统计</a><a href="profile.html" class="nav-item"><span class="nav-icon">👤</span>我的</a></div>
 <script>
-var today=(new Date()).toISOString().split('T')[0];var db=null;var user=null;var saving=false;
-function E(id){return document.getElementById(id)}
-function setStatus(t,bad){E('status').className='version'+(bad?' err':'');E('status').innerHTML=t}
-function init(){try{db=window.firebaseApp&&window.firebaseApp.db;try{user=JSON.parse(localStorage.getItem('userSession')||'null')}catch(e){user=null}if(!user){setStatus('v7.17：未登录，3秒后回首页',true);setTimeout(function(){location.href='index.html'},3000);return}setStatus('v7.17 JS 已启动；用户：'+(user.name||user.email||user.phone||user.id)+'；今天：'+today,false);render()}catch(e){alert('v7.17 启动错误：'+e.message)}}
-function getKey(){return 'diet_records_'+today}
-function getList(){try{return JSON.parse(localStorage.getItem(getKey())||'[]')}catch(e){return []}}
-function setList(a){localStorage.setItem(getKey(),JSON.stringify(a))}
-function addChickenRice(){E('name').value='鸡饭';E('kcal').value='607';E('protein').value='28';E('carbs').value='72';E('fats').value='22';E('note').value='一键测试';saveFromForm()}
-function saveFromForm(){if(saving){return}saving=true;try{var rec={id:'r'+Date.now(),date:today,userId:(user&&(user.id||user.uid||user.email))||'local',name:E('name').value||'未命名食物',calories:parseInt(E('kcal').value,10)||0,protein:parseInt(E('protein').value,10)||0,carbs:parseInt(E('carbs').value,10)||0,fat:parseInt(E('fats').value,10)||0,note:E('note').value||'',createdAt:(new Date()).toISOString()};var a=getList();a.push(rec);setList(a);setStatus('已保存到本机：'+rec.name+'，当前 '+a.length+' 条',false);render();if(db){db.collection('meals').add(rec).then(function(){setStatus('已保存到本机 + Firebase：'+rec.name,false);saving=false}).catch(function(err){setStatus('已保存本机；Firebase 失败：'+err.message,true);saving=false})}else{saving=false}}catch(e){saving=false;alert('保存错误：'+e.message)}}
-function render(){var a=getList();var c=0,p=0,cb=0,f=0,html='';for(var i=0;i<a.length;i++){var m=a[i];c+=m.calories||0;p+=m.protein||0;cb+=m.carbs||0;f+=m.fat||0;html+='<div class="meal"><div class="meal-name">'+safe(m.name)+'</div><div class="meal-meta"><span>P'+(m.protein||0)+' C'+(m.carbs||0)+' F'+(m.fat||0)+'</span><b>'+(m.calories||0)+' kcal</b></div></div>'}E('cal').innerHTML=c;E('pro').innerHTML=p+'g';E('carb').innerHTML=cb+'g';E('fat').innerHTML=f+'g';E('countInfo').innerHTML='本机记录数：'+a.length+'；key='+getKey();E('list').innerHTML=html||'<div class="small">暂无饮食记录</div>'}
-function safe(t){return String(t||'').replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
+(function(){
+  var today=(new Date()).toISOString().split('T')[0];
+  function E(id){return document.getElementById(id);}
+  function safe(t){return String(t||'').replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+  function status(t,bad){var s=E('status');if(!s){return;}s.className='version'+(bad?' err':'');s.innerHTML=t;}
+  function key(){return 'diet_records_v18_'+today;}
+  function get(){try{return JSON.parse(localStorage.getItem(key())||'[]');}catch(e){return [];}}
+  function set(a){localStorage.setItem(key(),JSON.stringify(a));}
+  function readForm(){return {id:'r'+Date.now(),date:today,name:E('name').value||'未命名食物',calories:parseInt(E('kcal').value,10)||0,protein:parseInt(E('protein').value,10)||0,carbs:parseInt(E('carbs').value,10)||0,fat:parseInt(E('fats').value,10)||0,note:E('note').value||'',createdAt:(new Date()).toISOString()};}
+  function save(){var a=get();var rec=readForm();a.push(rec);set(a);status('v7.18 已保存：'+safe(rec.name)+'；记录数 '+a.length,false);render();}
+  function test(){E('name').value='鸡饭';E('kcal').value='607';E('protein').value='28';E('carbs').value='72';E('fats').value='22';E('note').value='一键测试';save();}
+  function clear(){localStorage.removeItem(key());status('v7.18 已清空今日本机记录',false);render();}
+  function render(){var a=get();var c=0,p=0,cb=0,f=0,html='';for(var i=0;i<a.length;i++){var m=a[i];c+=m.calories||0;p+=m.protein||0;cb+=m.carbs||0;f+=m.fat||0;html+='<div class="meal"><div class="meal-name">'+safe(m.name)+'</div><div class="meal-meta"><span>P'+(m.protein||0)+' C'+(m.carbs||0)+' F'+(m.fat||0)+'</span><b>'+(m.calories||0)+' kcal</b></div></div>';}E('cal').innerHTML=c;E('pro').innerHTML=p+'g';E('carb').innerHTML=cb+'g';E('fat').innerHTML=f+'g';E('countInfo').innerHTML='v7.18 本机记录数：'+a.length+'；key='+key();E('list').innerHTML=html||'<div class="small">暂无饮食记录</div>';}
+  function bind(){E('saveBtn').onclick=save;E('testBtn').onclick=test;E('clearBtn').onclick=clear;E('saveBtn').ontouchend=function(e){e.preventDefault();save();};E('testBtn').ontouchend=function(e){e.preventDefault();test();};E('clearBtn').ontouchend=function(e){e.preventDefault();clear();};}
+  try{status('v7.18 JS 已启动 ✅ 不依赖 Firebase',false);bind();render();}catch(e){status('v7.18 JS 错误：'+safe(e.message),true);alert('v7.18 JS 错误：'+e.message);}
+})();
 </script>
 </body>
 </html>
