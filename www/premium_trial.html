@@ -235,7 +235,7 @@
                 <h3>月度订阅</h3>
                 <div class="price">RM 19.9</div>
                 <div class="period">每月</div>
-                <button class="btn btn-primary">选择月度</button>
+                <button type="button" class="btn btn-primary" onclick="event.stopPropagation();selectPlan('monthly')">选择月度</button>
             </div>
             
             <div class="pricing-card popular" onclick="selectPlan('yearly')">
@@ -243,7 +243,7 @@
                 <h3>年度订阅</h3>
                 <div class="price">RM 199</div>
                 <div class="period">每年（RM 16.6/月）</div>
-                <button class="btn btn-primary">选择年度</button>
+                <button type="button" class="btn btn-primary" onclick="event.stopPropagation();selectPlan('yearly')">选择年度</button>
             </div>
         </div>
 
@@ -253,7 +253,7 @@
                 <li>随时取消，无隐藏费用</li>
                 <li>7 天内不满意全额退款</li>
                 <li>数据永久保存，即使转免费</li>
-                <li>支持支付宝/微信/信用卡</li>
+                <li>支持 FPX / Touch n Go eWallet / GrabPay / 信用卡</li>
             </ul>
         </div>
 

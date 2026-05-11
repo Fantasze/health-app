@@ -432,7 +432,7 @@
                     <td>
                         ${com.status === 'pending' ?
                             `<button class="btn btn-primary" onclick="payCommission('${com.id}')">💸 支付</button>` :
-                            `<button class="btn" disabled>已支付</button>`
+                            `<button type="button" class="btn" onclick="viewCommission('${com.id}')">已支付</button>`
                         }
                     </td>
                 </tr>
@@ -451,6 +451,18 @@
                 alert('✅ 已支付！');
                 init();
             }
+        }
+
+        function viewCommission(commissionId) {
+            const commission = commissions.find(c => c.id === commissionId);
+            if (!commission) return;
+            const paidAt = commission.paidAt ? new Date(commission.paidAt).toLocaleString('zh-MY') : '未记录';
+            alert(`付款记录
+
+教练：${commission.coachName}
+金额：RM ${commission.amount.toFixed(2)}
+状态：已支付
+支付时间：${paidAt}`);
         }
 
         // 渲染订阅收入

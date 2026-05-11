@@ -123,6 +123,12 @@
         .nav-item.active { color: #667eea; }
         .nav-icon { font-size: 22px; display: block; margin-bottom: 2px; }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth_utils.js"></script>
+    <link rel="stylesheet" href="common.css">
 </head>
 <body>
     <div class="header">
@@ -132,14 +138,14 @@
     
     <div class="content">
         <div class="filter-bar">
-            <button class="filter-btn active">全部</button>
-            <button class="filter-btn">增肌</button>
-            <button class="filter-btn">减脂</button>
-            <button class="filter-btn">塑形</button>
-            <button class="filter-btn">瑜伽</button>
+            <button class="filter-btn active" onclick="filterCoaches('全部', this)">全部</button>
+            <button class="filter-btn" onclick="filterCoaches('增肌', this)">增肌</button>
+            <button class="filter-btn" onclick="filterCoaches('减脂', this)">减脂</button>
+            <button class="filter-btn" onclick="filterCoaches('塑形', this)">塑形</button>
+            <button class="filter-btn" onclick="filterCoaches('瑜伽', this)">瑜伽</button>
         </div>
         
-        <div class="coach-card">
+        <div class="coach-card" data-specialty="增肌 减脂 塑形">
             <div class="coach-top">
                 <div class="coach-avatar">张</div>
                 <div class="coach-info">
@@ -154,7 +160,7 @@
                     <div class="coach-stat-label">学员</div>
                 </div>
                 <div class="coach-stat">
-                    <div class="coach-stat-value">¥299</div>
+                    <div class="coach-stat-value">RM 299</div>
                     <div class="coach-stat-label">/月</div>
                 </div>
                 <div class="coach-stat">
@@ -165,7 +171,7 @@
             <button class="btn" onclick="selectCoach('张教练')">选择教练</button>
         </div>
         
-        <div class="coach-card">
+        <div class="coach-card" data-specialty="瑜伽 塑形">
             <div class="coach-top">
                 <div class="coach-avatar">李</div>
                 <div class="coach-info">
@@ -180,7 +186,7 @@
                     <div class="coach-stat-label">学员</div>
                 </div>
                 <div class="coach-stat">
-                    <div class="coach-stat-value">¥249</div>
+                    <div class="coach-stat-value">RM 249</div>
                     <div class="coach-stat-label">/月</div>
                 </div>
                 <div class="coach-stat">
@@ -191,7 +197,7 @@
             <button class="btn btn-outline" onclick="selectCoach('李教练')">选择教练</button>
         </div>
         
-        <div class="coach-card">
+        <div class="coach-card" data-specialty="减脂 营养指导">
             <div class="coach-top">
                 <div class="coach-avatar">王</div>
                 <div class="coach-info">
@@ -206,7 +212,7 @@
                     <div class="coach-stat-label">学员</div>
                 </div>
                 <div class="coach-stat">
-                    <div class="coach-stat-value">¥199</div>
+                    <div class="coach-stat-value">RM 199</div>
                     <div class="coach-stat-label">/月</div>
                 </div>
                 <div class="coach-stat">
@@ -240,9 +246,24 @@
     <div id="coachList" style="margin-top:15px"></div>
     
     <script>
-        const db=window.firebaseApp.db;
+        const db=window.firebaseApp?.db;
+        let currentCoachFilter='全部';
+
+        function filterCoaches(category, btn){
+            currentCoachFilter=category;
+            document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+            if(btn)btn.classList.add('active');
+            document.querySelectorAll('.coach-card').forEach(card=>{
+                const spec=card.getAttribute('data-specialty')||card.textContent;
+                card.style.display=(category==='全部'||spec.includes(category))?'block':'none';
+            });
+        }
         
         async function loadCoaches(){
+            if(!db){
+                console.warn('Firebase 未初始化，显示本地示例教练');
+                return;
+            }
             try{
                 const snapshot=await db.collection('coaches')
                     .where('status','==','approved')
@@ -262,7 +283,7 @@
                     const specialties=coach.specialties?coach.specialties.join('、'):'通用健身';
                     
                     html+=`
-                        <div class="coach-card">
+                        <div class="coach-card" data-specialty="${specialties}">
                             <div class="coach-top">
                                 <div class="coach-avatar">${coach.name.charAt(0)}</div>
                                 <div class="coach-info">
@@ -292,6 +313,7 @@
                 });
                 
                 list.innerHTML=html;
+                filterCoaches(currentCoachFilter, document.querySelector('.filter-btn.active'));
                 
             }catch(error){
                 console.error('加载教练失败:',error);
