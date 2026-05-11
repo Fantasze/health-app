@@ -3,143 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>健康管家 - 学员</title>
+    <title>健康管家 - 学员首页</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth_utils.js"></script>
+    <link rel="stylesheet" href="common.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f6fa;
-            min-height: 100vh;
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 20px 80px;
-        }
-        .header h1 { font-size: 24px; margin-bottom: 5px; }
-        .header p { opacity: 0.9; font-size: 14px; }
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-        }
-        .nav-item {
-            text-align: center;
-            color: #999;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .nav-item.active { color: #667eea; }
-        .nav-icon { font-size: 24px; display: block; margin-bottom: 3px; }
-        .content {
-            padding: 20px;
-            margin-top: -60px;
-        }
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-        .card h3 { color: #333; margin-bottom: 10px; font-size: 18px; }
-        .card p { color: #666; font-size: 14px; line-height: 1.6; }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .stat-item {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-        .stat-value { font-size: 24px; font-weight: 700; color: #667eea; }
-        .stat-label { font-size: 12px; color: #999; margin-top: 5px; }
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;min-height:100vh;padding-bottom:70px}
+        .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:25px 20px 20px}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+        .header h1{font-size:22px}
+        .logout-btn{color:white;text-decoration:none;font-size:14px;padding:8px 15px;border:1px solid rgba(255,255,255,0.5);border-radius:20px}
+        .content{padding:20px}
+        .bmi-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border-radius:15px;padding:20px;margin-bottom:15px}
+        .bmi-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+        .bmi-value{font-size:36px;font-weight:700}
+        .bmi-label{font-size:12px;opacity:0.8}
+        .bmi-progress{background:rgba(255,255,255,0.3);height:8px;border-radius:4px;overflow:hidden;margin-top:15px}
+        .bmi-bar{background:#4ade80;height:100%;border-radius:4px;transition:width 0.5s}
+        .bmi-range{display:flex;justify-content:space-between;font-size:11px;margin-top:5px;opacity:0.8}
+        .macro-card{background:white;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08)}
+        .macro-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+        .macro-ring{width:120px;height:120px;border-radius:50%;background:conic-gradient(#667eea 0% 0%,#e0e0e0 0% 100%);margin:0 auto 15px;position:relative}
+        .macro-ring-inner{width:90px;height:90px;border-radius:50%;background:white;margin:15px auto;position:absolute;top:15px;left:15px;display:flex;align-items:center;justify-content:center;flex-direction:column}
+        .macro-value{font-size:24px;font-weight:700;color:#667eea}
+        .macro-label{font-size:11px;color:#999}
+        .macro-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+        .macro-stat{text-align:center;padding:10px;background:#f8f9fa;border-radius:8px}
+        .macro-stat-value{font-size:16px;font-weight:600;color:#333}
+        .macro-stat-label{font-size:11px;color:#999;margin-top:3px}
+        .card{background:white;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08)}
+        .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+        .card h3{color:#333;font-size:17px}
+        .session-item{background:#fef3c7;border-radius:12px;padding:15px;margin-bottom:15px;border-left:4px solid #f59e0b}
+        .session-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        .session-date{font-size:13px;color:#667eea;font-weight:600}
+        .session-time{font-size:12px;color:#999}
+        .session-coach{font-size:14px;font-weight:600;color:#333;margin-bottom:5px}
+        .session-type{font-size:13px;color:#666}
+        .session-actions{display:flex;gap:10px;margin-top:10px}
+        .session-actions .btn{flex:1;padding:8px;font-size:12px;border-radius:6px;border:none;cursor:pointer}
+        .btn-change{background:#667eea;color:white}
+        .btn-change:disabled{background:#e0e0e0;color:#999}
+        .calendar-card{background:white;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08)}
+        .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+        .calendar-day-header{text-align:center;font-size:11px;color:#999;padding:5px}
+        .calendar-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;font-size:13px;position:relative;min-height:50px}
+        .calendar-day.has-data{background:#e8f5e9}
+        .calendar-day.has-workout{background:#e3f2fd}
+        .calendar-day.has-session{background:#fef3c7}
+        .calendar-day.today{border:2px solid #667eea}
+        .calendar-day-number{font-weight:600}
+        .calendar-day-mark{font-size:10px;margin-top:2px}
+        .nav-bar{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -5px 20px rgba(0,0,0,0.1);z-index:100}
+        .nav-item{text-align:center;color:#999;font-size:11px;cursor:pointer;text-decoration:none}
+        .nav-item.active{color:#667eea}
+        .nav-icon{font-size:22px;display:block;margin-bottom:2px}
+        .btn{padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none}
+        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .empty-state{text-align:center;padding:30px;color:#999}
+        .empty-icon{font-size:48px;margin-bottom:10px}
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>👋 欢迎回来！</h1>
-        <p>今天也要保持健康哦</p>
+        <div class="header-top">
+            <h1>🏋️ 健康管家</h1>
+            <a href="index.html" class="logout-btn" onclick="logout()">登出</a>
+        </div>
     </div>
     
     <div class="content">
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-value" id="calories">0</div>
-                <div class="stat-label">卡路里</div>
+        <div class="bmi-card">
+            <div class="bmi-header">
+                <div>
+                    <div class="bmi-label">当前 BMI</div>
+                    <div class="bmi-value" id="currentBmi">--</div>
+                </div>
+                <div style="text-align:right">
+                    <div class="bmi-label">目标 BMI</div>
+                    <div style="font-size:18px;font-weight:600" id="targetBmi">--</div>
+                </div>
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="water">0</div>
-                <div class="stat-label">杯水</div>
+            <div class="bmi-progress">
+                <div class="bmi-bar" id="bmiBar" style="width:0%"></div>
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="days">0</div>
-                <div class="stat-label">坚持天数</div>
+            <div class="bmi-range">
+                <span>18.5</span>
+                <span>健康范围 18.5-24.9</span>
+                <span>24.9</span>
+            </div>
+        </div>
+        
+        <div class="macro-card">
+            <div class="macro-header">
+                <h3>🍽️ 今日营养</h3>
+                <span class="card-more" onclick="addMeal()">+ 添加</span>
+            </div>
+            <div class="macro-ring" id="calorieRing">
+                <div class="macro-ring-inner">
+                    <div class="macro-value" id="calorieValue">0</div>
+                    <div class="macro-label">/ 2000 kcal</div>
+                </div>
+            </div>
+            <div class="macro-stats">
+                <div class="macro-stat">
+                    <div class="macro-stat-value" id="proteinValue">0g</div>
+                    <div class="macro-stat-label">蛋白质</div>
+                </div>
+                <div class="macro-stat">
+                    <div class="macro-stat-value" id="carbsValue">0g</div>
+                    <div class="macro-stat-label">碳水</div>
+                </div>
+                <div class="macro-stat">
+                    <div class="macro-stat-value" id="fatValue">0g</div>
+                    <div class="macro-stat-label">脂肪</div>
+                </div>
             </div>
         </div>
         
         <div class="card">
-            <h3>🍽️ 今日饮食</h3>
-            <p>记录今天的饮食，追踪营养摄入</p>
-            <button class="btn" onclick="alert('饮食记录功能开发中')">记录饮食</button>
+            <div class="card-header">
+                <h3>📅 教练课程</h3>
+                <a href="browse_coaches.html" style="color:#667eea;font-size:13px;text-decoration:none">浏览教练 →</a>
+            </div>
+            <div id="sessionList">
+                <div class="empty-state">
+                    <div class="empty-icon">📅</div>
+                    <div>暂无教练课程</div>
+                    <button class="btn btn-primary" onclick="window.location.href='browse_coaches.html'" style="margin-top:15px;padding:10px 20px;font-size:13px">找教练</button>
+                </div>
+            </div>
         </div>
         
-        <div class="card">
-            <h3>💪 训练计划</h3>
-            <p>查看你的专属训练计划</p>
-            <button class="btn" onclick="alert('训练计划功能开发中')">查看计划</button>
-        </div>
-        
-        <div class="card">
-            <h3>👨‍🏫 我的教练</h3>
-            <p>需要专业指导？找教练帮你</p>
-            <button class="btn" onclick="window.location.href='browse_coaches.html'">浏览教练</button>
+        <div class="calendar-card">
+            <div class="calendar-header">
+                <h3>📊 饮食与训练记录</h3>
+                <span class="card-more" id="currentMonth"></span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
         </div>
     </div>
     
     <div class="nav-bar">
-        <div class="nav-item active">
-            <span class="nav-icon">🏠</span>
-            首页
-        </div>
-        <div class="nav-item">
-            <span class="nav-icon">📊</span>
-            统计
-        </div>
-        <div class="nav-item">
-            <span class="nav-icon">👤</span>
-            我的
-        </div>
+        <div class="nav-item active"><span class="nav-icon">🏠</span>首页</div>
+        <a href="diet.html" class="nav-item"><span class="nav-icon">🍽️</span>饮食</a>
+        <a href="stats.html" class="nav-item"><span class="nav-icon">📊</span>统计</a>
+        <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span>我的</a>
     </div>
     
     <script>
-        // 初始化数据
-        document.getElementById('calories').textContent = localStorage.getItem('calories') || 0;
-        document.getElementById('water').textContent = localStorage.getItem('water') || 0;
-        document.getElementById('days').textContent = localStorage.getItem('days') || 1;
+        let userSession=null;
+        const db=window.firebaseApp.db;
+        
+        function checkLogin(){
+            userSession=JSON.parse(localStorage.getItem('userSession'));
+            if(!userSession){
+                window.location.href='index.html';
+            }
+        }
+        
+        function logout(){
+            localStorage.removeItem('userSession');
+            window.location.href='index.html';
+        }
+        
+        function addMeal(){
+            window.location.href='diet.html';
+        }
+        
+        async function loadBmi(){
+            try{
+                const weightsSnapshot=await db.collection('weights')
+                    .where('userId','==',userSession.id)
+                    .orderBy('date','desc')
+                    .limit(1)
+                    .get();
+                
+                if(weightsSnapshot.empty){
+                    document.getElementById('currentBmi').textContent='--';
+                    document.getElementById('targetBmi').textContent='--';
+                    document.getElementById('bmiBar').style.width='0%';
+                    return;
+                }
+                
+                const latestWeight=weightsSnapshot.docs[0].data();
+                const height=userSession.height||1.7;
+                const bmi=(latestWeight.weight/(height*height)).toFixed(1);
+                
+                document.getElementById('currentBmi').textContent=bmi;
+                document.getElementById('targetBmi').textContent=userSession.targetWeight?((userSession.targetWeight/(height*height)).toFixed(1)):'--';
+                
+                const progress=((bmi-18.5)/(24.9-18.5))*100;
+                document.getElementById('bmiBar').style.width=Math.min(100,Math.max(0,progress))+'%';
+            }catch(error){
+                console.error('加载 BMI 失败:',error);
+            }
+        }
+        
+        function loadNutrition(){
+            // 暂时使用 localStorage
+            const today=new Date().toISOString().split('T')[0];
+            const meals=JSON.parse(localStorage.getItem('meals_'+today)||'[]');
+            
+            let totalCalories=0;
+            let totalProtein=0;
+            let totalCarbs=0;
+            let totalFat=0;
+            
+            meals.forEach(meal=>{
+                totalCalories+=meal.calories||0;
+                totalProtein+=meal.protein||0;
+                totalCarbs+=meal.carbs||0;
+                totalFat+=meal.fat||0;
+            });
+            
+            document.getElementById('calorieValue').textContent=totalCalories;
+            document.getElementById('proteinValue').textContent=totalProtein+'g';
+            document.getElementById('carbsValue').textContent=totalCarbs+'g';
+            document.getElementById('fatValue').textContent=totalFat+'g';
+            
+            const percentage=(totalCalories/2000)*100;
+            document.getElementById('calorieRing').style.background=`conic-gradient(#667eea 0% ${percentage}%,#e0e0e0 ${percentage}% 100%)`;
+        }
+        
+        async function loadSessions(){
+            try{
+                const now=Date.now();
+                const sessionsSnapshot=await db.collection('sessions')
+                    .where('studentId','==',userSession.id)
+                    .orderBy('date','asc')
+                    .orderBy('time','asc')
+                    .get();
+                
+                const sessions=sessionsSnapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+                const futureSessions=sessions.filter(s=>{
+                    const sessionTime=new Date(s.date+'T'+s.time).getTime();
+                    return sessionTime>=now;
+                });
+                
+                const sessionList=document.getElementById('sessionList');
+                
+                if(futureSessions.length===0){
+                    sessionList.innerHTML='<div class="empty-state"><div class="empty-icon">📅</div><div>暂无教练课程</div></div>';
+                    return;
+                }
+                
+                sessionList.innerHTML=futureSessions.map(session=>{
+                    const sessionTime=new Date(session.date+'T'+session.time).getTime();
+                    const canChange=sessionTime-now>(24*60*60*1000);
+                    
+                    return `
+                    <div class="session-item">
+                        <div class="session-header">
+                            <div class="session-date">${new Date(session.date).toLocaleDateString()}</div>
+                            <div class="session-time">⏰ ${session.time}</div>
+                        </div>
+                        <div class="session-coach">👨‍🏫 ${session.coachName||'教练'}</div>
+                        <div class="session-type">${session.type}</div>
+                        ${session.notes?`<div style="font-size:12px;color:#999;margin-top:5px">📝 ${session.notes}</div>`:''}
+                        <div class="session-actions">
+                            <button class="btn btn-change" ${!canChange?'disabled':''} onclick="changeSession('${session.id}','${session.date}','${session.time}')">🔄 更改时间</button>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            }catch(error){
+                console.error('加载课程失败:',error);
+                document.getElementById('sessionList').innerHTML='<div class="empty-state">加载失败</div>';
+            }
+        }
+        
+        async function changeSession(sessionId,date,time){
+            const now=Date.now();
+            const sessionTime=new Date(date+'T'+time).getTime();
+            
+            if(sessionTime-now<=(24*60*60*1000)){
+                alert('⚠️ 训练前 24 小时内无法更改时间\n\n请联系教练直接调整。');
+                return;
+            }
+            
+            const newDate=prompt('新日期 (YYYY-MM-DD):',date);
+            const newTime=prompt('新时间 (HH:MM):',time);
+            
+            if(newDate&&newTime){
+                try{
+                    await db.collection('sessions').doc(sessionId).update({
+                        date:newDate,
+                        time:newTime,
+                        changeDeadline:new Date(newDate+'T'+newTime).getTime()-(24*60*60*1000)
+                    });
+                    
+                    alert('✅ 课程时间已更改！');
+                    loadSessions();
+                }catch(error){
+                    console.error('更改课程失败:',error);
+                    alert('❌ 更改失败：'+error.message);
+                }
+            }
+        }
+        
+        function renderCalendar(){
+            const now=new Date();
+            const year=now.getFullYear();
+            const month=now.getMonth();
+            document.getElementById('currentMonth').textContent=year+'年 '+(month+1)+'月';
+            
+            const firstDay=new Date(year,month,1);
+            const lastDay=new Date(year,month+1,0);
+            const startDay=firstDay.getDay();
+            const totalDays=lastDay.getDate();
+            
+            const weekDays=['日','一','二','三','四','五','六'];
+            let html=weekDays.map(d=>'<div class="calendar-day-header">'+d+'</div>').join('');
+            
+            for(let i=0;i<startDay;i++){
+                html+='<div class="calendar-day"></div>';
+            }
+            
+            const today=new Date().getDate();
+            for(let day=1;day<=totalDays;day++){
+                const dateStr=year+'-'+String(month+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+                const meals=JSON.parse(localStorage.getItem('meals_'+dateStr)||'[]');
+                const workouts=JSON.parse(localStorage.getItem('workouts_'+dateStr)||'[]');
+                const hasData=meals.length>0;
+                const hasWorkout=workouts.length>0;
+                const isToday=day===today;
+                
+                html+='<div class="calendar-day'+(hasData?' has-data':'')+(hasWorkout?' has-workout':'')+(isToday?' today':'')+'"><div class="calendar-day-number">'+day+'</div><div class="calendar-day-mark">'+(hasData?'🍽️':'')+(hasWorkout?'💪':'')+'</div></div>';
+            }
+            
+            document.getElementById('calendarGrid').innerHTML=html;
+        }
+        
+        checkLogin();
+        loadBmi();
+        loadNutrition();
+        loadSessions();
+        renderCalendar();
     </script>
 </body>
 </html>

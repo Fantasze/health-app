@@ -1,258 +1,168 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4CAF50">
-    <title>📝 用户注册 - 健康管家</title>
+    <title>健康管家 - 学员注册</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth_utils.js"></script>
+    <link rel="stylesheet" href="common.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #4CAF50;
-            --primary-dark: #388E3C;
-            --bg: #f5f5f5;
-            --card: #ffffff;
-            --text: #333333;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .container {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 450px;
-            width: 100%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            color: #666;
-            text-decoration: none;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .logo .icon {
-            font-size: 4em;
-            display: block;
-        }
-        .logo h1 {
-            color: var(--primary);
-            font-size: 1.8em;
-            margin-top: 10px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: var(--text);
-        }
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-        }
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        .form-group small {
-            display: block;
-            margin-top: 5px;
-            color: #666;
-            font-size: 0.85em;
-        }
-        .btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn-secondary {
-            background: linear-gradient(135deg, #9e9e9e, #757575);
-        }
-        .error-message {
-            background: #ffebee;
-            color: #f44336;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-            text-align: center;
-        }
-        .success-message {
-            display: none;
-            text-align: center;
-            padding: 40px 20px;
-        }
-        .success-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .register-card{background:white;border-radius:20px;padding:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .logo{font-size:48px;text-align:center;margin-bottom:10px}
+        .title{font-size:24px;font-weight:700;color:#333;text-align:center;margin-bottom:30px}
+        .form-group{margin-bottom:15px}
+        .form-group label{display:block;color:#555;margin-bottom:8px;font-size:14px;font-weight:500}
+        .form-group input,.form-group select{width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px}
+        .form-group input:focus,.form-group select:focus{border-color:#667eea;outline:none}
+        .btn{width:100%;padding:16px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;border:none;margin-bottom:10px}
+        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .btn-primary:disabled{opacity:0.6;cursor:not-allowed}
+        .loading{display:none;text-align:center;padding:20px}
+        .spinner{border:3px solid #f3f3f3;border-top:3px solid #667eea;border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;margin:0 auto 10px}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="register_choice.html" class="back-btn">
-            <span>←</span>
-            <span>返回</span>
-        </a>
-
+    <div class="register-card">
+        <div class="logo">👤</div>
+        <h1 class="title">学员注册</h1>
+        
         <div id="registerForm">
-            <div class="logo">
-                <span class="icon">👤</span>
-                <h1>学员注册</h1>
-                <p>创建你的健康档案</p>
+            <div class="form-group">
+                <label>姓名</label>
+                <input type="text" id="userName" placeholder="输入您的姓名">
             </div>
-
-            <div id="errorMessage" class="error-message"></div>
-
-            <form onsubmit="handleRegister(event)">
-                <div class="form-group">
-                    <label for="name">姓名 *</label>
-                    <input type="text" id="name" name="name" required placeholder="请输入您的姓名">
-                </div>
-
-                <div class="form-group">
-                    <label for="email">电子邮箱 *</label>
-                    <input type="email" id="email" name="email" required placeholder="example@email.com">
-                    <small>用于登录和接收通知</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">电话号码 *</label>
-                    <input type="tel" id="phone" name="phone" required placeholder="012-3456789">
-                </div>
-
-                <div class="form-group">
-                    <label for="password">密码 *</label>
-                    <input type="password" id="password" name="password" required placeholder="至少 6 位字符" minlength="6">
-                </div>
-
-                <div class="form-group">
-                    <label for="confirmPassword">确认密码 *</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="再次输入密码">
-                </div>
-
-                <div class="form-group">
-                    <label for="goal">健康目标 *</label>
-                    <select id="goal" name="goal" required>
-                        <option value="">请选择您的目标</option>
-                        <option value="lose_weight">减脂瘦身</option>
-                        <option value="gain_muscle">增肌塑形</option>
-                        <option value="maintain">保持健康</option>
-                        <option value="improve_fitness">提升体能</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn">
-                    <span>✅</span>
-                    <span>创建账号</span>
-                </button>
-
-                <button type="button" class="btn btn-secondary" onclick="goBack()" style="margin-top: 10px;">
-                    取消
-                </button>
-            </form>
+            
+            <div class="form-group">
+                <label>电话号码</label>
+                <input type="tel" id="userPhone" placeholder="0123456789">
+            </div>
+            
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="userPassword" placeholder="至少 6 位">
+            </div>
+            
+            <div class="form-group">
+                <label>身高 (cm)</label>
+                <input type="number" id="userHeight" placeholder="170">
+            </div>
+            
+            <div class="form-group">
+                <label>当前体重 (kg)</label>
+                <input type="number" id="userWeight" placeholder="70">
+            </div>
+            
+            <div class="form-group">
+                <label>目标体重 (kg)</label>
+                <input type="number" id="userTargetWeight" placeholder="65">
+            </div>
+            
+            <button class="btn btn-primary" id="registerBtn" onclick="register()">📝 注册</button>
         </div>
-
-        <div id="successMessage" class="success-message">
-            <div class="success-icon">✅</div>
-            <h2 style="color: var(--primary); margin-bottom: 15px;">注册成功！</h2>
-            <p style="color: #666; margin-bottom: 20px;">
-                账号已创建，现在可以登录了
-            </p>
-            <button class="btn" onclick="goToLogin()">
-                前往登录
-            </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div style="color:#666;font-size:14px">正在注册...</div>
+        </div>
+        
+        <div style="margin-top:20px;text-align:center">
+            <a href="index.html" style="color:#667eea;font-size:14px">← 返回首页</a>
         </div>
     </div>
-
+    
     <script>
-        function handleRegister(event) {
-            event.preventDefault();
+        async function register(){
+            const name=document.getElementById('userName').value.trim();
+            const phone=document.getElementById('userPhone').value.trim();
+            const password=document.getElementById('userPassword').value;
+            const height=parseFloat(document.getElementById('userHeight').value);
+            const weight=parseFloat(document.getElementById('userWeight').value);
+            const targetWeight=parseFloat(document.getElementById('userTargetWeight').value);
             
-            const form = event.target;
-            const formData = new FormData(form);
-            
-            const password = formData.get('password');
-            const confirmPassword = formData.get('confirmPassword');
-            
-            if (password !== confirmPassword) {
-                showError('❌ 两次输入的密码不一致');
+            if(!name||!phone||!password){
+                alert('请填写所有必填字段');
                 return;
             }
             
-            const user = {
-                id: 'user_' + Date.now(),
-                name: formData.get('name'),
-                email: formData.get('email'),
-                phone: formData.get('phone'),
-                password: password,
-                goal: formData.get('goal'),
-                role: 'student',
-                avatar: '👤',
-                createdAt: new Date().toISOString()
-            };
-            
-            console.log('📝 用户注册:', user);
-            
-            // 保存到本地存储
-            const users = JSON.parse(localStorage.getItem('healthApp_users') || '[]');
-            
-            // 检查邮箱是否已存在
-            const existing = users.find(u => u.email === user.email);
-            if (existing) {
-                showError('❌ 该邮箱已被注册');
+            if(password.length<6){
+                alert('密码至少需要 6 位');
                 return;
             }
             
-            users.push(user);
-            localStorage.setItem('healthApp_users', JSON.stringify(users));
+            if(!height||!weight||!targetWeight){
+                alert('请填写身高体重信息');
+                return;
+            }
             
-            // 显示成功消息
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('successMessage').classList.add('show');
-        }
-        
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.classList.add('show');
-            setTimeout(() => errorDiv.classList.remove('show'), 3000);
-        }
-        
-        function goBack() {
-            window.location.href = 'register_choice.html';
-        }
-        
-        function goToLogin() {
-            window.location.href = 'login.html';
+            // 显示加载
+            document.getElementById('registerForm').style.display='none';
+            document.getElementById('loading').style.display='block';
+            
+            try{
+                const db=window.firebaseApp.db;
+                const auth=window.firebaseApp.auth;
+                
+                // 检查用户是否已存在
+                const existingUser=await db.collection('users')
+                    .where('phone','==',phone)
+                    .where('role','==','student')
+                    .limit(1)
+                    .get();
+                
+                if(!existingUser.empty){
+                    alert('❌ 该电话号码已注册');
+                    document.getElementById('registerForm').style.display='block';
+                    document.getElementById('loading').style.display='none';
+                    return;
+                }
+                
+                // 创建用户
+                const userData={
+                    name:name,
+                    phone:phone,
+                    role:'student',
+                    height:height/100, // 转换为米
+                    weight:weight,
+                    targetWeight:targetWeight,
+                    startWeight:weight,
+                    createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin:new Date()
+                };
+                
+                const docRef=await db.collection('users').add(userData);
+                const userId=docRef.id;
+                
+                // 保存用户 session
+                const userSession={
+                    id:userId,
+                    ...userData
+                };
+                localStorage.setItem('userSession',JSON.stringify(userSession));
+                
+                // 保存初始体重记录
+                await db.collection('weights').add({
+                    userId:userId,
+                    weight:weight,
+                    date:new Date().toISOString().split('T')[0],
+                    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                alert('✅ 注册成功！\n\n欢迎 '+name+'！');
+                window.location.href='app.html';
+                
+            }catch(error){
+                console.error('注册错误:',error);
+                alert('❌ 注册失败：'+error.message);
+                document.getElementById('registerForm').style.display='block';
+                document.getElementById('loading').style.display='none';
+            }
         }
     </script>
 </body>

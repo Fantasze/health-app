@@ -1,344 +1,248 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4CAF50">
-    <title>🔧 管理员后台 - 教练审核</title>
+    <title>健康管家 - 管理员后台</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth_utils.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #4CAF50;
-            --primary-dark: #388E3C;
-            --secondary: #FF9800;
-            --danger: #f44336;
-            --info: #2196F3;
-            --bg: #f5f5f5;
-            --card: #ffffff;
-            --text: #333333;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .card {
-            background: var(--card);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .card h2 {
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-        .application-item {
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            background: #fafafa;
-        }
-        .application-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        .application-header h3 {
-            color: var(--text);
-            margin: 0;
-        }
-        .status-badge {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: bold;
-        }
-        .status-pending {
-            background: #fff3e0;
-            color: #F57C00;
-        }
-        .status-approved {
-            background: #e8f5e9;
-            color: var(--primary);
-        }
-        .status-rejected {
-            background: #ffebee;
-            color: var(--danger);
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .info-item {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-        }
-        .info-item label {
-            display: block;
-            color: #666;
-            font-size: 0.85em;
-            margin-bottom: 5px;
-        }
-        .info-item span {
-            font-weight: bold;
-            color: var(--text);
-        }
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn-approve {
-            background: var(--primary);
-            color: white;
-        }
-        .btn-reject {
-            background: #e0e0e0;
-            color: #666;
-        }
-        .btn-view {
-            background: var(--info);
-            color: white;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .stat-item {
-            text-align: center;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-        }
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        .stat-label {
-            color: #666;
-            font-size: 0.85em;
-            margin-top: 5px;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;min-height:100vh;padding-bottom:70px}
+        .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:25px 20px 20px}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+        .header h1{font-size:22px}
+        .logout-btn{color:white;text-decoration:none;font-size:14px;padding:8px 15px;border:1px solid rgba(255,255,255,0.5);border-radius:20px}
+        .content{padding:20px}
+        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px}
+        .stat-card{background:white;border-radius:15px;padding:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08);text-align:center}
+        .stat-value{font-size:24px;font-weight:700;color:#667eea}
+        .stat-label{font-size:11px;color:#999;margin-top:5px}
+        .card{background:white;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08)}
+        .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+        .card h3{color:#333;font-size:17px}
+        .badge{padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600}
+        .badge-pending{background:#fef3c7;color:#d97706}
+        .badge-approved{background:#d1fae5;color:#059669}
+        .badge-rejected{background:#fee2e2;color:#dc2626}
+        .application-item{padding:15px 0;border-bottom:1px solid #f0f0f0}
+        .application-item:last-child{border-bottom:none}
+        .app-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        .app-name{font-size:14px;font-weight:600;color:#333}
+        .app-date{font-size:12px;color:#999}
+        .app-details{font-size:13px;color:#666;margin-bottom:10px}
+        .app-specialties{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+        .specialty-tag{background:#f3f4f6;padding:4px 8px;border-radius:6px;font-size:11px;color:#666}
+        .app-certificates{margin-bottom:10px}
+        .cert-item{font-size:12px;color:#667eea;margin-bottom:3px}
+        .app-actions{display:flex;gap:10px}
+        .btn{flex:1;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none}
+        .btn-approve{background:#4ade80;color:white}
+        .btn-reject{background:#ef4444;color:white}
+        .nav-bar{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -5px 20px rgba(0,0,0,0.1);z-index:100}
+        .nav-item{text-align:center;color:#999;font-size:11px;cursor:pointer;text-decoration:none}
+        .nav-item.active{color:#667eea}
+        .nav-icon{font-size:22px;display:block;margin-bottom:2px}
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🔧 管理员后台</h1>
-        <p>教练申请审核系统</p>
-    </div>
-
-    <div class="stats">
-        <div class="stat-item">
-            <div class="stat-value" id="pendingCount">0</div>
-            <div class="stat-label">待审核</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value" id="approvedCount">0</div>
-            <div class="stat-label">已通过</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value" id="rejectedCount">0</div>
-            <div class="stat-label">已拒绝</div>
+        <div class="header-top">
+            <h1>⚙️ 管理员后台</h1>
+            <a href="index.html" class="logout-btn" onclick="logout()">登出</a>
         </div>
     </div>
-
-    <div class="card">
-        <h2>📋 待审核申请</h2>
-        <div id="pendingList">
-            <div class="empty-state">暂无待审核申请</div>
+    
+    <div class="content">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="pendingCount">0</div>
+                <div class="stat-label">待审核</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="approvedCount">0</div>
+                <div class="stat-label">已批准</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalCoaches">0</div>
+                <div class="stat-label">总教练</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>📋 教练申请审核</h3>
+                <span class="badge badge-pending" id="pendingBadge">0 待审核</span>
+            </div>
+            <div id="applicationList">
+                <div style="text-align:center;padding:30px;color:#999">暂无申请</div>
+            </div>
         </div>
     </div>
-
-    <div class="card">
-        <h2>✅ 已通过教练</h2>
-        <div id="approvedList">
-            <div class="empty-state">暂无通过教练</div>
-        </div>
+    
+    <div class="nav-bar">
+        <div class="nav-item active"><span class="nav-icon">⚙️</span>管理</div>
+        <div class="nav-item" onclick="window.location.href='index.html'"><span class="nav-icon">🏠</span>首页</div>
     </div>
-
+    
     <script>
-        window.addEventListener('load', function() {
+        const db=window.firebaseApp.db;
+
+        function escapeHTML(value){
+            return String(value??'').replace(/[&<>'"]/g,ch=>({
+                '&':'&amp;',
+                '<':'&lt;',
+                '>':'&gt;',
+                "'":'&#39;',
+                '"':'&quot;'
+            }[ch]));
+        }
+
+        async function initAdminPage(){
+            const ok=await window.authUtils.requireAdmin();
+            if(!ok)return;
             loadApplications();
-        });
-
-        function loadApplications() {
-            const applications = JSON.parse(localStorage.getItem('coach_applications') || '[]');
-            
-            const pending = applications.filter(a => a.status === 'pending');
-            const approved = applications.filter(a => a.status === 'approved');
-            const rejected = applications.filter(a => a.status === 'rejected');
-            
-            document.getElementById('pendingCount').textContent = pending.length;
-            document.getElementById('approvedCount').textContent = approved.length;
-            document.getElementById('rejectedCount').textContent = rejected.length;
-            
-            // 待审核列表
-            if (pending.length === 0) {
-                document.getElementById('pendingList').innerHTML = '<div class="empty-state">暂无待审核申请</div>';
-            } else {
-                document.getElementById('pendingList').innerHTML = pending.map(app => createApplicationCard(app, 'pending')).join('');
-            }
-            
-            // 已通过列表
-            if (approved.length === 0) {
-                document.getElementById('approvedList').innerHTML = '<div class="empty-state">暂无通过教练</div>';
-            } else {
-                document.getElementById('approvedList').innerHTML = approved.map(app => createApplicationCard(app, 'approved')).join('');
-            }
         }
 
-        function createApplicationCard(app, type) {
-            let actions = '';
-            if (type === 'pending') {
-                actions = `
-                    <div class="actions">
-                        <button class="btn btn-approve" onclick="approveApplication('${app.email}')">✅ 通过</button>
-                        <button class="btn btn-reject" onclick="rejectApplication('${app.email}')">❌ 拒绝</button>
-                    </div>
-                `;
-            } else {
-                actions = `<p style="text-align: center; color: #999; margin-top: 15px;">已${type === 'approved' ? '通过' : '拒绝'} - ${new Date(app.submittedAt).toLocaleDateString('zh-CN')}</p>`;
-            }
-            
-            return `
-                <div class="application-item">
-                    <div class="application-header">
-                        <h3>👨‍🏫 ${app.name}</h3>
-                        <span class="status-badge status-${type}">${type === 'pending' ? '⏳ 待审核' : type === 'approved' ? '✅ 已通过' : '❌ 已拒绝'}</span>
-                    </div>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <label>📧 邮箱</label>
-                            <span>${app.email}</span>
-                        </div>
-                        <div class="info-item">
-                            <label>📱 电话</label>
-                            <span>${app.phone}</span>
-                        </div>
-                        <div class="info-item">
-                            <label>🏆 认证</label>
-                            <span>${app.certification}</span>
-                        </div>
-                        <div class="info-item">
-                            <label>💼 经验</label>
-                            <span>${app.experience}年</span>
-                        </div>
-                        <div class="info-item">
-                            <label>🎯 专长</label>
-                            <span>${app.specialty}</span>
-                        </div>
-                        <div class="info-item">
-                            <label>📅 申请日期</label>
-                            <span>${new Date(app.submittedAt).toLocaleDateString('zh-CN')}</span>
-                        </div>
-                    </div>
-                    <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
-                        <label style="display: block; color: #666; font-size: 0.85em; margin-bottom: 5px;">📝 个人简介</label>
-                        <p style="color: var(--text);">${app.bio}</p>
-                    </div>
-                    <div style="background: white; padding: 12px; border-radius: 8px;">
-                        <label style="display: block; color: #666; font-size: 0.85em; margin-bottom: 5px;">💡 申请动机</label>
-                        <p style="color: var(--text);">${app.why}</p>
-                    </div>
-                    ${actions}
-                </div>
-            `;
+        function logout(){
+            window.authUtils.logoutAdmin();
         }
-
-        function approveApplication(email) {
-            if (!confirm('确定要通过此申请吗？\n\n通过后系统将自动发送邮件通知教练。')) {
-                return;
-            }
-            
-            const applications = JSON.parse(localStorage.getItem('coach_applications') || '[]');
-            const app = applications.find(a => a.email === email);
-            
-            if (app) {
-                app.status = 'approved';
-                app.approvedAt = new Date().toISOString();
+        
+        async function loadApplications(){
+            try{
+                // 统一使用 coachRegistrations，与提交页和 Firestore rules 保持一致
+                const pendingSnapshot=await db.collection('coachRegistrations')
+                    .where('status','==','pending')
+                    .orderBy('applyDate','desc')
+                    .get();
                 
-                // 同时添加到用户列表（作为教练）
-                const users = JSON.parse(localStorage.getItem('healthApp_users') || '[]');
-                const existingUser = users.find(u => u.email === email);
+                const approvedSnapshot=await db.collection('coaches').get();
                 
-                if (!existingUser) {
-                    users.push({
-                        id: 'coach_' + Date.now(),
-                        name: app.name,
-                        email: app.email,
-                        phone: app.phone,
-                        role: 'coach',
-                        specialty: app.specialty,
-                        status: 'approved',
-                        avatar: '👨‍🏫',
-                        createdAt: app.submittedAt
-                    });
-                    localStorage.setItem('healthApp_users', JSON.stringify(users));
-                } else {
-                    existingUser.status = 'approved';
-                    localStorage.setItem('healthApp_users', JSON.stringify(users));
+                const pendingCount=pendingSnapshot.size;
+                const approvedCount=approvedSnapshot.size;
+                
+                document.getElementById('pendingCount').textContent=pendingCount;
+                document.getElementById('approvedCount').textContent=approvedCount;
+                document.getElementById('totalCoaches').textContent=approvedCount;
+                document.getElementById('pendingBadge').textContent=pendingCount+' 待审核';
+                
+                const appList=document.getElementById('applicationList');
+                
+                if(pendingCount===0){
+                    appList.innerHTML='<div style="text-align:center;padding:30px;color:#999">暂无待审核申请</div>';
+                    return;
                 }
                 
-                localStorage.setItem('coach_applications', JSON.stringify(applications));
+                let html='';
+                pendingSnapshot.docs.forEach(doc=>{
+                    const app=doc.data();
+                    const docId=doc.id;
+                    const specialties=Array.isArray(app.specialties)?app.specialties:[];
+                    const certificates=Array.isArray(app.certificates)?app.certificates:[];
+                    const applyDate=app.applyDate?new Date(app.applyDate).toLocaleDateString():'未指定';
+                    
+                    html+=`
+                        <div class="application-item">
+                            <div class="app-header">
+                                <div class="app-name">${escapeHTML(app.name)}</div>
+                                <div class="app-date">${escapeHTML(applyDate)}</div>
+                            </div>
+                            <div class="app-details">
+                                📍 ${escapeHTML(app.region||'未指定')} | 📞 ${escapeHTML(app.phone)} | ✉️ ${escapeHTML(app.email)}<br>
+                                💰 RM ${escapeHTML(app.hourlyRate||0)}/小时 | RM ${escapeHTML(app.monthlyRate||0)}/月
+                            </div>
+                            <div class="app-specialties">
+                                ${specialties.map(s=>'<span class="specialty-tag">'+escapeHTML(s)+'</span>').join('')}
+                            </div>
+                            <div class="app-certificates">
+                                <strong>证书 (${certificates.length}个):</strong><br>
+                                ${certificates.map(c=>'<div class="cert-item">📄 '+escapeHTML(c.name||c)+'</div>').join('')}
+                            </div>
+                            ${app.bio?`<div style="font-size:13px;color:#666;margin-bottom:10px"><strong>简介:</strong> ${escapeHTML(app.bio)}</div>`:''}
+                            <div class="app-actions">
+                                <button class="btn btn-approve" onclick="approveApplication('${docId}')">✅ 批准</button>
+                                <button class="btn btn-reject" onclick="rejectApplication('${docId}')">❌ 拒绝</button>
+                            </div>
+                        </div>
+                    `;
+                });
                 
-                alert('✅ 已通过！\n\n系统已自动发送邮件到：' + app.email);
-                loadApplications();
+                appList.innerHTML=html;
+                
+            }catch(error){
+                console.error('加载申请失败:',error);
+                document.getElementById('applicationList').innerHTML='<div style="text-align:center;padding:30px;color:#ef4444">加载失败：'+escapeHTML(error.message)+'</div>';
             }
         }
+        
+        async function approveApplication(docId){
+            try{
+                const doc=await db.collection('coachRegistrations').doc(docId).get();
+                if(!doc.exists){
+                    alert('❌ 找不到申请记录');
+                    return;
+                }
+                const app=doc.data();
+                const coachId='COACH'+Date.now().toString().slice(-6);
+                const salesCode='COACH'+coachId.replace(/[^A-Z0-9]/g,'')+Date.now().toString(36).toUpperCase();
+                
+                await db.collection('coaches').add({
+                    ...app,
+                    status:'approved',
+                    coachId,
+                    salesCode,
+                    approveDate:new Date().toISOString(),
+                    rating:5.0,
+                    students:[],
+                    joinDate:new Date().toISOString()
+                });
 
-        function rejectApplication(email) {
-            const reason = prompt('请输入拒绝原因（可选）：');
-            if (reason === null) return; // 取消
-            
-            const applications = JSON.parse(localStorage.getItem('coach_applications') || '[]');
-            const app = applications.find(a => a.email === email);
-            
-            if (app) {
-                app.status = 'rejected';
-                app.rejectedAt = new Date().toISOString();
-                app.rejectReason = reason || '未通过审核';
+                await db.collection('salesCodes').add({
+                    code:salesCode,
+                    coachName:app.name||null,
+                    coachId,
+                    freeDays:30,
+                    used:false,
+                    usedBy:null,
+                    usedDate:null,
+                    createdAt:new Date().toISOString()
+                });
                 
-                localStorage.setItem('coach_applications', JSON.stringify(applications));
+                await db.collection('coachRegistrations').doc(docId).update({
+                    status:'approved',
+                    coachId,
+                    salesCode,
+                    approveDate:new Date().toISOString()
+                });
                 
-                alert('❌ 已拒绝申请\n\n' + (reason ? '原因：' + reason : ''));
+                alert('✅ 已批准！\n教练 ID: '+coachId+'\n销售码：'+salesCode);
                 loadApplications();
+                
+            }catch(error){
+                alert('❌ 批准失败：'+error.message);
             }
         }
+        
+        async function rejectApplication(docId){
+            if(!confirm('确定要拒绝这个申请吗？'))return;
+            try{
+                await db.collection('coachRegistrations').doc(docId).update({
+                    status:'rejected',
+                    rejectDate:new Date().toISOString()
+                });
+                
+                alert('❌ 已拒绝申请。');
+                loadApplications();
+                
+            }catch(error){
+                alert('❌ 拒绝失败：'+error.message);
+            }
+        }
+        
+        initAdminPage();
     </script>
 </body>
 </html>

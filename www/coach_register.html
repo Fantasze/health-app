@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教练注册 - 健康管家</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth_utils.js"></script>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;min-height:100vh;padding-bottom:70px}
+        .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:25px 20px 20px}
+        .header h1{font-size:22px}
+        .content{padding:20px}
+        .card{background:white;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08)}
+        .card h2{color:#333;font-size:18px;margin-bottom:20px}
+        .form-group{margin-bottom:20px}
+        .form-group label{display:block;font-size:14px;color:#333;margin-bottom:8px;font-weight:600}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#667eea;outline:none}
+        .checkbox-group{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+        .checkbox-item{display:flex;align-items:center;padding:12px;background:#f8f9fa;border-radius:8px;cursor:pointer}
+        .checkbox-item input{margin-right:10px}
+        .checkbox-item.active{background:#e8f0ff;border-color:#667eea}
+        .file-upload{border:2px dashed #e0e0e0;border-radius:10px;padding:20px;text-align:center;cursor:pointer}
+        .file-upload:hover{border-color:#667eea;background:#f8f9fa}
+        .file-upload-icon{font-size:48px;margin-bottom:10px}
+        .file-upload-text{color:#666}
+        .file-list{margin-top:15px}
+        .file-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f8f9fa;border-radius:8px;margin-bottom:8px}
+        .file-delete{color:#ef4444;cursor:pointer;font-size:20px;font-weight:bold}
+        .btn{width:100%;padding:16px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;border:none;margin-bottom:10px}
+        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .btn-secondary{background:#f3f4f6;color:#666}
+        .info-box{background:#f0f9ff;border-left:4px solid #0ea5e9;padding:15px;border-radius:8px;margin-bottom:20px}
+        .info-box p{font-size:13px;color:#0369a1;line-height:1.6}
+        .nav-bar{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -5px 20px rgba(0,0,0,0.1);z-index:100}
+        .nav-item{text-align:center;color:#999;font-size:11px;cursor:pointer;text-decoration:none}
+        .nav-item.active{color:#667eea}
+        .nav-icon{font-size:22px;display:block;margin-bottom:2px}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👨‍🏫 教练注册</h1>
+    </div>
+    
+    <div class="content">
+        <div class="info-box">
+            <p>💡 注册流程说明：</p>
+            <p>1. 填写您的个人信息和教练资质</p>
+            <p>2. 上传教练证书证明文件</p>
+            <p>3. 提交后等待管理员审核</p>
+            <p>4. 审核通过后，我们会发送教练 ID 到您的电邮</p>
+            <p>5. 使用教练 ID 登录教练后台</p>
+        </div>
+        
+        <div class="card">
+            <h2>📝 个人信息</h2>
+            <div class="form-group">
+                <label>姓名 *</label>
+                <input type="text" id="coachName" placeholder="输入您的全名">
+            </div>
+            <div class="form-group">
+                <label>电邮 *</label>
+                <input type="email" id="coachEmail" placeholder="例如：coach@example.com">
+            </div>
+            <div class="form-group">
+                <label>电话号码 *</label>
+                <input type="tel" id="coachPhone" placeholder="例如：0123456789">
+            </div>
+            <div class="form-group">
+                <label>📍 执教地区 *</label>
+                <select id="coachRegion">
+                    <option value="">选择执教地区</option>
+                    <option value="吉隆坡">🏙️ 吉隆坡 (Kuala Lumpur)</option>
+                    <option value="雪兰莪">🌆 雪兰莪 (Selangor)</option>
+                    <option value="槟城">🌉 槟城 (Penang)</option>
+                    <option value="柔佛">🏞️ 柔佛 (Johor)</option>
+                    <option value="霹雳">⛰️ 霹雳 (Perak)</option>
+                    <option value="马六甲">🏛️ 马六甲 (Melaka)</option>
+                    <option value="森美兰">🌴 森美兰 (Negeri Sembilan)</option>
+                    <option value="彭亨">🏔️ 彭亨 (Pahang)</option>
+                    <option value="吉打">🌾 吉打 (Kedah)</option>
+                    <option value="吉兰丹">🎏 吉兰丹 (Kelantan)</option>
+                    <option value="登嘉楼">🏖️ 登嘉楼 (Terengganu)</option>
+                    <option value="玻璃市">🌅 玻璃市 (Perlis)</option>
+                    <option value="沙巴">🏝️ 沙巴 (Sabah)</option>
+                    <option value="砂拉越">🦅 砂拉越 (Sarawak)</option>
+                    <option value="全国/在线">💻 全国/在线教学</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>💪 擅长领域（多选）</h2>
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" value="减重" onchange="toggleCheckbox(this)">
+                    <span>🏃 减重</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="增肌" onchange="toggleCheckbox(this)">
+                    <span>💪 增肌</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="产后恢复" onchange="toggleCheckbox(this)">
+                    <span>👶 产后恢复</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="营养指导" onchange="toggleCheckbox(this)">
+                    <span>🥗 营养指导</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="力量训练" onchange="toggleCheckbox(this)">
+                    <span>🏋️ 力量训练</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="有氧运动" onchange="toggleCheckbox(this)">
+                    <span>🚴 有氧运动</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="瑜伽普拉提" onchange="toggleCheckbox(this)">
+                    <span>🧘 瑜伽/普拉提</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="康复训练" onchange="toggleCheckbox(this)">
+                    <span>🏥 康复训练</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>📄 上传教练证书 *</h2>
+            <div class="file-upload" onclick="document.getElementById('certUpload').click()">
+                <div class="file-upload-icon">📄</div>
+                <div class="file-upload-text">点击上传证书<br>支持 PDF、JPG、PNG 格式</div>
+                <input type="file" id="certUpload" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFileUpload(event)" style="display:none">
+            </div>
+            <div class="file-list" id="fileList"></div>
+            <small style="margin-top:10px;display:block;color:#999">请上传您的健身教练证书、营养师大证书等相关证明文件</small>
+        </div>
+        
+        <div class="card">
+            <h2>💰 服务定价</h2>
+            <div class="form-group">
+                <label>每小时收费 (RM)</label>
+                <input type="number" id="hourlyRate" placeholder="例如：150">
+            </div>
+            <div class="form-group">
+                <label>每月套餐收费 (RM)</label>
+                <input type="number" id="monthlyRate" placeholder="例如：500">
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>📝 个人简介</h2>
+            <div class="form-group">
+                <textarea id="coachBio" rows="4" placeholder="介绍您的经验、专长和教学风格..."></textarea>
+            </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="submitRegistration()">📤 提交注册申请</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">❌ 取消</button>
+    </div>
+    
+    <div class="nav-bar">
+        <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+        <a href="login.html" class="nav-item"><span class="nav-icon">🔐</span>登录</a>
+        <div class="nav-item active"><span class="nav-icon">👨‍🏫</span>教练注册</div>
+    </div>
+    
+    <script>
+        let uploadedFiles=[];
+        const db=window.firebaseApp.db;
+        
+        function toggleCheckbox(el){
+            el.parentElement.classList.toggle('active',el.checked);
+        }
+        
+        function handleFileUpload(event){
+            const files=event.target.files;
+            if(!files||files.length===0)return;
+            
+            for(let file of files){
+                const sizeMB=(file.size/1024/1024).toFixed(2);
+                uploadedFiles.push({
+                    name:file.name,
+                    size:sizeMB,
+                    type:file.type
+                });
+            }
+            renderFileList();
+        }
+        
+        function renderFileList(){
+            const fileList=document.getElementById('fileList');
+            if(uploadedFiles.length===0){
+                fileList.innerHTML='';
+                return;
+            }
+            
+            fileList.innerHTML=uploadedFiles.map((file,index)=>`
+                <div class="file-item">
+                    <div class="file-name">📄 ${file.name} (${file.size} MB)</div>
+                    <div class="file-delete" onclick="removeFile(${index})">×</div>
+                </div>
+            `).join('');
+        }
+        
+        function removeFile(index){
+            uploadedFiles.splice(index,1);
+            renderFileList();
+        }
+        
+        async function submitRegistration(){
+            const name=document.getElementById('coachName').value;
+            const email=document.getElementById('coachEmail').value;
+            const phone=document.getElementById('coachPhone').value;
+            const region=document.getElementById('coachRegion').value;
+            const hourlyRate=document.getElementById('hourlyRate').value;
+            const monthlyRate=document.getElementById('monthlyRate').value;
+            const bio=document.getElementById('coachBio').value;
+            
+            // 获取选中的擅长领域
+            const specialties=[];
+            document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked').forEach(cb=>{
+                specialties.push(cb.value);
+            });
+            
+            // 验证
+            if(!name||!email||!phone){
+                alert('请填写所有必填字段（姓名、电邮、电话）');
+                return;
+            }
+            
+            if(!region){
+                alert('请选择执教地区');
+                return;
+            }
+            
+            if(specialties.length===0){
+                alert('请至少选择一个擅长领域');
+                return;
+            }
+            
+            if(uploadedFiles.length===0){
+                alert('请上传至少一个教练证书');
+                return;
+            }
+            
+            // 保存到 Firebase
+            const registration={
+                name,
+                email,
+                phone,
+                region,
+                specialties,
+                hourlyRate:hourlyRate||0,
+                monthlyRate:monthlyRate||0,
+                bio:bio||'',
+                certificates:uploadedFiles,
+                status:'pending',
+                applyDate:new Date().toISOString(),
+                coachId:null // 审核通过后生成
+            };
+            
+            try{
+                await db.collection('coachRegistrations').add(registration);
+                
+                alert('✅ 注册申请已提交！\n\n我们会尽快审核您的资料，审核通过后会发送教练 ID 到您的电邮：'+email);
+                window.location.href='index.html';
+                
+            }catch(error){
+                alert('❌ 提交失败：'+error.message);
+            }
+        }
+    </script>
+</body>
+</html>

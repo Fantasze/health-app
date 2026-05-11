@@ -1,348 +1,267 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4CAF50">
-    <title>👨‍🏫 教练申请 - 健康管家</title>
+    <title>健康管家 - 教练申请</title>
+    <script src="firebase-config.js"></script>
+    <script src="auth_utils.js"></script>
+    <link rel="stylesheet" href="common.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #4CAF50;
-            --primary-dark: #388E3C;
-            --secondary: #FF9800;
-            --danger: #f44336;
-            --bg: #f5f5f5;
-            --card: #ffffff;
-            --text: #333333;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .container {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            color: #666;
-            text-decoration: none;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-        }
-        .back-btn:hover {
-            color: var(--primary);
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .logo .icon {
-            font-size: 4em;
-            display: block;
-        }
-        .logo h1 {
-            color: var(--primary);
-            font-size: 1.8em;
-            margin-top: 10px;
-        }
-        .logo p {
-            color: #666;
-            margin-top: 5px;
-        }
-        .info-box {
-            background: #e3f2fd;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            border-left: 4px solid #2196F3;
-        }
-        .info-box h3 {
-            color: #1976D2;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        .info-box p {
-            color: #555;
-            line-height: 1.6;
-            font-size: 0.9em;
-        }
-        .info-box ol {
-            margin-top: 10px;
-            padding-left: 20px;
-            color: #555;
-        }
-        .info-box li {
-            margin: 5px 0;
-            line-height: 1.5;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: var(--text);
-        }
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1em;
-            font-family: inherit;
-        }
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        .form-group small {
-            display: block;
-            margin-top: 5px;
-            color: #666;
-            font-size: 0.85em;
-        }
-        .btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn:active {
-            transform: scale(0.98);
-        }
-        .btn-secondary {
-            background: linear-gradient(135deg, #9e9e9e, #757575);
-        }
-        .requirements {
-            background: #fff3e0;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid var(--secondary);
-        }
-        .requirements h4 {
-            color: #F57C00;
-            margin-bottom: 10px;
-            font-size: 1em;
-        }
-        .requirements ul {
-            padding-left: 20px;
-            color: #555;
-        }
-        .requirements li {
-            margin: 5px 0;
-            font-size: 0.9em;
-        }
-        .success-message {
-            display: none;
-            text-align: center;
-            padding: 40px 20px;
-        }
-        .success-message.show {
-            display: block;
-        }
-        .success-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
-        .success-message h2 {
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-        .success-message p {
-            color: #666;
-            line-height: 1.6;
-        }
-        .form-content {
-            display: block;
-        }
-        .form-content.hidden {
-            display: none;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;min-height:100vh;padding-bottom:70px}
+        .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:25px 20px 20px}
+        .header h1{font-size:22px}
+        .content{padding:20px}
+        .card{background:white;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08)}
+        .card h2{color:#333;font-size:18px;margin-bottom:20px}
+        .form-group{margin-bottom:20px}
+        .form-group label{display:block;color:#555;margin-bottom:8px;font-size:14px;font-weight:500}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#667eea;outline:none}
+        .form-group small{color:#999;font-size:12px;margin-top:5px;display:block}
+        .checkbox-group{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+        .checkbox-item{display:flex;align-items:center;padding:12px;background:#f8f9fa;border-radius:8px;cursor:pointer}
+        .checkbox-item input{width:auto;margin-right:10px}
+        .checkbox-item.active{background:#e8f5e9;border:1px solid #4ade80}
+        .file-upload{border:2px dashed #e0e0e0;border-radius:10px;padding:20px;text-align:center;cursor:pointer}
+        .file-upload:hover{border-color:#667eea;background:#f8f9fa}
+        .file-upload input{display:none}
+        .file-upload-icon{font-size:48px;margin-bottom:10px}
+        .file-upload-text{color:#666;font-size:14px}
+        .file-list{margin-top:10px}
+        .file-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f8f9fa;border-radius:8px;margin-bottom:8px}
+        .file-name{font-size:13px;color:#333;flex:1}
+        .file-delete{color:#ff4444;font-size:20px;cursor:pointer;margin-left:10px}
+        .btn{width:100%;padding:16px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;border:none;margin-bottom:10px}
+        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .btn-secondary{background:#e0e0e0;color:#333}
+        .nav-bar{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -5px 20px rgba(0,0,0,0.1);z-index:100}
+        .nav-item{text-align:center;color:#999;font-size:11px;cursor:pointer;text-decoration:none}
+        .nav-item.active{color:#667eea}
+        .nav-icon{font-size:22px;display:block;margin-bottom:2px}
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="register_choice.html" class="back-btn">
-            <span>←</span>
-            <span>返回</span>
-        </a>
-
-        <!-- 申请表单 -->
-        <div id="formContent" class="form-content">
-            <div class="logo">
-                <span class="icon">👨‍🏫</span>
-                <h1>教练申请</h1>
-                <p>填写资料，等待审核</p>
-            </div>
-
-            <div class="info-box">
-                <h3>📋 申请流程</h3>
-                <ol>
-                    <li>填写以下申请表格</li>
-                    <li>提交后等待我们审核（1-3 个工作日）</li>
-                    <li>审核通过后，您会收到确认邮件</li>
-                    <li>使用邮箱和密码登录教练后台</li>
-                </ol>
-            </div>
-
-            <div class="requirements">
-                <h4>✅ 教练要求</h4>
-                <ul>
-                    <li>持有相关健身/营养认证</li>
-                    <li>至少 1 年以上教学经验</li>
-                    <li>良好的沟通能力</li>
-                    <li>愿意帮助学员达成目标</li>
-                </ul>
-            </div>
-
-            <form id="coachApplyForm" onsubmit="submitApplication(event)">
-                <div class="form-group">
-                    <label for="name">姓名 *</label>
-                    <input type="text" id="name" name="name" required placeholder="请输入您的姓名">
-                </div>
-
-                <div class="form-group">
-                    <label for="email">电子邮箱 *</label>
-                    <input type="email" id="email" name="email" required placeholder="example@email.com">
-                    <small>审核结果将发送到此邮箱</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">电话号码 *</label>
-                    <input type="tel" id="phone" name="phone" required placeholder="012-3456789">
-                </div>
-
-                <div class="form-group">
-                    <label for="certification">专业认证 *</label>
-                    <input type="text" id="certification" name="certification" required placeholder="例如：ACE-CPT, NASM-CPT">
-                    <small>请填写您持有的健身/营养相关认证</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="experience">教学经验（年） *</label>
-                    <select id="experience" name="experience" required>
-                        <option value="">请选择</option>
-                        <option value="1-2">1-2 年</option>
-                        <option value="3-5">3-5 年</option>
-                        <option value="5-10">5-10 年</option>
-                        <option value="10+">10 年以上</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="specialty">专长领域 *</label>
-                    <input type="text" id="specialty" name="specialty" required placeholder="例如：减脂、增肌、产后恢复">
-                </div>
-
-                <div class="form-group">
-                    <label for="bio">个人简介 *</label>
-                    <textarea id="bio" name="bio" required placeholder="介绍一下您的教学风格、理念等（至少 50 字）"></textarea>
-                    <small>简介将显示在您的公开资料页</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="why">为什么想成为我们的教练？ *</label>
-                    <textarea id="why" name="why" required placeholder="请告诉我们您的动机和期望"></textarea>
-                </div>
-
-                <button type="submit" class="btn">
-                    <span>📤</span>
-                    <span>提交申请</span>
-                </button>
-
-                <button type="button" class="btn btn-secondary" onclick="goBack()" style="margin-top: 10px;">
-                    取消
-                </button>
-            </form>
-        </div>
-
-        <!-- 成功消息 -->
-        <div id="successMessage" class="success-message">
-            <div class="success-icon">✅</div>
-            <h2>申请已提交！</h2>
-            <p>
-                感谢您的申请！<br><br>
-                我们会在 <strong>1-3 个工作日</strong> 内审核您的资料。<br><br>
-                审核结果将发送至：<br>
-                <strong id="submittedEmail" style="color: var(--primary);"></strong>
-            </p>
-            <p style="margin-top: 20px; color: #666;">
-                请留意您的邮箱（包括垃圾邮件箱）<br>
-                如有任何问题，请联系客服
-            </p>
-            <button class="btn" onclick="goBack()" style="margin-top: 20px;">
-                返回主页
-            </button>
-        </div>
+    <div class="header">
+        <h1>👨‍🏫 教练申请</h1>
     </div>
-
+    
+    <div class="content">
+        <div class="card">
+            <h2>📝 基本信息</h2>
+            <div class="form-group">
+                <label>姓名</label>
+                <input type="text" id="coachName" placeholder="输入您的姓名">
+            </div>
+            <div class="form-group">
+                <label>电话号码</label>
+                <input type="tel" id="coachPhone" placeholder="例如：0123456789">
+            </div>
+            <div class="form-group">
+                <label>电子邮箱</label>
+                <input type="email" id="coachEmail" placeholder="例如：coach@example.com">
+            </div>
+            <div class="form-group">
+                <label>📍 教学地区</label>
+                <select id="coachRegion" style="width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px">
+                    <option value="">选择教学地区</option>
+                    <option value="吉隆坡">🏙️ 吉隆坡 (Kuala Lumpur)</option>
+                    <option value="雪兰莪">🌆 雪兰莪 (Selangor)</option>
+                    <option value="槟城">🌉 槟城 (Penang)</option>
+                    <option value="柔佛">🏞️ 柔佛 (Johor)</option>
+                    <option value="霹雳">⛰️ 霹雳 (Perak)</option>
+                    <option value="马六甲">🏛️ 马六甲 (Melaka)</option>
+                    <option value="森美兰">🌴 森美兰 (Negeri Sembilan)</option>
+                    <option value="彭亨">🏔️ 彭亨 (Pahang)</option>
+                    <option value="吉打">🌾 吉打 (Kedah)</option>
+                    <option value="吉兰丹">🎏 吉兰丹 (Kelantan)</option>
+                    <option value="登嘉楼">🏖️ 登嘉楼 (Terengganu)</option>
+                    <option value="玻璃市">🌅 玻璃市 (Perlis)</option>
+                    <option value="沙巴">🏝️ 沙巴 (Sabah)</option>
+                    <option value="砂拉越">🦅 砂拉越 (Sarawak)</option>
+                    <option value="全国/在线">💻 全国/在线教学</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>个人简介</label>
+                <textarea id="coachBio" rows="4" placeholder="介绍您的经验和专长..."></textarea>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>💪 专业领域（多选）</h2>
+            <div class="checkbox-group">
+                <label class="checkbox-item">
+                    <input type="checkbox" value="减重" onchange="toggleCheckbox(this)">
+                    <span>🏃 减重</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="增肌" onchange="toggleCheckbox(this)">
+                    <span>💪 增肌</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="产后恢复" onchange="toggleCheckbox(this)">
+                    <span>👶 产后恢复</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="营养指导" onchange="toggleCheckbox(this)">
+                    <span>🥗 营养指导</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="力量训练" onchange="toggleCheckbox(this)">
+                    <span>🏋️ 力量训练</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="有氧运动" onchange="toggleCheckbox(this)">
+                    <span>🚴 有氧运动</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="瑜伽普拉提" onchange="toggleCheckbox(this)">
+                    <span>🧘 瑜伽/普拉提</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" value="康复训练" onchange="toggleCheckbox(this)">
+                    <span>🏥 康复训练</span>
+                </label>
+            </div>
+            <small style="margin-top:10px;display:block;color:#999">请选择您的专业领域（可多选）</small>
+        </div>
+        
+        <div class="card">
+            <h2>📄 上传证书</h2>
+            <div class="file-upload" onclick="document.getElementById('certUpload').click()">
+                <div class="file-upload-icon">📄</div>
+                <div class="file-upload-text">点击上传证书<br>支持 PDF、JPG、PNG 格式</div>
+                <input type="file" id="certUpload" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleFileUpload(event)">
+            </div>
+            <div class="file-list" id="fileList"></div>
+            <small style="margin-top:10px;display:block;color:#999">请上传您的健身教练证书、营养师大证书等相关证明文件</small>
+        </div>
+        
+        <div class="card">
+            <h2>💰 服务定价</h2>
+            <div class="form-group">
+                <label>每小时收费 (RM)</label>
+                <input type="number" id="hourlyRate" placeholder="例如：150">
+            </div>
+            <div class="form-group">
+                <label>每月套餐收费 (RM)</label>
+                <input type="number" id="monthlyRate" placeholder="例如：500">
+            </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="submitApplication()">📤 提交申请</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">❌ 取消</button>
+    </div>
+    
+    <div class="nav-bar">
+        <div class="nav-item" onclick="window.location.href='index.html'"><span class="nav-icon">🏠</span>首页</div>
+        <div class="nav-item active"><span class="nav-icon">👨‍🏫</span>教练</div>
+    </div>
+    
     <script>
-        function submitApplication(event) {
-            event.preventDefault();
-            
-            const form = event.target;
-            const formData = new FormData(form);
-            
-            const application = {
-                name: formData.get('name'),
-                email: formData.get('email'),
-                phone: formData.get('phone'),
-                certification: formData.get('certification'),
-                experience: formData.get('experience'),
-                specialty: formData.get('specialty'),
-                bio: formData.get('bio'),
-                why: formData.get('why'),
-                status: 'pending',
-                submittedAt: new Date().toISOString()
-            };
-            
-            console.log('📝 教练申请提交:', application);
-            
-            // 保存到本地存储（实际应该发送到服务器）
-            const applications = JSON.parse(localStorage.getItem('coach_applications') || '[]');
-            applications.push(application);
-            localStorage.setItem('coach_applications', JSON.stringify(applications));
-            
-            // 显示成功消息
-            document.getElementById('submittedEmail').textContent = application.email;
-            document.getElementById('formContent').classList.add('hidden');
-            document.getElementById('successMessage').classList.add('show');
-            
-            // 这里可以添加发送到后端的代码
-            // fetch('/api/coach/apply', { method: 'POST', body: JSON.stringify(application) })
+        let uploadedFiles=[];
+        
+        function toggleCheckbox(el){
+            el.parentElement.classList.toggle('active',el.checked);
         }
         
-        function goBack() {
-            window.location.href = 'splash.html';
+        function handleFileUpload(event){
+            const files=event.target.files;
+            if(!files||files.length===0)return;
+            
+            for(let i=0;i<files.length;i++){
+                const file=files[i];
+                const fileSize=(file.size/1024/1024).toFixed(2);
+                uploadedFiles.push({name:file.name,size:fileSize,type:file.type});
+            }
+            
+            renderFileList();
+        }
+        
+        function renderFileList(){
+            const fileList=document.getElementById('fileList');
+            if(uploadedFiles.length===0){
+                fileList.innerHTML='';
+                return;
+            }
+            
+            fileList.innerHTML=uploadedFiles.map((file,index)=>`
+                <div class="file-item">
+                    <div class="file-name">📄 ${file.name} (${file.size} MB)</div>
+                    <div class="file-delete" onclick="removeFile(${index})">×</div>
+                </div>
+            `).join('');
+        }
+        
+        function removeFile(index){
+            uploadedFiles.splice(index,1);
+            renderFileList();
+        }
+        
+        function submitApplication(){
+            const name=document.getElementById('coachName').value;
+            const phone=document.getElementById('coachPhone').value;
+            const email=document.getElementById('coachEmail').value;
+            const region=document.getElementById('coachRegion').value;
+            const bio=document.getElementById('coachBio').value;
+            const hourlyRate=document.getElementById('hourlyRate').value;
+            const monthlyRate=document.getElementById('monthlyRate').value;
+            
+            // 获取选中的专业领域
+            const specialties=[];
+            document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked').forEach(cb=>{
+                specialties.push(cb.value);
+            });
+            
+            // 验证
+            if(!name||!phone||!email){
+                alert('请填写所有必填字段');
+                return;
+            }
+            
+            if(!region){
+                alert('请选择教学地区');
+                return;
+            }
+            
+            if(specialties.length===0){
+                alert('请至少选择一个专业领域');
+                return;
+            }
+            
+            if(uploadedFiles.length===0){
+                alert('请上传至少一个证书');
+                return;
+            }
+            
+            // 保存申请数据
+            const application={
+                name,
+                phone,
+                email,
+                region,  // 教学地区
+                bio,
+                specialties,
+                hourlyRate,
+                monthlyRate,
+                certificates:uploadedFiles,
+                status:'pending',
+                applyDate:new Date().toISOString()
+            };
+            
+            // 保存到 Firebase Firestore
+            const db=window.firebaseApp.db;
+            
+            db.collection('coachRegistrations').add(application)
+                .then(()=>{
+                    alert('✅ 申请已提交！\n\n我们会尽快审核您的资料，审核结果将通过电话或电邮通知您。');
+                    window.location.href='index.html';
+                })
+                .catch((error)=>{
+                    alert('❌ 提交失败：'+error.message);
+                });
         }
     </script>
 </body>

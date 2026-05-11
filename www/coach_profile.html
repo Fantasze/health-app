@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康管家 - 教练资料</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;min-height:100vh;padding-bottom:70px}
+        .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:25px 20px 20px}
+        .header h1{font-size:22px}
+        .content{padding:20px}
+        .profile-card{background:white;border-radius:20px;padding:30px;margin-bottom:20px;box-shadow:0 5px 15px rgba(0,0,0,0.08);text-align:center}
+        .avatar-container{width:120px;height:120px;margin:0 auto 20px;border-radius:50%;overflow:hidden;background:#f3f4f6;position:relative}
+        .avatar{width:100%;height:100%;object-fit:cover}
+        .avatar-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px;color:#999}
+        .avatar-upload{position:absolute;bottom:0;right:0;background:#667eea;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}
+        .coach-name{font-size:24px;font-weight:700;color:#333;margin-bottom:5px}
+        .coach-phone{color:#666;font-size:14px;margin-bottom:15px}
+        .specialties{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:15px}
+        .specialty-tag{background:#f3f4f6;padding:6px 12px;border-radius:16px;font-size:12px;color:#666}
+        .rating{display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:15px}
+        .rating-stars{color:#fbbf24;font-size:18px}
+        .rating-text{color:#999;font-size:13px}
+        .card{background:white;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08)}
+        .card h3{color:#333;font-size:17px;margin-bottom:15px}
+        .form-group{margin-bottom:15px}
+        .form-group label{display:block;color:#555;margin-bottom:8px;font-size:14px;font-weight:500}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#667eea;outline:none}
+        .form-group textarea{min-height:100px;resize:vertical}
+        .btn{width:100%;padding:16px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;border:none;margin-bottom:10px}
+        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .btn-secondary{background:#e0e0e0;color:#333}
+        .nav-bar{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -5px 20px rgba(0,0,0,0.1);z-index:100}
+        .nav-item{text-align:center;color:#999;font-size:11px;cursor:pointer;text-decoration:none}
+        .nav-item.active{color:#667eea}
+        .nav-icon{font-size:22px;display:block;margin-bottom:2px}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👤 我的资料</h1>
+    </div>
+    
+    <div class="content">
+        <div class="profile-card">
+            <div class="avatar-container" onclick="uploadAvatar()">
+                <div class="avatar-placeholder" id="avatarPlaceholder">👨‍🏫</div>
+                <img id="avatarImage" class="avatar" style="display:none">
+                <div class="avatar-upload">📷</div>
+            </div>
+            <div class="coach-name" id="displayName">Demo 教练</div>
+            <div class="coach-phone" id="displayPhone">0123456789</div>
+            <div class="specialties" id="displaySpecialties">
+                <span class="specialty-tag">🏃 减重</span>
+                <span class="specialty-tag">💪 增肌</span>
+                <span class="specialty-tag">🥗 营养指导</span>
+            </div>
+            <div class="rating">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <div class="rating-text">5.0 (12 条评价)</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>📝 自我介绍</h3>
+            <div class="form-group">
+                <textarea id="bio" placeholder="介绍您的经验、专长、教学风格..."></textarea>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>📞 联络方式</h3>
+            <div class="form-group">
+                <label>电话号码</label>
+                <input type="tel" id="phone" placeholder="0123456789">
+            </div>
+            <div class="form-group">
+                <label>电子邮箱</label>
+                <input type="email" id="email" placeholder="coach@example.com">
+            </div>
+            <div class="form-group">
+                <label>WhatsApp</label>
+                <input type="tel" id="whatsapp" placeholder="0123456789">
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>🏋️ 所在 Gym</h3>
+            <div class="form-group">
+                <label>Gym 名称</label>
+                <input type="text" id="gymName" placeholder="例如：Fitness First">
+            </div>
+            <div class="form-group">
+                <label>Gym 地址</label>
+                <input type="text" id="gymAddress" placeholder="例如：KLCC, Kuala Lumpur">
+            </div>
+            <div class="form-group">
+                <label>备注</label>
+                <textarea id="gymNotes" placeholder="交通信息、停车信息等..."></textarea>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>💰 服务定价</h3>
+            <div class="form-group">
+                <label>每小时收费 (RM)</label>
+                <input type="number" id="hourlyRate" placeholder="150">
+            </div>
+            <div class="form-group">
+                <label>每月套餐 (RM)</label>
+                <input type="number" id="monthlyRate" placeholder="500">
+            </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="saveProfile()">💾 保存资料</button>
+        <button class="btn btn-secondary" onclick="logout()">🚪 登出</button>
+    </div>
+    
+    <div class="nav-bar">
+        <div class="nav-item" onclick="window.location.href='coach_dashboard.html'"><span class="nav-icon">📊</span>后台</div>
+        <div class="nav-item" onclick="window.location.href='coach_calendar.html'"><span class="nav-icon">📅</span>日历</div>
+        <div class="nav-item active"><span class="nav-icon">👤</span>我的</div>
+    </div>
+    
+    <script>
+        let coachSession=null;
+        
+        function checkLogin(){
+            coachSession=JSON.parse(localStorage.getItem('coachSession'));
+            if(!coachSession){
+                window.location.href='coach.html';
+            }
+        }
+        
+        function logout(){
+            localStorage.removeItem('coachSession');
+            window.location.href='index.html';
+        }
+        
+        function loadProfile(){
+            const profile=JSON.parse(localStorage.getItem('coachProfile')||'{}');
+            
+            if(profile.avatar){
+                document.getElementById('avatarImage').src=profile.avatar;
+                document.getElementById('avatarImage').style.display='block';
+                document.getElementById('avatarPlaceholder').style.display='none';
+            }
+            
+            document.getElementById('displayName').textContent=profile.name||coachSession.name||'Demo 教练';
+            document.getElementById('displayPhone').textContent=profile.phone||coachSession.phone||'0123456789';
+            
+            if(profile.specialties&&profile.specialties.length>0){
+                document.getElementById('displaySpecialties').innerHTML=profile.specialties.map(s=>'<span class="specialty-tag">'+s+'</span>').join('');
+            }
+            
+            document.getElementById('bio').value=profile.bio||'';
+            document.getElementById('phone').value=profile.phone||coachSession.phone||'';
+            document.getElementById('email').value=profile.email||coachSession.email||'';
+            document.getElementById('whatsapp').value=profile.whatsapp||'';
+            document.getElementById('gymName').value=profile.gymName||'';
+            document.getElementById('gymAddress').value=profile.gymAddress||'';
+            document.getElementById('gymNotes').value=profile.gymNotes||'';
+            document.getElementById('hourlyRate').value=profile.hourlyRate||coachSession.hourlyRate||'';
+            document.getElementById('monthlyRate').value=profile.monthlyRate||coachSession.monthlyRate||'';
+        }
+        
+        function uploadAvatar(){
+            const input=document.createElement('input');
+            input.type='file';
+            input.accept='image/*';
+            input.onchange=function(e){
+                const file=e.target.files[0];
+                if(!file)return;
+                
+                const reader=new FileReader();
+                reader.onload=function(event){
+                    const base64=event.target.result;
+                    document.getElementById('avatarImage').src=base64;
+                    document.getElementById('avatarImage').style.display='block';
+                    document.getElementById('avatarPlaceholder').style.display='none';
+                    
+                    const profile=JSON.parse(localStorage.getItem('coachProfile')||'{}');
+                    profile.avatar=base64;
+                    localStorage.setItem('coachProfile',JSON.stringify(profile));
+                    
+                    alert('✅ 头像已更新！');
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+        
+        function saveProfile(){
+            const profile={
+                name:coachSession.name,
+                phone:document.getElementById('phone').value,
+                email:document.getElementById('email').value,
+                whatsapp:document.getElementById('whatsapp').value,
+                bio:document.getElementById('bio').value,
+                gymName:document.getElementById('gymName').value,
+                gymAddress:document.getElementById('gymAddress').value,
+                gymNotes:document.getElementById('gymNotes').value,
+                hourlyRate:document.getElementById('hourlyRate').value,
+                monthlyRate:document.getElementById('monthlyRate').value,
+                specialties:coachSession.specialties||[],
+                updateDate:new Date().toISOString()
+            };
+            
+            localStorage.setItem('coachProfile',JSON.stringify(profile));
+            
+            // 更新 coachSession
+            coachSession.phone=profile.phone;
+            coachSession.email=profile.email;
+            localStorage.setItem('coachSession',JSON.stringify(coachSession));
+            
+            alert('✅ 资料已保存！');
+            loadProfile();
+        }
+        
+        checkLogin();
+        loadProfile();
+    </script>
+</body>
+</html>

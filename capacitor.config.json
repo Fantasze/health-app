@@ -1,5 +1,8 @@
 {
   "appId": "com.healthapp.app",
   "appName": "健康管家",
-  "webDir": "www"
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
 }

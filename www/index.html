@@ -2,140 +2,82 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>健康管家</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="健康管家">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <title>健康管家 - 欢迎</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .logo {
-            font-size: 80px;
-            margin-bottom: 10px;
-        }
-        
-        h1 {
-            color: white;
-            font-size: 32px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        .subtitle {
-            color: rgba(255,255,255,0.9);
-            font-size: 16px;
-            margin-bottom: 50px;
-            text-align: center;
-        }
-        
-        .welcome-text {
-            color: white;
-            font-size: 20px;
-            margin-bottom: 30px;
-            text-align: center;
-            font-weight: 500;
-        }
-        
-        .role-cards {
-            display: flex;
-            gap: 20px;
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        .role-card {
-            flex: 1;
-            background: white;
-            border-radius: 20px;
-            padding: 30px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .role-card:active {
-            transform: scale(0.95);
-        }
-        
-        .role-icon {
-            font-size: 50px;
-            margin-bottom: 15px;
-        }
-        
-        .role-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-        
-        .role-desc {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.5;
-        }
-        
-        .login-link {
-            margin-top: 40px;
-            color: rgba(255,255,255,0.9);
-            text-decoration: none;
-            font-size: 15px;
-            padding: 12px 30px;
-            border: 2px solid rgba(255,255,255,0.5);
-            border-radius: 25px;
-            transition: all 0.3s;
-        }
-        
-        .login-link:active {
-            background: rgba(255,255,255,0.2);
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .welcome-card{background:white;border-radius:20px;padding:40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center}
+        .logo{font-size:64px;margin-bottom:20px}
+        .title{font-size:28px;font-weight:700;color:#333;margin-bottom:10px}
+        .subtitle{font-size:14px;color:#999;margin-bottom:30px}
+        .role-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:20px}
+        .role-card{background:#f8f9fa;border-radius:15px;padding:25px 15px;cursor:pointer;transition:all 0.3s;border:2px solid transparent}
+        .role-card:hover{border-color:#667eea;background:#e8f0ff}
+        .role-icon{font-size:40px;margin-bottom:10px}
+        .role-title{font-size:16px;font-weight:600;color:#333}
+        .role-desc{font-size:11px;color:#999;margin-top:5px}
+        .divider{display:flex;align-items:center;margin:20px 0}
+        .divider-line{flex:1;height:1px;background:#e0e0e0}
+        .divider-text{padding:0 15px;color:#999;font-size:13px}
+        .btn{width:100%;padding:16px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;border:none;margin-bottom:10px}
+        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .btn-coach{background:#f3f4f6;color:#667eea;border:2px solid #667eea}
     </style>
 </head>
 <body>
-    <div class="logo">💪</div>
-    <h1>健康管家</h1>
-    <p class="subtitle">你的私人健康顾问</p>
-    
-    <p class="welcome-text">👋 欢迎！请选择你的角色</p>
-    
-    <div class="role-cards">
-        <div class="role-card" onclick="selectRole('student')">
-            <div class="role-icon">👤</div>
-            <div class="role-title">学员</div>
-            <div class="role-desc">记录饮食<br>追踪进度<br>找教练</div>
+    <div class="welcome-card">
+        <div class="logo">🏋️</div>
+        <h1 class="title">健康管家</h1>
+        <p class="subtitle">您的专属健身饮食管理平台</p>
+        
+        <div class="role-grid">
+            <div class="role-card" onclick="selectRole('student')">
+                <div class="role-icon">👤</div>
+                <div class="role-title">学员</div>
+                <div class="role-desc">记录饮食和训练</div>
+            </div>
+            <div class="role-card" onclick="selectRole('coach')">
+                <div class="role-icon">👨‍🏫</div>
+                <div class="role-title">教练</div>
+                <div class="role-desc">管理学生和课程</div>
+            </div>
         </div>
         
-        <div class="role-card" onclick="selectRole('coach')">
-            <div class="role-icon">👨‍🏫</div>
-            <div class="role-title">教练</div>
-            <div class="role-desc">管理学生<br>安排课程<br>追踪收入</div>
+        <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-text">或</div>
+            <div class="divider-line"></div>
+        </div>
+        
+        <button class="btn btn-coach" onclick="window.location.href='coach_direct_login.html'">👨‍🏫 教练快速登录</button>
+        <button class="btn btn-primary" onclick="window.location.href='login.html'">🔐 账号登录</button>
+        
+        <div style="margin-top:15px">
+            <a href="coach_register.html" style="color:#667eea;font-size:14px;text-decoration:none">👨‍🏫 申请成为教练</a>
         </div>
     </div>
     
-    <a href="login.html" class="login-link">已有账号？立即登入</a>
-    
     <script>
-        function selectRole(role) {
-            localStorage.setItem('userRole', role);
-            if (role === 'student') {
-                window.location.href = 'app.html';
-            } else {
-                window.location.href = 'coach_dashboard.html';
+        function selectRole(role){
+            if(role==='student'){
+                window.location.href='language_choice.html';
+            }else if(role==='coach'){
+                window.location.href='coach_direct_login.html';
             }
+        }
+        
+        // Register Service Worker for PWA
+        if('serviceWorker' in navigator){
+            navigator.serviceWorker.register('sw.js')
+                .then(reg=>console.log('SW registered:',reg))
+                .catch(err=>console.log('SW registration failed:',err));
         }
     </script>
 </body>

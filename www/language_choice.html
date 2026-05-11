@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康管家 - 语言选择</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .logo { font-size: 80px; margin-bottom: 20px; }
+        h1 { color: white; font-size: 32px; margin-bottom: 10px; text-align: center; }
+        .subtitle { color: rgba(255,255,255,0.9); font-size: 16px; margin-bottom: 50px; text-align: center; }
+        
+        .lang-cards { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 350px; }
+        .lang-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .lang-card:active { transform: scale(0.98); }
+        .lang-icon { font-size: 32px; margin-right: 15px; }
+        .lang-text { flex: 1; text-align: left; }
+        .lang-title { font-size: 18px; font-weight: 600; color: #333; }
+        .lang-subtitle { font-size: 13px; color: #999; margin-top: 3px; }
+        .lang-arrow { font-size: 24px; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="logo">💪</div>
+    <h1 id="title">健康管家</h1>
+    <p class="subtitle" id="subtitle">Your Personal Health Assistant</p>
+    
+    <div class="lang-cards">
+        <div class="lang-card" onclick="selectLang('zh')">
+            <div class="lang-icon">🈯</div>
+            <div class="lang-text">
+                <div class="lang-title">中文</div>
+                <div class="lang-subtitle">Chinese</div>
+            </div>
+            <div class="lang-arrow">›</div>
+        </div>
+        
+        <div class="lang-card" onclick="selectLang('en')">
+            <div class="lang-icon">🔤</div>
+            <div class="lang-text">
+                <div class="lang-title">English</div>
+                <div class="lang-subtitle">英文</div>
+            </div>
+            <div class="lang-arrow">›</div>
+        </div>
+    </div>
+    
+    <script>
+        function selectLang(lang) {
+            localStorage.setItem('preferredLang', lang);
+            // 获取之前选择的角色
+            const role = localStorage.getItem('tempRole') || 'student';
+            if (role === 'student') {
+                window.location.href = 'student_register.html?lang=' + lang;
+            } else {
+                window.location.href = 'coach_apply.html?lang=' + lang;
+            }
+        }
+    </script>
+</body>
+</html>

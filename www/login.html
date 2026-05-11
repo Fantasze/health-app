@@ -3,123 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登入 - 健康管家</title>
+    <title>健康管家 - 登录</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth_utils.js"></script>
+    <link rel="stylesheet" href="common.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .login-box {
-            background: white;
-            border-radius: 20px;
-            padding: 40px 30px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-        .subtitle {
-            color: #666;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            color: #555;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        button:active {
-            transform: scale(0.98);
-        }
-        .back-link {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .back-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 14px;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .login-card{background:white;border-radius:20px;padding:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .logo{font-size:48px;text-align:center;margin-bottom:10px}
+        .title{font-size:24px;font-weight:700;color:#333;text-align:center;margin-bottom:30px}
+        .form-group{margin-bottom:20px}
+        .form-group label{display:block;color:#555;margin-bottom:8px;font-size:14px;font-weight:500}
+        .form-group input{width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px}
+        .form-group input:focus{border-color:#667eea;outline:none}
+        .btn{width:100%;padding:16px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;border:none;margin-bottom:10px}
+        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .btn-demo{background:#f3f4f6;color:#667eea;border:2px solid #667eea}
+        .divider{display:flex;align-items:center;margin:20px 0}
+        .divider-line{flex:1;height:1px;background:#e0e0e0}
+        .divider-text{padding:0 15px;color:#999;font-size:13px}
+        .demo-info{background:#f8f9fa;border-radius:10px;padding:15px;margin-top:20px}
+        .demo-info h4{color:#667eea;font-size:14px;margin-bottom:10px}
+        .demo-info p{font-size:12px;color:#666;margin-bottom:5px}
     </style>
 </head>
 <body>
-    <div class="login-box">
-        <h1>欢迎回来</h1>
-        <p class="subtitle">登入你的健康管家账户</p>
+    <div class="login-card">
+        <div class="logo">🏋️</div>
+        <h1 class="title">健康管家</h1>
         
-        <form onsubmit="handleLogin(event)">
-            <div class="form-group">
-                <label>电子邮箱</label>
-                <input type="email" id="email" required placeholder="example@email.com">
-            </div>
-            
-            <div class="form-group">
-                <label>密码</label>
-                <input type="password" id="password" required placeholder="请输入密码">
-            </div>
-            
-            <button type="submit">登入</button>
-        </form>
+        <div class="form-group">
+            <label>电话号码</label>
+            <input type="tel" id="phone" placeholder="输入电话号码">
+        </div>
         
-        <div class="back-link">
-            <a href="index.html">← 返回首页</a>
+        <div class="form-group">
+            <label>密码</label>
+            <input type="password" id="password" placeholder="输入密码">
+        </div>
+        
+        <div style="text-align:right;margin-bottom:15px">
+            <a href="forgot_password.html" style="color:#667eea;font-size:13px;text-decoration:none">🔐 忘记密码？</a>
+        </div>
+        
+        <button class="btn btn-primary" onclick="login()">🔐 登录</button>
+        
+        <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-text">或</div>
+            <div class="divider-line"></div>
+        </div>
+        
+        <button class="btn btn-demo" onclick="demoCoach()">👨‍🏫 教练 Demo</button>
+        <button class="btn btn-demo" onclick="demoAdmin()">⚙️ 管理员 Demo</button>
+        
+        <div class="demo-info">
+            <h4>🧪 Demo 账号</h4>
+            <p>👨‍🏫 教练：点击"教练 Demo"直接登录</p>
+            <p>⚙️ 管理员：点击"管理员 Demo"直接登录</p>
         </div>
     </div>
     
     <script>
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            localStorage.setItem('userEmail', email);
-            localStorage.setItem('isLoggedIn', 'true');
+        function login(){
+            const phone=document.getElementById('phone').value;
+            const password=document.getElementById('password').value;
             
-            // 简单判断角色
-            if (email.includes('coach')) {
-                window.location.href = 'coach_dashboard.html';
-            } else {
-                window.location.href = 'app.html';
+            if(!phone||!password){
+                alert('请输入电话号码和密码');
+                return;
             }
+            
+            // 检查是否是学员
+            const users=JSON.parse(localStorage.getItem('users')||'[]');
+            const user=users.find(u=>u.phone===phone&&u.password===password);
+            
+            if(user){
+                localStorage.setItem('userSession',JSON.stringify(user));
+                alert('✅ 登录成功！');
+                window.location.href='app.html';
+                return;
+            }
+            
+            // 检查是否是教练
+            const coaches=JSON.parse(localStorage.getItem('coaches')||'[]');
+            const coach=coaches.find(c=>c.phone===phone&&c.password===password);
+            
+            if(coach){
+                localStorage.setItem('coachSession',JSON.stringify(coach));
+                alert('✅ 教练登录成功！');
+                window.location.href='coach_dashboard.html';
+                return;
+            }
+            
+            alert('❌ 账号或密码错误');
+        }
+        
+        function demoCoach(){
+            // Demo 教练账号
+            const demoCoach={
+                id:'demo-coach',
+                name:'Demo 教练',
+                phone:'0123456789',
+                email:'coach@demo.com',
+                specialties:['减重','增肌','营养指导'],
+                hourlyRate:150,
+                monthlyRate:500,
+                rating:5.0,
+                students:12,
+                status:'approved'
+            };
+            
+            localStorage.setItem('coachSession',JSON.stringify(demoCoach));
+            alert('✅ 教练 Demo 登录成功！\n\n您已跳过申请直接登录教练后台。');
+            window.location.href='coach_dashboard.html';
+        }
+        
+        function demoAdmin(){
+            alert('管理员后台已改为 Firebase 管理员账号登录。');
+            window.location.href='admin_login.html';
         }
     </script>
 </body>

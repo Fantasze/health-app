@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康管家 - 教练登录</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth_utils.js"></script>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .login-card{background:white;border-radius:20px;padding:30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .logo{font-size:48px;text-align:center;margin-bottom:10px}
+        .title{font-size:24px;font-weight:700;color:#333;text-align:center;margin-bottom:30px}
+        .form-group{margin-bottom:20px}
+        .form-group label{display:block;color:#555;margin-bottom:8px;font-size:14px;font-weight:500}
+        .form-group input{width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px}
+        .form-group input:focus{border-color:#667eea;outline:none}
+        .btn{width:100%;padding:16px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;border:none;margin-bottom:10px}
+        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .info-box{background:#f8f9fa;border-radius:10px;padding:15px;margin-top:20px}
+        .info-box h4{color:#667eea;font-size:14px;margin-bottom:10px}
+        .info-box p{font-size:12px;color:#666;margin-bottom:5px}
+        .loading{display:none;text-align:center;padding:20px}
+        .spinner{border:3px solid #f3f3f3;border-top:3px solid #667eea;border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;margin:0 auto 10px}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .alert-box{margin-top:15px;background:#f0f9ff;border-left:4px solid #0ea5e9;padding:12px;border-radius:8px}
+        .alert-box p{font-size:13px;color:#0369a1;margin:0}
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">👨‍🏫</div>
+        <h1 class="title">教练登录</h1>
+        
+        <div id="loginForm">
+            <div class="form-group">
+                <label>教练 ID *</label>
+                <input type="text" id="coachId" placeholder="例如：COACH001（管理员批准时提供）" style="text-transform:uppercase">
+            </div>
+            
+            <div class="form-group">
+                <label>电话号码 *</label>
+                <input type="tel" id="coachPhone" placeholder="0123456789">
+            </div>
+            
+            <button class="btn btn-primary" id="loginBtn" onclick="coachLogin()">🔐 登录</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div style="color:#666;font-size:14px">正在验证教练 ID...</div>
+        </div>
+        
+        <div class="info-box">
+            <h4>📝 使用说明</h4>
+            <p>1. 输入管理员批准时提供的<strong>教练 ID</strong></p>
+            <p>2. 输入注册时的电话号码</p>
+            <p>3. 点击"登录"</p>
+            <p>4. 验证通过后进入教练后台</p>
+        </div>
+        
+        <div class="alert-box">
+            <p>
+                💡 <strong>还没有教练 ID？</strong><br>
+                请先注册申请，等待管理员审核批准后会通过电邮发送教练 ID 给您。
+            </p>
+        </div>
+        
+        <div style="margin-top:20px;text-align:center">
+            <a href="index.html" style="color:#667eea;font-size:14px">← 返回首页</a>
+        </div>
+    </div>
+    
+    <script>
+        async function coachLogin(){
+            const coachId=document.getElementById('coachId').value.trim().toUpperCase();
+            const phone=document.getElementById('coachPhone').value.trim();
+            
+            if(!coachId||!phone){
+                alert('请输入教练 ID 和电话号码');
+                return;
+            }
+            
+            // 显示加载
+            document.getElementById('loginForm').style.display='none';
+            document.getElementById('loading').style.display='block';
+            
+            try{
+                const db=window.firebaseApp.db;
+                
+                // 验证教练 ID 和电话，并且状态必须是 approved
+                const coachSnapshot=await db.collection('coaches')
+                    .where('coachId','==',coachId)
+                    .where('phone','==',phone)
+                    .where('status','==','approved')
+                    .limit(1)
+                    .get();
+                
+                if(coachSnapshot.empty){
+                    // 教练 ID 或电话不匹配，或状态不是 approved
+                    alert('❌ 教练 ID 或电话号码不正确。\n\n如果您还没有教练 ID，请先注册申请，等待管理员审核批准后会通过电邮发送教练 ID 给您。');
+                    document.getElementById('loginForm').style.display='block';
+                    document.getElementById('loading').style.display='none';
+                    return;
+                }
+                
+                // 验证通过
+                const doc=coachSnapshot.docs[0];
+                const coachData=doc.data();
+                
+                // 更新最后登录时间
+                await db.collection('coaches').doc(doc.id).update({
+                    lastLogin:new Date()
+                });
+                
+                // 保存教练 session
+                const coachSession={
+                    id:doc.id,
+                    coachId:coachId,
+                    ...coachData
+                };
+                localStorage.setItem('coachSession',JSON.stringify(coachSession));
+                
+                alert('✅ 欢迎 '+coachData.name+' 教练！\n\n教练 ID: '+coachId);
+                window.location.href='coach_dashboard.html';
+                
+            }catch(error){
+                console.error('登录错误:',error);
+                alert('❌ 登录失败：'+error.message);
+                document.getElementById('loginForm').style.display='block';
+                document.getElementById('loading').style.display='none';
+            }
+        }
+        
+        // 允许按 Enter 登录
+        document.addEventListener('keypress',function(e){
+            if(e.key==='Enter'){
+                coachLogin();
+            }
+        });
+    </script>
+</body>
+</html>

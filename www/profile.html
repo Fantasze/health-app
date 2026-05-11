@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的 - 健康管家</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth_utils.js"></script>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;min-height:100vh;padding-bottom:70px}
+        .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:20px}
+        .header h1{font-size:20px}
+        .content{padding:20px}
+        .profile-card{background:white;border-radius:15px;padding:25px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08);text-align:center}
+        .avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 15px}
+        .user-name{font-size:20px;font-weight:700;color:#333;margin-bottom:5px}
+        .user-email{font-size:13px;color:#999}
+        .card{background:white;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08)}
+        .card h3{color:#333;font-size:17px;margin-bottom:15px}
+        .info-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}
+        .info-row:last-child{border-bottom:none}
+        .info-label{color:#666}
+        .info-value{color:#333;font-weight:600}
+        .btn{padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;width:100%;margin-bottom:10px}
+        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white}
+        .btn-danger{background:#ef4444;color:white}
+        .nav-bar{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -5px 20px rgba(0,0,0,0.1);z-index:100}
+        .nav-item{text-align:center;color:#999;font-size:11px;cursor:pointer;text-decoration:none}
+        .nav-item.active{color:#667eea}
+        .nav-icon{font-size:22px;display:block;margin-bottom:2px}
+        .setting-item{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid #eee}
+        .setting-item:last-child{border-bottom:none}
+        .setting-label{font-size:15px;color:#333}
+        .setting-value{color:#999;font-size:14px}
+        .toggle{width:50px;height:26px;background:#e0e0e0;border-radius:13px;position:relative;cursor:pointer;transition:0.3s}
+        .toggle.on{background:#667eea}
+        .toggle::after{content:'';position:absolute;width:22px;height:22px;background:white;border-radius:50%;top:2px;left:2px;transition:0.3s}
+        .toggle.on::after{left:26px}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👤 我的</h1>
+    </div>
+    
+    <div class="content">
+        <div class="profile-card">
+            <div class="avatar">👤</div>
+            <div class="user-name" id="userName">加载中...</div>
+            <div class="user-email" id="userEmail">加载中...</div>
+        </div>
+        
+        <div class="card">
+            <h3>个人信息</h3>
+            <div class="info-row">
+                <span class="info-label">身高</span>
+                <span class="info-value" id="userHeight">-- cm</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">当前体重</span>
+                <span class="info-value" id="userWeight">-- kg</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">目标体重</span>
+                <span class="info-value" id="userTargetWeight">-- kg</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">BMI</span>
+                <span class="info-value" id="userBmi">--</span>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>设置</h3>
+            <div class="setting-item">
+                <span class="setting-label">每日卡路里目标</span>
+                <span class="setting-value" id="calorieGoal">2000 kcal</span>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">蛋白质目标</span>
+                <span class="setting-value" id="proteinGoal">150g</span>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">体重提醒</span>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">语言</span>
+                <span class="setting-value">中文</span>
+            </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="editProfile()">编辑资料</button>
+        <button class="btn btn-danger" onclick="logout()">退出登录</button>
+    </div>
+    
+    <div class="nav-bar">
+        <a href="app.html" class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+        <a href="diet.html" class="nav-item"><span class="nav-icon">🍽️</span>饮食</a>
+        <a href="stats.html" class="nav-item"><span class="nav-icon">📊</span>统计</a>
+        <div class="nav-item active"><span class="nav-icon">👤</span>我的</div>
+    </div>
+    
+    <script>
+        let userSession=null;
+        const db=window.firebaseApp.db;
+        
+        function checkLogin(){
+            userSession=JSON.parse(localStorage.getItem('userSession'));
+            if(!userSession){
+                window.location.href='index.html';
+            }
+        }
+        
+        function logout(){
+            localStorage.removeItem('userSession');
+            window.location.href='index.html';
+        }
+        
+        function editProfile(){
+            const height=prompt('身高 (cm):',userSession.height||'170');
+            if(height===null)return;
+            
+            const weight=prompt('当前体重 (kg):',userSession.weight||'70');
+            if(weight===null)return;
+            
+            const targetWeight=prompt('目标体重 (kg):',userSession.targetWeight||'65');
+            if(targetWeight===null)return;
+            
+            userSession.height=parseFloat(height)/100;
+            userSession.weight=parseFloat(weight);
+            userSession.targetWeight=parseFloat(targetWeight);
+            
+            localStorage.setItem('userSession',JSON.stringify(userSession));
+            
+            db.collection('users').doc(userSession.id).update({
+                height:userSession.height,
+                weight:userSession.weight,
+                targetWeight:userSession.targetWeight
+            }).then(()=>{
+                alert('更新成功！');
+                loadProfile();
+            }).catch(err=>{
+                alert('更新失败：'+err.message);
+            });
+        }
+        
+        async function loadProfile(){
+            try{
+                document.getElementById('userName').textContent=userSession.name||'用户';
+                document.getElementById('userEmail').textContent=userSession.email||'';
+                
+                const heightCm=userSession.height?Math.round(userSession.height*100):0;
+                document.getElementById('userHeight').textContent=heightCm>0?heightCm+' cm':'-- cm';
+                document.getElementById('userWeight').textContent=userSession.weight?userSession.weight+' kg':'-- kg';
+                document.getElementById('userTargetWeight').textContent=userSession.targetWeight?userSession.targetWeight+' kg':'-- kg';
+                
+                if(userSession.weight&&userSession.height){
+                    const bmi=(userSession.weight/(userSession.height*userSession.height)).toFixed(1);
+                    document.getElementById('userBmi').textContent=bmi;
+                }
+                
+                // 加载最新体重
+                const weightsSnapshot=await db.collection('weights')
+                    .where('userId','==',userSession.id)
+                    .orderBy('date','desc')
+                    .limit(1)
+                    .get();
+                
+                if(!weightsSnapshot.empty){
+                    const latestWeight=weightsSnapshot.docs[0].data();
+                    document.getElementById('userWeight').textContent=latestWeight.weight+' kg';
+                }
+                
+            }catch(error){
+                console.error('加载个人资料失败:',error);
+            }
+        }
+        
+        checkLogin();
+        loadProfile();
+    </script>
+</body>
+</html>

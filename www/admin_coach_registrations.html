@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教练注册审核 - 健康管家</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth_utils.js"></script>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;min-height:100vh;padding-bottom:70px}
+        .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:25px 20px 20px}
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+        .header h1{font-size:22px}
+        .logout-btn{color:white;text-decoration:none;font-size:14px;padding:8px 15px;border:1px solid rgba(255,255,255,0.5);border-radius:20px}
+        .content{padding:20px}
+        .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px}
+        .stat-card{background:white;border-radius:15px;padding:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08);text-align:center}
+        .stat-value{font-size:24px;font-weight:700;color:#667eea}
+        .stat-label{font-size:11px;color:#999;margin-top:5px}
+        .card{background:white;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.08)}
+        .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+        .card h3{color:#333;font-size:17px}
+        .badge{padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600}
+        .badge-pending{background:#fef3c7;color:#d97706}
+        .badge-approved{background:#d1fae5;color:#059669}
+        .badge-rejected{background:#fee2e2;color:#dc2626}
+        .registration-item{padding:15px 0;border-bottom:1px solid #f0f0f0}
+        .registration-item:last-child{border-bottom:none}
+        .reg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        .reg-name{font-size:14px;font-weight:600;color:#333}
+        .reg-date{font-size:12px;color:#999}
+        .reg-details{font-size:13px;color:#666;margin-bottom:10px}
+        .reg-specialties{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+        .specialty-tag{background:#f3f4f6;padding:4px 8px;border-radius:6px;font-size:11px;color:#666}
+        .reg-certificates{margin-bottom:10px}
+        .cert-item{font-size:12px;color:#667eea;margin-bottom:3px}
+        .reg-actions{display:flex;gap:10px;margin-top:10px}
+        .btn{flex:1;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none}
+        .btn-approve{background:#4ade80;color:white}
+        .btn-reject{background:#ef4444;color:white}
+        .nav-bar{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 0;box-shadow:0 -5px 20px rgba(0,0,0,0.1);z-index:100}
+        .nav-item{text-align:center;color:#999;font-size:11px;cursor:pointer;text-decoration:none}
+        .nav-item.active{color:#667eea}
+        .nav-icon{font-size:22px;display:block;margin-bottom:2px}
+        .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
+        .modal-content{background:white;border-radius:15px;padding:25px;max-width:400px;width:90%}
+        .modal-title{font-size:18px;font-weight:700;margin-bottom:15px}
+        .modal-input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px;margin-bottom:15px}
+        .modal-buttons{display:flex;gap:10px}
+        .modal-btn{flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none}
+        .modal-btn-primary{background:#667eea;color:white}
+        .modal-btn-secondary{background:#f3f4f6;color:#666}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <h1>👨‍🏫 教练注册审核</h1>
+            <a href="index.html" class="logout-btn" onclick="logout()">登出</a>
+        </div>
+    </div>
+    
+    <div class="content">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="pendingCount">0</div>
+                <div class="stat-label">待审核</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="approvedCount">0</div>
+                <div class="stat-label">已批准</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalCoaches">0</div>
+                <div class="stat-label">总教练</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>📋 教练注册申请</h3>
+                <span class="badge badge-pending" id="pendingBadge">0 待审核</span>
+            </div>
+            <div id="registrationList">
+                <div style="text-align:center;padding:30px;color:#999">暂无申请</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 批准弹窗 -->
+    <div class="modal" id="approveModal">
+        <div class="modal-content">
+            <div class="modal-title">🎉 批准教练注册</div>
+            <p style="margin-bottom:15px;font-size:14px;color:#666">输入教练 ID（将发送到申请者电邮）：</p>
+            <input type="text" class="modal-input" id="coachIdInput" placeholder="例如：COACH001">
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal()">取消</button>
+                <button class="modal-btn modal-btn-primary" onclick="confirmApprove()">✅ 批准并发送</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="nav-bar">
+        <div class="nav-item active"><span class="nav-icon">⚙️</span>管理</div>
+        <a href="admin_dashboard.html" class="nav-item"><span class="nav-icon">📋</span>申请审核</a>
+        <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span>首页</a>
+    </div>
+    
+    <script>
+        const db=window.firebaseApp.db;
+        let currentRegId=null;
+        
+        function logout(){
+            window.authUtils.logoutAdmin();
+        }
+        
+        async function initAdminPage(){
+            const ok=await window.authUtils.requireAdmin();
+            if(!ok)return;
+            loadRegistrations();
+        }
+        
+        async function loadRegistrations(){
+            try{
+                const pendingSnapshot=await db.collection('coachRegistrations')
+                    .where('status','==','pending')
+                    .orderBy('applyDate','desc')
+                    .get();
+                
+                const approvedSnapshot=await db.collection('coaches').get();
+                
+                let pendingCount=pendingSnapshot.size;
+                let approvedCount=approvedSnapshot.size;
+                
+                document.getElementById('pendingCount').textContent=pendingCount;
+                document.getElementById('approvedCount').textContent=approvedCount;
+                document.getElementById('totalCoaches').textContent=approvedCount;
+                document.getElementById('pendingBadge').textContent=pendingCount+' 待审核';
+                
+                const regList=document.getElementById('registrationList');
+                
+                if(pendingCount===0){
+                    regList.innerHTML='<div style="text-align:center;padding:30px;color:#999">暂无待审核申请</div>';
+                    return;
+                }
+                
+                let html='';
+                pendingSnapshot.docs.forEach(doc=>{
+                    const reg=doc.data();
+                    const docId=doc.id;
+                    const specialties=reg.specialties?reg.specialties.join('、'):'未指定';
+                    
+                    html+=`
+                        <div class="registration-item">
+                            <div class="reg-header">
+                                <div class="reg-name">${reg.name}</div>
+                                <div class="reg-date">${new Date(reg.applyDate).toLocaleDateString()}</div>
+                            </div>
+                            <div class="reg-details">
+                                📧 ${reg.email} | 📞 ${reg.phone}<br>
+                                📍 ${reg.region} | 💰 RM ${reg.hourlyRate}/小时 | RM ${reg.monthlyRate}/月
+                            </div>
+                            <div class="reg-specialties">
+                                ${reg.specialties.map(s=>'<span class="specialty-tag">'+s+'</span>').join('')}
+                            </div>
+                            <div class="reg-certificates">
+                                <strong>证书 (${reg.certificates.length}个):</strong><br>
+                                ${reg.certificates.map(c=>'<div class="cert-item">📄 '+c.name+'</div>').join('')}
+                            </div>
+                            ${reg.bio?`<div style="font-size:13px;color:#666;margin-bottom:10px"><strong>简介:</strong> ${reg.bio}</div>`:''}
+                            <div class="reg-actions">
+                                <button class="btn btn-approve" onclick="openApproveModal('${docId}','${reg.name}','${reg.email}')">✅ 批准</button>
+                                <button class="btn btn-reject" onclick="rejectRegistration('${docId}')">❌ 拒绝</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                regList.innerHTML=html;
+                
+            }catch(error){
+                console.error('加载注册失败:',error);
+                document.getElementById('registrationList').innerHTML='<div style="text-align:center;padding:30px;color:#ef4444">加载失败：'+error.message+'</div>';
+            }
+        }
+        
+        function openApproveModal(docId,name,email){
+            currentRegId=docId;
+            document.getElementById('approveModal').style.display='flex';
+            document.getElementById('coachIdInput').placeholder='例如：COACH'+Date.now().toString().slice(-6);
+        }
+        
+        function closeModal(){
+            document.getElementById('approveModal').style.display='none';
+            currentRegId=null;
+        }
+        
+        async function confirmApprove(){
+            const coachId=document.getElementById('coachIdInput').value.trim();
+            
+            if(!coachId){
+                alert('请输入教练 ID');
+                return;
+            }
+            
+            try{
+                const doc=await db.collection('coachRegistrations').doc(currentRegId).get();
+                const reg=doc.data();
+                
+                // 生成教练专属销售码
+                const salesCode='COACH'+coachId.replace(/[^A-Z0-9]/g,'')+Date.now().toString(36).toUpperCase();
+                
+                // 添加到教练列表
+                await db.collection('coaches').add({
+                    name:reg.name,
+                    email:reg.email,
+                    phone:reg.phone,
+                    region:reg.region,
+                    specialties:reg.specialties,
+                    hourlyRate:reg.hourlyRate,
+                    monthlyRate:reg.monthlyRate,
+                    bio:reg.bio,
+                    certificates:reg.certificates,
+                    status:'approved',
+                    coachId:coachId,
+                    salesCode:salesCode,
+                    approveDate:new Date().toISOString(),
+                    rating:5.0,
+                    students:[],
+                    joinDate:new Date().toISOString()
+                });
+                
+                // 创建销售码记录
+                await db.collection('salesCodes').add({
+                    code:salesCode,
+                    coachName:reg.name,
+                    coachId:coachId,
+                    freeDays:30,
+                    used:false,
+                    usedBy:null,
+                    usedDate:null,
+                    createdAt:new Date().toISOString()
+                });
+                
+                // 更新注册状态
+                await db.collection('coachRegistrations').doc(currentRegId).update({
+                    status:'approved',
+                    coachId:coachId,
+                    salesCode:salesCode,
+                    approveDate:new Date().toISOString()
+                });
+                
+                // 模拟发送邮件（实际需要云函数）
+                alert('✅ 已批准！\n\n教练 ID: '+coachId+'\n电邮：'+reg.email+'\n销售码：'+salesCode+'\n\n请发送以下信息给教练：\n1. 教练 ID: '+coachId+'\n2. 销售码：'+salesCode+'（可分享给用户，30 天免费）');
+                
+                closeModal();
+                loadRegistrations();
+                
+            }catch(error){
+                alert('❌ 批准失败：'+error.message);
+            }
+        }
+        
+        async function rejectRegistration(docId){
+            if(!confirm('确定要拒绝这个申请吗？'))return;
+            
+            try{
+                await db.collection('coachRegistrations').doc(docId).update({
+                    status:'rejected',
+                    rejectDate:new Date().toISOString()
+                });
+                
+                alert('❌ 已拒绝申请。');
+                loadRegistrations();
+                
+            }catch(error){
+                alert('❌ 拒绝失败：'+error.message);
+            }
+        }
+        
+        initAdminPage();
+    </script>
+</body>
+</html>
